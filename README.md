@@ -8,11 +8,13 @@ This software is currently under development.
 Please note that it will not be available for use until this notice is removed.
 
 ## Overview
-An in-memory database that logs each operation (using a unit called delta) to make it easy to track and manage differences.
-It is optimized for sites with specific requirements, including medical institutions in Japan.
-This software is not designed for large-scale operation.
-This software is useful for small-scale data sets where convenience, cost, security, etc. are more important than search speed.
-In all other cases, please consider a traditional database.
+DeltaTraceDB is an in-memory database that simplifies change tracking and management by logging each operation as a delta.  
+It is designed for sites with specific requirements, such as Japanese medical institutions,  
+with a particular emphasis on small-scale, low-cost operations.  
+
+The software is suitable for small- to medium-sized projects where low-volume data management,  
+cost-efficiency, and security are priorities, and was developed with the aim of reducing the social burden of an aging population in mind.  
+For large data sets and search speed requirements, we recommend using a general database.  
 
 ## Usage
 Please check out the Examples tab in pub.dev.
