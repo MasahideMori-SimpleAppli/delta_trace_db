@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:delta_trace_db/src/jwt_manager.dart';
+import 'package:delta_trace_db/src/dtd_auth_service.dart';
 import 'package:delta_trace_db/src/server/dtdb_server_response.dart';
 import 'package:http/http.dart' as http;
 
@@ -29,7 +29,7 @@ class DeltaTraceDatabase {
   // Singleton code end.
 
   // parameters
-  late final JWTManager _jwtManager;
+  late final DTDAuthService _authService;
   late final String? _endpointUrl;
   late final Duration _timeout;
 
@@ -45,14 +45,13 @@ class DeltaTraceDatabase {
   /// (ja) 初期化関数です。エンドポイントURLがnullではない場合、
   /// 指定サーバーに対してアクセスを行うように構成されます。
   ///
-  /// * [jwtManager] : A manager class for obtaining JWT tokens.
-  /// You can also design your own authentication by
-  /// passing in this extended class.
+  /// * [authService] : This is the service class used for authentication.
+  /// This class manages tokens and logins.
   /// * [endpointUrl] : The URL of the database implemented as an https server.
   /// * [timeout] : Timeout period for server access.
-  Future<void> initialize(JWTManager jwtManager,
+  Future<void> initialize(DTDAuthService authService,
       {String? endpointUrl, Duration? timeout}) async {
-    _jwtManager = jwtManager;
+    _authService = authService;
     _endpointUrl = endpointUrl;
     _timeout = timeout ?? const Duration(minutes: 1);
     if (!isRemote) {
@@ -106,29 +105,29 @@ class DeltaTraceDatabase {
 
   /// サーバーに認証トークン付のデータをPOSTします。
   Future<DTDBServerResponse> _sendToServer(Map<String, dynamic> data) async {
-    final String authToken = await _jwtManager.getToken();
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $authToken', // 毎回トークンを渡す
-    };
-
+    final String? authToken = await _authService.getToken();
+    if (authToken == null) {
+      return DTDBServerResponse(null, true, false, null, null);
+    }
     try {
       // HTTPリクエスト処理
       final response = await http
           .post(
             Uri.parse(_endpointUrl!),
-            headers: headers,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken', // 毎回トークンを渡す
+            },
             body: jsonEncode(data),
           )
           .timeout(_timeout);
       return DTDBServerResponse(
-          response, false, jsonDecode(response.body), null);
+          response, false, false, jsonDecode(response.body), null);
     } on TimeoutException catch (_) {
       // タイムアウトが発生した場合の処理
-      return DTDBServerResponse(null, true, null, null);
+      return DTDBServerResponse(null, false, true, null, null);
     } catch (e) {
-      return DTDBServerResponse(null, false, null, e.toString());
+      return DTDBServerResponse(null, false, false, null, e.toString());
     }
   }
 }

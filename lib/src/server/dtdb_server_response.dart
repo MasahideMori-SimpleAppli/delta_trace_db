@@ -10,20 +10,23 @@ import 'package:http/http.dart' as http;
 class DTDBServerResponse {
   final http.Response? response;
   late final int statusCode;
+  final bool isTokenExpired;
   final bool isTimeOut;
   final Map<String, dynamic>? resBody;
   final String? error;
 
   /// * [response] : Http response object.
+  /// * [isTokenExpired] : If true, the token has expired and a login process
+  /// is required.
   /// * [isTimeOut] : If true, request timeout occurred.
   /// * [resBody] :　The json decode server response body.
   /// * [error] : Null if no error occurred.
   /// It will also be null on timeout.
-  DTDBServerResponse(this.response, this.isTimeOut, this.resBody, this.error) {
-    if(response != null) {
+  DTDBServerResponse(this.response, this.isTokenExpired, this.isTimeOut,
+      this.resBody, this.error) {
+    if (response != null) {
       statusCode = response!.statusCode;
-    }
-    else{
+    } else {
       statusCode = -1;
     }
   }
