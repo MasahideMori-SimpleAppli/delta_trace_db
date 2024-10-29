@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:delta_trace_db/src/dtd_auth_service.dart';
-import 'package:delta_trace_db/src/server/dtdb_server_response.dart';
+import 'package:delta_trace_db/src/dtdb_auth_service.dart';
+import 'package:delta_trace_db/src/server_response/dtdb_server_response.dart';
+import 'package:delta_trace_db/src/server_response/util_server_response.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:delta_trace_db/src/local/delta_trace_database_core.dart';
@@ -29,7 +30,7 @@ class DeltaTraceDatabase {
   // Singleton code end.
 
   // parameters
-  late final DTDAuthService _authService;
+  late final DTDBAuthService _authService;
   late final String? _endpointUrl;
   late final Duration _timeout;
 
@@ -49,7 +50,7 @@ class DeltaTraceDatabase {
   /// This class manages tokens and logins.
   /// * [endpointUrl] : The URL of the database implemented as an https server.
   /// * [timeout] : Timeout period for server access.
-  Future<void> initialize(DTDAuthService authService,
+  Future<void> initialize(DTDBAuthService authService,
       {String? endpointUrl, Duration? timeout}) async {
     _authService = authService;
     _endpointUrl = endpointUrl;
@@ -107,7 +108,7 @@ class DeltaTraceDatabase {
   Future<DTDBServerResponse> _sendToServer(Map<String, dynamic> data) async {
     final String? authToken = await _authService.getToken();
     if (authToken == null) {
-      return DTDBServerResponse(null, true, false, null, null);
+      return UtilServerResponse.signInRequired();
     }
     try {
       // HTTPリクエスト処理
@@ -121,13 +122,15 @@ class DeltaTraceDatabase {
             body: jsonEncode(data),
           )
           .timeout(_timeout);
-      return DTDBServerResponse(
-          response, false, false, jsonDecode(response.body), null);
+      if (response.statusCode == 200) {
+        return UtilServerResponse.success(response);
+      } else {
+        return UtilServerResponse.serverError(response);
+      }
     } on TimeoutException catch (_) {
-      // タイムアウトが発生した場合の処理
-      return DTDBServerResponse(null, false, true, null, null);
+      return UtilServerResponse.timeout();
     } catch (e) {
-      return DTDBServerResponse(null, false, false, null, e.toString());
+      return UtilServerResponse.otherError(e);
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:delta_trace_db/src/enum/enum_server_response_status.dart';
 import 'package:http/http.dart' as http;
 
 /// (en) This class stores the return values from
@@ -7,11 +8,13 @@ import 'package:http/http.dart' as http;
 ///
 /// (ja) DeltaTraceDBのAPIに関する、サーバーからの戻り値格納用クラスです。
 /// サーバーからのデコード済みレスポンス以外に、エラーコードなども格納されます。
+///
+/// Author Masahide Mori
+///
+/// First edition creation date 2024-10-29 17:36:24
 class DTDBServerResponse {
   final http.Response? response;
-  late final int statusCode;
-  final bool isTokenExpired;
-  final bool isTimeOut;
+  final EnumSeverResponseStatus resultStatus;
   final Map<String, dynamic>? resBody;
   final String? error;
 
@@ -22,12 +25,6 @@ class DTDBServerResponse {
   /// * [resBody] :　The json decode server response body.
   /// * [error] : Null if no error occurred.
   /// It will also be null on timeout.
-  DTDBServerResponse(this.response, this.isTokenExpired, this.isTimeOut,
-      this.resBody, this.error) {
-    if (response != null) {
-      statusCode = response!.statusCode;
-    } else {
-      statusCode = -1;
-    }
-  }
+  DTDBServerResponse(
+      this.response, this.resultStatus, this.resBody, this.error);
 }
