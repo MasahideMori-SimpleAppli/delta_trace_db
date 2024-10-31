@@ -27,4 +27,18 @@ class DTDBServerResponse {
   /// It will also be null on timeout.
   DTDBServerResponse(
       this.response, this.resultStatus, this.resBody, this.error);
+
+  @override
+  String toString() {
+    return '''
+DTDBServerResponse {
+  resultStatus: $resultStatus,
+  response: {
+    statusCode: ${response?.statusCode ?? 'N/A'},
+    reasonPhrase: ${response?.reasonPhrase ?? 'N/A'}
+  },
+  resBody: ${resBody != null ? resBody.toString() : 'N/A'},
+  error: ${error ?? 'N/A'}
+}''';
+  }
 }
