@@ -70,17 +70,32 @@ class DeltaTraceDatabase {
     }
   }
 
-  /// Databaseを操作します。
-  Future<DTDBServerResponse> operate(DTDBDelta delta) {
+  /// Databaseに対して操作を行います。
+  Future<DTDBServerResponse> operate(DTDBDelta delta,
+      {String localModeSID = "local_user"}) {
     if (isLocalMode) {
-      return _dbCore!.operate(delta);
+      return _dbCore!.operate([delta], localModeSID);
     } else {
-      return _sendToServer(delta);
+      return _sendToServer([delta]);
+    }
+  }
+
+  /// Databaseに対して複数の操作を行います。
+  Future<DTDBServerResponse> multiOperate(List<DTDBDelta> deltaList,
+      {String localModeSID = "local_user"}) {
+    if (isLocalMode) {
+      return _dbCore!.operate(deltaList, localModeSID);
+    } else {
+      return _sendToServer(deltaList);
     }
   }
 
   /// サーバーにデータをPOSTします。
-  Future<DTDBServerResponse> _sendToServer(DTDBDelta delta) async {
+  Future<DTDBServerResponse> _sendToServer(List<DTDBDelta> deltaList) async {
+    List<Map<String, dynamic>> mDeltaList = [];
+    for (DTDBDelta i in deltaList) {
+      mDeltaList.add(i.toDict());
+    }
     if (_authService == null) {
       // 認証なしでのHTTPリクエスト処理
       try {
@@ -90,7 +105,7 @@ class DeltaTraceDatabase {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: jsonEncode(delta.toDict()),
+              body: jsonEncode({"deltaList": mDeltaList}),
             )
             .timeout(_timeout);
         if (response.statusCode == 200) {
@@ -117,7 +132,7 @@ class DeltaTraceDatabase {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer $authToken',
               },
-              body: jsonEncode(delta.toDict()),
+              body: jsonEncode(mDeltaList),
             )
             .timeout(_timeout);
         if (response.statusCode == 200) {

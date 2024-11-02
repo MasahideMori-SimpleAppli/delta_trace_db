@@ -9,8 +9,11 @@ import 'package:file_state_manager/file_state_manager.dart';
 /// Author Masahide Mori
 ///
 /// First edition creation date 2024-11-02 16:05:26
-class DTDBDataNode extends CloneableFile{
+class DTDBDataNode extends CloneableFile {
   late final String nodeName;
+
+  // アクセスレイヤー構成時に追加される、このノードの深さを表す値。
+  int? depth;
 
   /// * [nodeName] : The node name.
   DTDBDataNode(this.nodeName);
@@ -21,11 +24,25 @@ class DTDBDataNode extends CloneableFile{
 
   @override
   Map<String, dynamic> toDict() {
-    return {"nodeName": nodeName};
+    return {"nodeName": nodeName, "depth": depth};
   }
 
   @override
   DTDBDataNode clone() {
     return DTDBDataNode.fromDict(toDict());
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is DTDBDataNode) {
+      return nodeName == other.nodeName && depth == other.depth;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAll([nodeName, depth]);
   }
 }

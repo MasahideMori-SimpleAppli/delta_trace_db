@@ -1,6 +1,6 @@
 import 'package:delta_trace_db/src/delta/enum_crud.dart';
 import 'package:delta_trace_db/src/structure/dtdb_access_layer.dart';
-import 'package:delta_trace_db/src/structure/dtdb_data.dart';
+import 'package:delta_trace_db/src/node/dtdb_data.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 
 /// (en) An object that represents a single operation on a database.
@@ -18,7 +18,22 @@ class DTDBDelta extends CloneableFile {
   DTDBAccessLayer target;
   DTDBData data;
 
-  DTDBDelta(this.crud, this.target, this.data);
+  // フロントエンドでこれが作成された時のUNIX時間。
+  late final int creationTimeMS;
+
+  // サーバーサイドでのデータ復元時のUNIX時間。
+  int? serverReceiveTimeMS;
+
+  // 認証が完了した時点で、サーバーサイドで上書きされるSID。
+  String? sid;
+
+  // サーバーサイドで操作が成功した場合はtrueが入る。
+  // 認証に失敗した場合や操作に失敗した場合などはfalseが入る。
+  bool? isSuccess;
+
+  DTDBDelta(this.crud, this.target, this.data) {
+    creationTimeMS = DateTime.now().millisecondsSinceEpoch;
+  }
 
   @override
   CloneableFile clone() {

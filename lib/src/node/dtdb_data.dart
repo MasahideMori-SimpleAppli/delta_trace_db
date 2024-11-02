@@ -13,6 +13,16 @@ import 'package:file_state_manager/file_state_manager.dart';
 class DTDBData extends CloneableFile{
   static const String className = "DTDBData";
   static const int version = 1;
+  Map<String, dynamic> data;
+  // UNIXTime
+  // このデータの作成日時。サーバー側での処理時の時刻が入ります。
+  int? creationTimeMS;
+  // このデータの更新日時。サーバー側での処理時の時刻が入ります。
+  // 初期状態ではcreationTimeMSと同じ値です。
+  int? updateTimeMS;
+
+  /// * [data] : データの内容。
+  DTDBData(this.data);
 
   @override
   CloneableFile clone() {

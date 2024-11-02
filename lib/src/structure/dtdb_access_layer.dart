@@ -1,5 +1,6 @@
-import 'package:delta_trace_db/src/structure/dtdb_data_node.dart';
 import 'package:file_state_manager/file_state_manager.dart';
+
+import '../node/dtdb_node.dart';
 
 /// (en) An abstract class for a database security layer with
 /// serialization capabilities.
@@ -28,10 +29,10 @@ abstract class DTDBAccessLayer extends CloneableFile{
   /// これを呼び出した順にアクセス先が構成され、
   /// 最終的な到達ノードがデータベースのアクセス先になります。
   ///
-  /// * [node] : The node name.
+  /// * [node] : The node.
   ///
   /// Returns : This object.
-  DTDBAccessLayer addNode(DTDBDataNode node);
+  DTDBAccessLayer addNode(DTDBNode node);
 
   /// (en) Adds all the nodes at once.
   /// The order of the nodes to be accessed is determined by
@@ -43,6 +44,6 @@ abstract class DTDBAccessLayer extends CloneableFile{
   /// 最終的な到達ノードがデータベースのアクセス先になります。
   ///
   /// * [nodes] : The node names array.
-  void addNodes(List<DTDBDataNode> nodes);
+  void addNodes(List<DTDBNode> nodes);
 
 }

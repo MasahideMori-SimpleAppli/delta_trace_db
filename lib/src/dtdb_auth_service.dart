@@ -64,8 +64,14 @@ class DTDBAuthService {
     _timeout = timeout ?? const Duration(minutes: 1);
   }
 
+  /// 現在サインイン状態かどうかを返します。
+  /// 判定はリフレッシュトークンの有無で判断されます。
+  bool isSignedIn(){
+    return _refreshToken != null;
+  }
+
   /// リフレッシュトークンを返します。ただし、まだ取得していない場合はnullが返されます。
-  /// これは主にログイン状態を維持したい時に、リフレッシュトークンを保存するために使用します。
+  /// これは主にサインイン状態を維持したい時に、リフレッシュトークンを保存するために使用します。
   /// ただし、セキュリティには十分に気をつけてください。
   String? getRefreshToken() {
     return _refreshToken;

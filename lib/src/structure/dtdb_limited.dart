@@ -1,5 +1,5 @@
 import 'package:delta_trace_db/src/structure/dtdb_access_layer.dart';
-import 'package:delta_trace_db/src/structure/dtdb_data_node.dart';
+import '../node/dtdb_node.dart';
 
 /// (en) A class for configuring nodes in a database where
 /// only limited access is allowed.
@@ -34,13 +34,13 @@ class DTDBLimited extends DTDBAccessLayer{
   }
 
   @override
-  DTDBAccessLayer addNode(DTDBDataNode node) {
+  DTDBAccessLayer addNode(DTDBNode node) {
     // TODO: implement addNode
     throw UnimplementedError();
   }
 
   @override
-  void addNodes(List<DTDBDataNode> nodes) {
+  void addNodes(List<DTDBNode> nodes) {
     // TODO: implement addNodes
   }
 
