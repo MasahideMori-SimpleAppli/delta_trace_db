@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:delta_trace_db/src/delta/dtdb_delta.dart';
 import 'package:delta_trace_db/src/dtdb_auth_service.dart';
 import 'package:delta_trace_db/src/server_response/dtdb_server_response.dart';
 import 'package:delta_trace_db/src/server_response/util_server_response.dart';
@@ -69,60 +70,27 @@ class DeltaTraceDatabase {
     }
   }
 
-  // TODO 作成中。
-  /// Create操作
-  Future<DTDBServerResponse> create(Map<String, dynamic> data) async {
+  /// Databaseを操作します。
+  Future<DTDBServerResponse> operate(DTDBDelta delta) {
     if (isLocalMode) {
-      // ローカルデータベースにデータを挿入
-      return await _dbCore.create(data);
+      return _dbCore!.operate(delta);
     } else {
-      // サーバーAPIにPOSTリクエストを送信
-      return await _sendToServer(data);
-    }
-  }
-
-  // TODO 作成中。
-  /// Read操作
-  Future<DTDBServerResponse> read(String id) async {
-    if (isLocalMode) {
-      return await _dbCore.read(id);
-    } else {
-      return await _sendToServer({'id': id});
-    }
-  }
-
-  // TODO 作成中。
-  /// Update操作
-  Future<DTDBServerResponse> update(String id) async {
-    if (isLocalMode) {
-      return await _dbCore.update(id);
-    } else {
-      return await _sendToServer({'id': id});
-    }
-  }
-
-  // TODO 作成中。
-  /// Delete操作
-  Future<DTDBServerResponse> delete(String id) async {
-    if (isLocalMode) {
-      return await _dbCore.delete(id);
-    } else {
-      return await _sendToServer({'id': id});
+      return _sendToServer(delta);
     }
   }
 
   /// サーバーにデータをPOSTします。
-  Future<DTDBServerResponse> _sendToServer(Map<String, dynamic> data) async {
+  Future<DTDBServerResponse> _sendToServer(DTDBDelta delta) async {
     if (_authService == null) {
+      // 認証なしでのHTTPリクエスト処理
       try {
-        // 認証なしでのHTTPリクエスト処理
         final response = await http
             .post(
               Uri.parse(_endpointUrl!),
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: jsonEncode(data),
+              body: jsonEncode(delta.toDict()),
             )
             .timeout(_timeout);
         if (response.statusCode == 200) {
@@ -136,12 +104,12 @@ class DeltaTraceDatabase {
         return UtilServerResponse.otherError(e);
       }
     } else {
+      // ステートレス認証でのHTTPリクエスト処理
       final String? authToken = await _authService!.getToken();
       if (authToken == null) {
         return UtilServerResponse.signInRequired();
       }
       try {
-        // ステートレス認証でのHTTPリクエスト処理
         final response = await http
             .post(
               Uri.parse(_endpointUrl!),
@@ -149,7 +117,7 @@ class DeltaTraceDatabase {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer $authToken',
               },
-              body: jsonEncode(data),
+              body: jsonEncode(delta.toDict()),
             )
             .timeout(_timeout);
         if (response.statusCode == 200) {

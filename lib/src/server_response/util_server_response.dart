@@ -1,5 +1,5 @@
 import 'package:delta_trace_db/src/server_response/dtdb_server_response.dart';
-import 'package:delta_trace_db/src/enum/enum_server_response_status.dart';
+import 'package:delta_trace_db/src/server_response/enum_server_response_status.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 

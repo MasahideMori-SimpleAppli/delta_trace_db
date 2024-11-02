@@ -4,7 +4,7 @@
 ///
 /// Author Masahide Mori
 ///
-/// First edition creation date 2024-10-27 17:20:37
+/// First edition creation date 2024-10-27 17:20:37(now creating)
 class DeltaTraceDatabaseCore {
 
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:delta_trace_db/src/enum/enum_server_response_status.dart';
+import 'package:delta_trace_db/src/server_response/enum_server_response_status.dart';
 import 'package:delta_trace_db/src/network/util_check_url.dart';
 import 'package:delta_trace_db/src/server_response/dtdb_server_response.dart';
 import 'package:delta_trace_db/src/server_response/util_server_response.dart';
@@ -28,6 +28,7 @@ class DTDBAuthService {
   late final String? _clientSecret;
   late final Duration _timeout;
 
+  // tokens
   String? _accessToken;
   String? _refreshToken;
   int? _accessTokenExpireUnixMS;
@@ -61,6 +62,13 @@ class DTDBAuthService {
     _clientID = clientID;
     _clientSecret = clientSecret;
     _timeout = timeout ?? const Duration(minutes: 1);
+  }
+
+  /// リフレッシュトークンを返します。ただし、まだ取得していない場合はnullが返されます。
+  /// これは主にログイン状態を維持したい時に、リフレッシュトークンを保存するために使用します。
+  /// ただし、セキュリティには十分に気をつけてください。
+  String? getRefreshToken() {
+    return _refreshToken;
   }
 
   /// サインイン処理を行います。
@@ -178,7 +186,10 @@ class DTDBAuthService {
           _accessTokenExpireUnixMS = nowUnixTimeMS +
               (int.parse(tokens[FJsonKeysFromServer.expiresIn].toString()) *
                   1000);
-          _refreshToken = tokens[FJsonKeysFromServer.refreshToken];
+          // リフレッシュトークンの交換がある場合は入れ替える。
+          if (tokens.containsKey(FJsonKeysFromServer.refreshToken)) {
+            _refreshToken = tokens[FJsonKeysFromServer.refreshToken];
+          }
           return UtilServerResponse.success(response);
         } catch (e) {
           return UtilServerResponse.otherError('Invalid token format');
