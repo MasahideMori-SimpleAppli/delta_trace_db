@@ -6,7 +6,7 @@ import 'package:delta_trace_db/src/server_response/dtdb_server_response.dart';
 import 'package:delta_trace_db/src/server_response/util_server_response.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:delta_trace_db/src/local/delta_trace_database_core.dart';
+import 'package:delta_trace_db/src/local/dtdb_core.dart';
 
 import 'network/util_check_url.dart';
 
@@ -40,7 +40,7 @@ class DeltaTraceDatabase {
   bool get isLocalMode => _endpointUrl == null;
 
   // For local DB
-  DeltaTraceDatabaseCore? _dbCore;
+  DTDBCore? _dbCore;
 
   // methods
   /// (en) This is an initialization function. If the endpoint URL is not null,
@@ -66,32 +66,54 @@ class DeltaTraceDatabase {
     _timeout = timeout ?? const Duration(minutes: 1);
     if (isLocalMode) {
       // ローカルデータベースのセットアップ
-      _dbCore = DeltaTraceDatabaseCore();
+      _dbCore = DTDBCore();
     }
   }
 
   /// Databaseに対して操作を行います。
+  /// * [localModeSID] : ローカルモード、またはサーバーサイドDartで使用する、
+  /// 既に認証されたユーザーのSID。
   Future<DTDBServerResponse> operate(DTDBDelta delta,
       {String localModeSID = "local_user"}) {
     if (isLocalMode) {
-      return _dbCore!.operate([delta], localModeSID);
+      return _dbCore!.operate([delta], localModeSID: localModeSID);
     } else {
-      return _sendToServer([delta]);
+      return _sendToServer(_endpointUrl!, [delta]);
     }
   }
 
   /// Databaseに対して複数の操作を行います。
+  /// * [localModeSID] : ローカルモード、またはサーバーサイドDartで使用する、
+  /// 既に認証されたユーザーのSID。
   Future<DTDBServerResponse> multiOperate(List<DTDBDelta> deltaList,
       {String localModeSID = "local_user"}) {
     if (isLocalMode) {
-      return _dbCore!.operate(deltaList, localModeSID);
+      return _dbCore!.operate(deltaList, localModeSID: localModeSID);
     } else {
-      return _sendToServer(deltaList);
+      return _sendToServer(_endpointUrl!, deltaList);
     }
   }
 
+  /// Databaseと同様のスキームで処理を行う、特定のエンドポイントに対して操作を行います。
+  /// これはネットワークが必須のため、ローカルモードでは動作しません。
+  /// * [endpointUrl] : DeltaTraceDatabaseと同様のスキームで処理を行えるエンドポイントのURL。
+  /// これを用いると、検索結果に追加の独自処理を加えたい場合などに、クラウド関数を挟んで処理できます。
+  Future<DTDBServerResponse> operateTo(String endpointUrl, DTDBDelta delta) {
+    return _sendToServer(endpointUrl, [delta]);
+  }
+
+  /// Databaseと同様のスキームで処理を行う、特定のエンドポイントに対して複数の操作を行います。
+  /// これはネットワークが必須のため、ローカルモードでは動作しません。
+  /// * [endpointUrl] : DeltaTraceDatabaseと同様のスキームで処理を行えるエンドポイントのURL。
+  /// これを用いると、検索結果に追加の独自処理を加えたい場合などに、クラウド関数を挟んで処理できます。
+  Future<DTDBServerResponse> multiOperateTo(
+      String endpointUrl, List<DTDBDelta> deltaList) {
+    return _sendToServer(endpointUrl, deltaList);
+  }
+
   /// サーバーにデータをPOSTします。
-  Future<DTDBServerResponse> _sendToServer(List<DTDBDelta> deltaList) async {
+  Future<DTDBServerResponse> _sendToServer(
+      String endpointUrl, List<DTDBDelta> deltaList) async {
     List<Map<String, dynamic>> mDeltaList = [];
     for (DTDBDelta i in deltaList) {
       mDeltaList.add(i.toDict());
@@ -101,7 +123,7 @@ class DeltaTraceDatabase {
       try {
         final response = await http
             .post(
-              Uri.parse(_endpointUrl!),
+              Uri.parse(endpointUrl),
               headers: {
                 'Content-Type': 'application/json',
               },
@@ -127,7 +149,7 @@ class DeltaTraceDatabase {
       try {
         final response = await http
             .post(
-              Uri.parse(_endpointUrl!),
+              Uri.parse(endpointUrl),
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer $authToken',

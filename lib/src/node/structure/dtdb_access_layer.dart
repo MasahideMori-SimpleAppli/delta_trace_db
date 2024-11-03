@@ -1,6 +1,5 @@
+import 'package:delta_trace_db/src/node/search/dtdb_search_obj.dart';
 import 'package:file_state_manager/file_state_manager.dart';
-
-import '../node/dtdb_node.dart';
 
 /// (en) An abstract class for a database security layer with
 /// serialization capabilities.
@@ -21,29 +20,29 @@ abstract class DTDBAccessLayer extends CloneableFile{
   @override
   Map<String, dynamic> toDict();
 
-  /// (en) Adds a node to be accessed.
+  /// (en) Adds a search object to be accessed.
   /// The nodes to be accessed are configured in the order in which this is
   /// called, The final node reached becomes the database to be accessed.
   ///
-  /// (ja) アクセス先のノードを追加します。
+  /// (ja) 探索用オブジェクトを追加します。
   /// これを呼び出した順にアクセス先が構成され、
   /// 最終的な到達ノードがデータベースのアクセス先になります。
   ///
   /// * [node] : The node.
   ///
   /// Returns : This object.
-  DTDBAccessLayer addNode(DTDBNode node);
+  DTDBAccessLayer addSearchObj(DTDBSearchObj node);
 
-  /// (en) Adds all the nodes at once.
+  /// (en) Adds all the search objects at once.
   /// The order of the nodes to be accessed is determined by
   /// the order of the array,
   /// and the final node to be reached becomes the database destination.
   ///
-  /// (ja) ノードを一括で追加します。
+  /// (ja) 探索用オブジェクトを一括で追加します。
   /// 配列の順番の通りにアクセス先が構成され、
   /// 最終的な到達ノードがデータベースのアクセス先になります。
   ///
   /// * [nodes] : The node names array.
-  void addNodes(List<DTDBNode> nodes);
+  void addSearchObjs(List<DTDBSearchObj> nodes);
 
 }

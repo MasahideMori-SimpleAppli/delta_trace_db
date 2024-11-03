@@ -1,5 +1,7 @@
-import 'package:delta_trace_db/src/structure/dtdb_access_layer.dart';
-import '../node/dtdb_node.dart';
+import 'package:delta_trace_db/src/node/search/dtdb_search_obj.dart';
+
+import 'dtdb_access_layer.dart';
+
 
 /// (en) An abstract class for a database security layer with
 /// serialization capabilities.
@@ -15,7 +17,8 @@ class DTDBPublic extends DTDBAccessLayer{
 
   DTDBPublic();
 
-  DTDBPublic.fromDict(Map<String, dynamic> src) {
+  factory DTDBPublic.fromDict(Map<String, dynamic> src) {
+    return DTDBPublic();
   }
 
   @override
@@ -30,13 +33,13 @@ class DTDBPublic extends DTDBAccessLayer{
   }
 
   @override
-  DTDBAccessLayer addNode(DTDBNode node) {
+  DTDBAccessLayer addSearchObj(DTDBSearchObj node) {
     // TODO: implement addNode
     throw UnimplementedError();
   }
 
   @override
-  void addNodes(List<DTDBNode> nodes) {
+  void addSearchObjs(List<DTDBSearchObj> nodes) {
     // TODO: implement addNodes
   }
 

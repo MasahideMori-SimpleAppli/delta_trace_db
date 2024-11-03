@@ -1,6 +1,6 @@
-import 'package:delta_trace_db/src/structure/dtdb_access_layer.dart';
 
-import '../node/dtdb_node.dart';
+import '../search/dtdb_search_obj.dart';
+import 'dtdb_access_layer.dart';
 
 /// (en) A class for configuring nodes in a database where
 /// only private access is allowed.
@@ -17,8 +17,8 @@ class DTDBPrivate extends DTDBAccessLayer{
 
   DTDBPrivate(this.userSID);
 
-  DTDBPrivate.fromDict(Map<String, dynamic> src) {
-    userSID = src["userSerialID"];
+  factory DTDBPrivate.fromDict(Map<String, dynamic> src) {
+    return DTDBPrivate(src["userSerialID"]);
   }
 
   @override
@@ -33,13 +33,13 @@ class DTDBPrivate extends DTDBAccessLayer{
   }
 
   @override
-  DTDBAccessLayer addNode(DTDBNode node) {
+  DTDBAccessLayer addSearchObj(DTDBSearchObj node) {
     // TODO: implement addNode
     throw UnimplementedError();
   }
 
   @override
-  void addNodes(List<DTDBNode> nodes) {
+  void addSearchObjs(List<DTDBSearchObj> nodes) {
     // TODO: implement addNodes
   }
 
