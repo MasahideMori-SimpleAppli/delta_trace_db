@@ -1,5 +1,4 @@
-import 'package:delta_trace_db/src/node/search/dtdb_search_obj.dart';
-
+import '../search/dtdb_search_obj.dart';
 import 'dtdb_access_layer.dart';
 
 

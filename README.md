@@ -7,6 +7,10 @@
 This software is currently under development.
 Please note that it will not be available for use until this notice is removed.
 
+## Plans for future updates
+1. Add limited layers.
+2. Add complex search methods.
+
 ## Overview
 DeltaTraceDB is an in-memory database that simplifies change tracking and management by logging each operation as a delta.  
 It is designed for sites with specific requirements, such as Japanese medical institutions,  
