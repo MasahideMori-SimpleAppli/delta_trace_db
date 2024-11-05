@@ -21,6 +21,7 @@ import 'package:http/http.dart' as http;
 /// First edition creation date 2024-10-28 20:29:00(now creating)
 class DTDBAuthService {
   // parameters
+  late final String _registerUrl;
   late final String _signInUrl;
   late final String _refreshUrl;
   late final String _signOutURL;
@@ -40,6 +41,7 @@ class DTDBAuthService {
   /// (ja) 初期化関数です。エンドポイントURLがnullではない場合、
   /// 指定サーバーに対してアクセスを行うように構成されます。
   ///
+  /// * [registerURL] : The user register URL.
   /// * [signInURL] : The authentication URL.
   /// * [refreshURL] : A URL for reissuing a token using a refresh token.
   /// * [signOutURL] : The URL for signOut (revoke) the token.
@@ -50,12 +52,14 @@ class DTDBAuthService {
   /// If you are using it on the front end, set it to null.
   /// * [timeout] : Timeout period for server access.
   DTDBAuthService(
-      {required String signInURL,
+      {required String registerURL,
+      required String signInURL,
       required String refreshURL,
       required String signOutURL,
       String? clientID,
       String? clientSecret,
       Duration? timeout}) {
+    _registerUrl = UtilCheckURL.validateHttpsUrl(registerURL);
     _signInUrl = UtilCheckURL.validateHttpsUrl(signInURL);
     _refreshUrl = UtilCheckURL.validateHttpsUrl(refreshURL);
     _signOutURL = UtilCheckURL.validateHttpsUrl(signOutURL);
@@ -66,7 +70,7 @@ class DTDBAuthService {
 
   /// 現在サインイン状態かどうかを返します。
   /// 判定はリフレッシュトークンの有無で判断されます。
-  bool isSignedIn(){
+  bool isSignedIn() {
     return _refreshToken != null;
   }
 
@@ -75,6 +79,57 @@ class DTDBAuthService {
   /// ただし、セキュリティには十分に気をつけてください。
   String? getRefreshToken() {
     return _refreshToken;
+  }
+
+  /// ユーザー登録処理を行います。
+  /// * [email] : ユーザー識別のためのメールアドレス。
+  /// * [password] : パスワード。
+  /// * [name] : ユーザーの本名（オプション）。
+  /// * [nickname] : ユーザーのニックネーム（オプション）。
+  Future<DTDBServerResponse> register(
+      String email, String password, String? name, String? nickname) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse(_registerUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              FJsonKeysToServer.username: email,
+              FJsonKeysToServer.password: password,
+              FJsonKeysToServer.name: name,
+              FJsonKeysToServer.nickname: nickname,
+              FJsonKeysToServer.clientID: _clientID,
+              FJsonKeysToServer.clientSecret: _clientSecret,
+            }),
+          )
+          .timeout(_timeout);
+      if (response.statusCode == 200) {
+        // サーバーがトークンを返す仕様の場合は取得してログイン状態にする
+        final int nowUnixTimeMS = DateTime.now().millisecondsSinceEpoch;
+        try {
+          final Map<String, dynamic> tokens = jsonDecode(response.body);
+          if (tokens.containsKey(FJsonKeysFromServer.accessToken)) {
+            _accessToken = tokens[FJsonKeysFromServer.accessToken];
+            _accessTokenExpireUnixMS = nowUnixTimeMS +
+                (int.parse(tokens[FJsonKeysFromServer.expiresIn].toString()) *
+                    1000);
+          }
+          if (tokens.containsKey(FJsonKeysFromServer.refreshToken)) {
+            _refreshToken = tokens[FJsonKeysFromServer.refreshToken];
+          }
+          return UtilServerResponse.success(response);
+        } catch (e) {
+          // サーバーがトークンを返さない、または戻り値がJSONでは無いような場合。
+          return UtilServerResponse.success(response);
+        }
+      } else {
+        return UtilServerResponse.serverError(response);
+      }
+    } on TimeoutException catch (_) {
+      return UtilServerResponse.timeout();
+    } catch (e) {
+      return UtilServerResponse.otherError(e);
+    }
   }
 
   /// サインイン処理を行います。
