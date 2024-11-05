@@ -1,3 +1,4 @@
+import 'package:delta_trace_db/src/node/structure/enum_dtdb_layer_type.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 
 import '../search/dtdb_search_obj.dart';
@@ -11,8 +12,11 @@ import '../search/dtdb_search_obj.dart';
 ///
 /// First edition creation date 2024-11-02 16:05:26
 abstract class DTDBAccessLayer extends CloneableFile{
+
+  EnumDTDBLayerType layerType;
+
   /// Normal constructor.
-  DTDBAccessLayer();
+  DTDBAccessLayer(this.layerType);
 
   factory DTDBAccessLayer.fromDict(Map<String, dynamic> src) {
     throw UnimplementedError();

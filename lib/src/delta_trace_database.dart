@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:delta_trace_db/src/local/dtdb_core.dart';
 
+import 'local/enum_dtdb_user_type.dart';
 import 'network/util_check_url.dart';
 
 /// (en) This is a class for operating DeltaTraceDB.
@@ -71,24 +72,30 @@ class DeltaTraceDatabase {
   }
 
   /// Databaseに対して操作を行います。
-  /// * [localModeSID] : ローカルモード、またはサーバーサイドDartで使用する、
-  /// 既に認証されたユーザーのSID。
+  /// * [localModeSID] : ローカルモードで使用する、既に認証されたユーザーのSID。
+  /// * [userType] : ローカルモードで使用する、アクセス元がユーザーなのかシステムなのかの指定。
+  /// システムによるアクセスの場合のみ、システムレイヤへのアクセスが許可されます。
   Future<DTDBServerResponse> operate(DTDBDelta delta,
-      {String localModeSID = "local_user"}) {
+      {String localModeSID = "local_user",
+      EnumDTDBUserType userType = EnumDTDBUserType.general}) {
     if (isLocalMode) {
-      return _dbCore!.operate([delta], localModeSID: localModeSID);
+      return _dbCore!
+          .operate([delta], localModeSID: localModeSID, userType: userType);
     } else {
       return _sendToServer(_endpointUrl!, [delta]);
     }
   }
 
   /// Databaseに対して複数の操作を行います。
-  /// * [localModeSID] : ローカルモード、またはサーバーサイドDartで使用する、
-  /// 既に認証されたユーザーのSID。
+  /// * [localModeSID] : ローカルモードで使用する、既に認証されたユーザーのSID。
+  /// * [userType] : ローカルモードで使用する、アクセス元がユーザーなのかシステムなのかの指定。
+  /// システムによるアクセスの場合のみ、システムレイヤへのアクセスが許可されます。
   Future<DTDBServerResponse> multiOperate(List<DTDBDelta> deltaList,
-      {String localModeSID = "local_user"}) {
+      {String localModeSID = "local_user",
+      EnumDTDBUserType userType = EnumDTDBUserType.general}) {
     if (isLocalMode) {
-      return _dbCore!.operate(deltaList, localModeSID: localModeSID);
+      return _dbCore!
+          .operate(deltaList, localModeSID: localModeSID, userType: userType);
     } else {
       return _sendToServer(_endpointUrl!, deltaList);
     }

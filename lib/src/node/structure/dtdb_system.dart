@@ -10,15 +10,15 @@ import 'enum_dtdb_layer_type.dart';
 ///
 /// Author Masahide Mori
 ///
-/// First edition creation date 2024-11-02 16:19:48(now creating)
-class DTDBPublic extends DTDBAccessLayer{
-  static const String className = "DTDBPublic";
+/// First edition creation date 2024-11-05 18:46:11(now creating)
+class DTDBSystem extends DTDBAccessLayer{
+  static const String className = "DTDBSystem";
   static const int version = 1;
 
-  DTDBPublic(): super(EnumDTDBLayerType.public);
+  DTDBSystem(): super(EnumDTDBLayerType.public);
 
-  factory DTDBPublic.fromDict(Map<String, dynamic> src) {
-    return DTDBPublic();
+  factory DTDBSystem.fromDict(Map<String, dynamic> src) {
+    return DTDBSystem();
   }
 
   @override
@@ -28,8 +28,8 @@ class DTDBPublic extends DTDBAccessLayer{
   }
 
   @override
-  DTDBPublic clone() {
-    return DTDBPublic.fromDict(toDict());
+  DTDBSystem clone() {
+    return DTDBSystem.fromDict(toDict());
   }
 
   @override
