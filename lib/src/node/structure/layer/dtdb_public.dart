@@ -1,4 +1,4 @@
-import '../search/dtdb_search_obj.dart';
+import '../../search/dtdb_search_obj.dart';
 import 'dtdb_access_layer.dart';
 import 'enum_dtdb_layer_type.dart';
 

@@ -1,5 +1,6 @@
-import 'package:delta_trace_db/src/node/structure/limited/enum_dtdb_limited_authority.dart';
 import 'package:file_state_manager/file_state_manager.dart';
+
+import 'enum_dtdb_limited_authority.dart';
 
 class DTDBGroupUser extends CloneableFile{
   final String uid;

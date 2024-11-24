@@ -1,6 +1,6 @@
-import 'package:delta_trace_db/src/node/structure/enum_dtdb_layer_type.dart';
+import 'package:delta_trace_db/src/node/structure/layer/enum_dtdb_layer_type.dart';
 
-import '../search/dtdb_search_obj.dart';
+import '../../search/dtdb_search_obj.dart';
 import 'dtdb_access_layer.dart';
 
 /// (en) A class for configuring nodes in a database where

@@ -3,7 +3,7 @@ import 'package:delta_trace_db/src/delta/enum_crud.dart';
 import 'package:delta_trace_db/src/node/data/dtdb_data.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 
-import '../node/structure/dtdb_access_layer.dart';
+import '../node/structure/layer/dtdb_access_layer.dart';
 
 /// (en) An object that represents a single operation on a database.
 /// This delta unit is used not only to operate the database,

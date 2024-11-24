@@ -1,7 +1,7 @@
-import 'package:delta_trace_db/src/node/structure/enum_dtdb_layer_type.dart';
+import 'package:delta_trace_db/src/node/structure/layer/enum_dtdb_layer_type.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 
-import '../search/dtdb_search_obj.dart';
+import '../../search/dtdb_search_obj.dart';
 
 /// (en) An abstract class for a database security layer with
 /// serialization capabilities.

@@ -1,4 +1,5 @@
-import 'package:delta_trace_db/src/node/data/dtdb_data.dart';
+
+import 'package:delta_trace_db/src/node/structure/data/dtdb_data.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:collection/collection.dart';
 
@@ -10,6 +11,9 @@ import 'package:collection/collection.dart';
 ///
 /// First edition creation date 2024-11-03 16:07:11(now creating)
 class DTDBNode extends CloneableFile {
+  static const String className = "DTDBNode";
+  static const int version = 1;
+
   late final int serial;
   late final int parentSerial;
 
@@ -37,6 +41,8 @@ class DTDBNode extends CloneableFile {
   @override
   Map<String, dynamic> toDict() {
     return {
+      "className": className,
+      "version": version,
       "serial": serial,
       "parentSerial": parentSerial,
       "children": children,

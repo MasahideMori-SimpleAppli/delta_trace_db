@@ -1,6 +1,6 @@
 import 'package:delta_trace_db/src/node/search/dtdb_search_obj.dart';
 import 'dtdb_node_search.dart';
-import 'enum_dtdb_search_chain_mode.dart';
+import '../enum_dtdb_search_chain_mode.dart';
 
 /// 複数パラメータで探索する場合に利用するオブジェクト。
 /// 探索条件にカッコの計算が必要になる複合検索などに使用します。
