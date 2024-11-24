@@ -33,6 +33,11 @@ class DTDBNode extends CloneableFile {
   DTDBNode(
       this.serial, this.parentSerial, this.children, this.nodeName, this.data);
 
+  /// (en) Restore this object from the dictionary.
+  ///
+  /// (ja) このオブジェクトを辞書から復元します。
+  ///
+  /// * [src] : A dictionary made with toDict of this class.
   factory DTDBNode.fromDict(Map<String, dynamic> src) {
     return DTDBNode(src["serial"], src["parentSerial"], src["children"],
         src["nodeName"], DTDBData.fromDict(src["data"]));

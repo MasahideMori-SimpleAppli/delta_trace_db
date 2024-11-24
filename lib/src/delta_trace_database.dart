@@ -66,11 +66,11 @@ class DeltaTraceDatabase {
   /// システムによるアクセスの場合のみ、システムレイヤへのアクセスが許可されます。
   Future<ServerResponse> operate(DTDBDelta delta,
       {String? jwt,
-      String localModeSID = "local_user",
+      String localModeSID = "localUser",
       EnumDTDBUserType userType = EnumDTDBUserType.general}) {
     if (isLocalMode) {
       return _dbCore!
-          .operate([delta], localModeSID: localModeSID, userType: userType);
+          .operate([delta], sid: localModeSID, userType: userType);
     } else {
       return _sendToServer(_endpointUrl!, jwt, [delta]);
     }
@@ -83,11 +83,11 @@ class DeltaTraceDatabase {
   /// システムによるアクセスの場合のみ、システムレイヤへのアクセスが許可されます。
   Future<ServerResponse> multiOperate(List<DTDBDelta> deltaList,
       {String? jwt,
-      String localModeSID = "local_user",
+      String localModeSID = "localUser",
       EnumDTDBUserType userType = EnumDTDBUserType.general}) {
     if (isLocalMode) {
       return _dbCore!
-          .operate(deltaList, localModeSID: localModeSID, userType: userType);
+          .operate(deltaList, sid: localModeSID, userType: userType);
     } else {
       return _sendToServer(_endpointUrl!, jwt, deltaList);
     }

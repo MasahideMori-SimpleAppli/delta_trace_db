@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:delta_trace_db/src/local/enum_dtdb_user_type.dart';
+import 'package:delta_trace_db/src/node/dtdb_nodes.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:simple_jwt_manager/simple_jwt_manager.dart';
 import '../delta/dtdb_delta.dart';
+import '../delta/enum_crud.dart';
 import '../node/dtdb_node.dart';
 import '../node/structure/layer/enum_dtdb_layer_type.dart';
 import 'package:http/http.dart' as http;
@@ -18,12 +20,31 @@ import 'package:http/http.dart' as http;
 class DTDBCore extends CloneableFile {
   static const String className = "DTDBCore";
   static const int version = 1;
-  List<DTDBNode> _nodes = [];
+  DTDBNodes _publicNodes = DTDBNodes();
+  DTDBNodes _limitedNodes = DTDBNodes();
+  DTDBNodes _privateNodes = DTDBNodes();
+  DTDBNodes _systemNodes = DTDBNodes();
 
-  /// * [nodes] : Specify the list of nodes you want to restore, if any.
-  DTDBCore({List<DTDBNode>? nodes}) {
-    if (nodes != null) {
-      _nodes = nodes;
+  /// * [publicNodes] : Pass in any node information you want to restore.
+  /// * [limitedNodes] : Pass in any node information you want to restore.
+  /// * [privateNodes] : Pass in any node information you want to restore.
+  /// * [systemNodes] : Pass in any node information you want to restore.
+  DTDBCore(
+      {DTDBNodes? publicNodes,
+      DTDBNodes? limitedNodes,
+      DTDBNodes? privateNodes,
+      DTDBNodes? systemNodes}) {
+    if (publicNodes != null) {
+      _publicNodes = publicNodes;
+    }
+    if (limitedNodes != null) {
+      _limitedNodes = limitedNodes;
+    }
+    if (privateNodes != null) {
+      _privateNodes = privateNodes;
+    }
+    if (systemNodes != null) {
+      _systemNodes = systemNodes;
     }
   }
 
@@ -33,11 +54,11 @@ class DTDBCore extends CloneableFile {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory DTDBCore.fromDict(Map<String, dynamic> src) {
-    List<DTDBNode> nodes = [];
-    for (Map<String, dynamic> i in src["nodes"]) {
-      nodes.add(DTDBNode.fromDict(i));
-    }
-    return DTDBCore(nodes: nodes);
+    return DTDBCore(
+        publicNodes: DTDBNodes.fromDict(src["publicNodes"]),
+        limitedNodes: DTDBNodes.fromDict(src["limitedNodes"]),
+        privateNodes: DTDBNodes.fromDict(src["privateNodes"]),
+        systemNodes: DTDBNodes.fromDict(src["systemNodes"]));
   }
 
   @override
@@ -47,41 +68,40 @@ class DTDBCore extends CloneableFile {
 
   @override
   Map<String, dynamic> toDict() {
-    List<Map<String, dynamic>> nodes = [];
-    for (DTDBNode i in _nodes) {
-      nodes.add(i.toDict());
-    }
     return {
       "className": className,
       "version": version,
-      "nodes": nodes,
+      "publicNodes": _publicNodes.toDict(),
+      "limitedNodes": _limitedNodes.toDict(),
+      "privateNodes": _privateNodes.toDict(),
+      "systemNodes": _systemNodes.toDict(),
     };
   }
 
   /// Databaseに対して実行する操作（Delta）をリストで渡します。
   ///
-  /// * [localModeSID] : ローカルモードで使用する、既に認証されたユーザーのSID。
+  /// * [sid] : 既に認証されたユーザーのSID。
   /// * [userType] : ローカルモードで使用する、アクセス元がユーザーなのかシステムなのかの指定。
   /// システムによるアクセスの場合のみ、システムレイヤへのアクセスが許可されます。
   ///
   /// Returns : {"nodeList": serialized DTDBNode list}
   Future<ServerResponse> operate(List<DTDBDelta> deltaList,
-      {String localModeSID = "local_user",
+      {String sid = "localUser",
       EnumDTDBUserType userType = EnumDTDBUserType.general}) async {
     List<DTDBNode> nodeList = [];
     for (DTDBDelta i in deltaList) {
       switch (i.target.layerType) {
         case EnumDTDBLayerType.public:
-          nodeList.add(_operatePublic(i));
+          nodeList.add(_operatePublic(i, sid));
           break;
         case EnumDTDBLayerType.limited:
-          nodeList.add(_operateLimited(i));
+          nodeList.add(_operateLimited(i, sid));
           break;
         case EnumDTDBLayerType.private:
-          nodeList.add(_operatePrivate(i));
+          nodeList.add(_operatePrivate(i, sid));
           break;
         case EnumDTDBLayerType.system:
-          nodeList.add(_operateSystem(i));
+          nodeList.add(_operateSystem(i, sid));
           break;
       }
     }
@@ -93,11 +113,71 @@ class DTDBCore extends CloneableFile {
         http.Response(jsonEncode({"nodeList": r}), 200));
   }
 
-  DTDBNode _operatePublic(DTDBDelta i) {}
+  DTDBNode _operatePublic(DTDBDelta i, String sid) {
+    switch (i.crud) {
+      case EnumCRUD.create:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.read:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.update:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.delete:
+        // TODO: Handle this case.
+        break;
+    }
+  }
 
-  DTDBNode _operateLimited(DTDBDelta i) {}
+  DTDBNode _operateLimited(DTDBDelta i, String sid) {
+    switch (i.crud) {
+      case EnumCRUD.create:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.read:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.update:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.delete:
+        // TODO: Handle this case.
+        break;
+    }
+  }
 
-  DTDBNode _operatePrivate(DTDBDelta i) {}
+  DTDBNode _operatePrivate(DTDBDelta i, String sid) {
+    switch (i.crud) {
+      case EnumCRUD.create:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.read:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.update:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.delete:
+        // TODO: Handle this case.
+        break;
+    }
+  }
 
-  DTDBNode _operateSystem(DTDBDelta i) {}
+  DTDBNode _operateSystem(DTDBDelta i, String sid) {
+    switch (i.crud) {
+      case EnumCRUD.create:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.read:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.update:
+        // TODO: Handle this case.
+        break;
+      case EnumCRUD.delete:
+        // TODO: Handle this case.
+        break;
+    }
+  }
 }
