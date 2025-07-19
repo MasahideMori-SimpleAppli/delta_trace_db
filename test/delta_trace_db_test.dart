@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:file_state_manager/file_state_manager.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 class User extends CloneableFile {
   final String id;

@@ -17,36 +17,36 @@ testフォルダのspeed_test.dartを利用して実際の環境でテストし�
 十分に時間がかかる条件をチョイスしてテストしていますが、実用上問題になることは稀だと思います。
 
 ```text
-speed test for 100000 records
+speed test for 100000 records                                                                                                                                                                                
 start add
-end add: 189 ms
-start getAll (with object convert)                                                                                                                                  
-end getAll: 302 ms
+end add: 169 ms
+start getAll (with object convert)
+end getAll: 277 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 327 ms
+end save: 332 ms
 start load (with json string convert)
-end load: 237 ms
+end load: 248 ms
 start search (with object convert)
-end search: 539 ms
+end search: 514 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 333 ms
+end search paging: 414 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 392 ms
+end search paging by obj: 419 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 403 ms
+end search paging by offset: 395 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 27 ms
+end update: 59 ms
 start updateOne of half index object
-end updateOne: 8 ms
+end updateOne: 13 ms
 start conformToTemplate
-end conformToTemplate: 63 ms
+end conformToTemplate: 68 ms
 start delete half object (with object convert)
-end delete: 267 ms
+end delete: 241 ms
 returnsLength:50000
 ```
 

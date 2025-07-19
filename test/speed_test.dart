@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:file_state_manager/file_state_manager.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 class User extends CloneableFile {
   final String id;
@@ -88,7 +87,7 @@ class User2 extends CloneableFile {
 void main() {
   test('speed test', () {
     final int recordsCount = 100000;
-    debugPrint("speed test for $recordsCount records");
+    print("speed test for $recordsCount records");
     final now = DateTime.now();
     // データベース作成とデータ追加
     final db = DeltaTraceDatabase();
@@ -107,45 +106,45 @@ void main() {
     }
     // add
     final Query q1 = QueryBuilder.add(target: 'users', addData: users).build();
-    debugPrint("start add");
+    print("start add");
     DateTime dt1 = DateTime.now();
     final QueryResult<User> r1 = db.executeQuery<User>(q1);
     DateTime dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end add: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
     expect(r1.isNoErrors, true);
 
     // getAll
     final Query q1Get = QueryBuilder.getAll(target: 'users').build();
-    debugPrint("start getAll (with object convert)");
+    print("start getAll (with object convert)");
     dt1 = DateTime.now();
     final QueryResult<User> r1Get = db.executeQuery<User>(q1Get);
     final List<User> _ = r1Get.convert(User.fromDict);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end getAll: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
     expect(r1.isNoErrors, true);
-    debugPrint("returnsLength:${r1Get.result.length}");
+    print("returnsLength:${r1Get.result.length}");
 
     // save
-    debugPrint("start save (with json string convert)");
+    print("start save (with json string convert)");
     dt1 = DateTime.now();
     final dbMap = db.toDict();
     final jsonStr = jsonEncode(dbMap);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end save: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
 
     // load
-    debugPrint("start load (with json string convert)");
+    print("start load (with json string convert)");
     dt1 = DateTime.now();
     final jsonMap = jsonDecode(jsonStr);
     final _ = DeltaTraceDatabase.fromDict(jsonMap);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end load: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
 
@@ -155,15 +154,15 @@ void main() {
       queryNode: FieldStartsWith("name", "sample"),
       sortObj: SingleSort(field: 'age'),
     ).build();
-    debugPrint("start search (with object convert)");
+    print("start search (with object convert)");
     dt1 = DateTime.now();
     final QueryResult<User> r2 = db.executeQuery<User>(q2);
     List<User> _ = r2.convert(User.fromDict);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end search: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    debugPrint("returnsLength:${r2.result.length}");
+    print("returnsLength:${r2.result.length}");
 
     // search (paging obj)
     final Query q2Paging = QueryBuilder.search(
@@ -172,49 +171,47 @@ void main() {
       sortObj: SingleSort(field: 'age'),
       limit: recordsCount ~/ 2,
     ).build();
-    debugPrint(
-      "start search paging, half limit pre search (with object convert)",
-    );
+    print("start search paging, half limit pre search (with object convert)");
     dt1 = DateTime.now();
     final QueryResult<User> r2Paging = db.executeQuery<User>(q2Paging);
     List<User> _ = r2Paging.convert(User.fromDict);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end search paging: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    debugPrint("returnsLength:${r2Paging.result.length}");
+    print("returnsLength:${r2Paging.result.length}");
     final Query q2PagingByObj = QueryBuilder.search(
       target: 'users',
       queryNode: FieldStartsWith("name", "sample"),
       sortObj: SingleSort(field: 'age'),
       startAfter: r2Paging.result.last,
     ).build();
-    debugPrint("start search paging by obj (with object convert)");
+    print("start search paging by obj (with object convert)");
     dt1 = DateTime.now();
     final QueryResult<User> r2PagingObj = db.executeQuery<User>(q2PagingByObj);
     List<User> _ = r2PagingObj.convert(User.fromDict);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end search paging by obj: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    debugPrint("returnsLength:${r2PagingObj.result.length}");
+    print("returnsLength:${r2PagingObj.result.length}");
     final Query q2PagingOffset = QueryBuilder.search(
       target: 'users',
       queryNode: FieldStartsWith("name", "sample"),
       sortObj: SingleSort(field: 'age'),
       offset: 50000,
     ).build();
-    debugPrint("start search paging by offset (with object convert)");
+    print("start search paging by offset (with object convert)");
     dt1 = DateTime.now();
     final QueryResult<User> r2PagingOffset = db.executeQuery<User>(
       q2PagingOffset,
     );
     List<User> _ = r2PagingOffset.convert(User.fromDict);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end search paging by offset: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    debugPrint("returnsLength:${r2PagingOffset.result.length}");
+    print("returnsLength:${r2PagingOffset.result.length}");
 
     // update
     final Query q3 = QueryBuilder.update(
@@ -227,11 +224,11 @@ void main() {
       returnData: false,
       sortObj: SingleSort(field: 'id'),
     ).build();
-    debugPrint("start update at half index and last index object");
+    print("start update at half index and last index object");
     dt1 = DateTime.now();
     final _ = db.executeQuery<User>(q3);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end update: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
 
@@ -242,11 +239,11 @@ void main() {
       overrideData: {'age': recordsCount},
       returnData: false,
     ).build();
-    debugPrint("start updateOne of half index object");
+    print("start updateOne of half index object");
     dt1 = DateTime.now();
     final _ = db.executeQuery<User>(q4);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end updateOne: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
 
@@ -261,12 +258,12 @@ void main() {
         gender: "None",
       ),
     ).build();
-    debugPrint("start conformToTemplate");
+    print("start conformToTemplate");
     final db2 = db.clone() as DeltaTraceDatabase;
     dt1 = DateTime.now();
     final _ = db2.executeQuery<User2>(q5);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end conformToTemplate: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
 
@@ -277,14 +274,14 @@ void main() {
       sortObj: SingleSort(field: 'id'),
       returnData: true,
     ).build();
-    debugPrint("start delete half object (with object convert)");
+    print("start delete half object (with object convert)");
     dt1 = DateTime.now();
     final r6 = db.executeQuery<User>(q6);
     List<User> _ = r6.convert(User.fromDict);
     dt2 = DateTime.now();
-    debugPrint(
+    print(
       "end delete: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    debugPrint("returnsLength:${r6.result.length}");
+    print("returnsLength:${r6.result.length}");
   });
 }

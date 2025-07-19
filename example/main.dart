@@ -184,5 +184,6 @@ void main() async {
 
   // Restoring the database can be completed simply by loading the map.
   final DeltaTraceDatabase resumedDB = DeltaTraceDatabase.fromDict(jsonMap);
+  debugPrint("// save and load");
   debugPrint("resumedDB users length:${resumedDB.collection('users').length}");
 }
