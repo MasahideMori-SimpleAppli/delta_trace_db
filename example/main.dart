@@ -1,6 +1,5 @@
 import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:file_state_manager/file_state_manager.dart';
-import 'package:flutter/material.dart';
 
 class User extends CloneableFile {
   final String id;
@@ -46,7 +45,6 @@ class User extends CloneableFile {
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   final now = DateTime.now();
   final db = DeltaTraceDatabase();
 
@@ -90,9 +88,9 @@ void main() async {
   ).build();
   // If the query is processed on the server, it can be serialized.
   // final jsonMap = q1.toDict();
-  debugPrint("// add");
+  print("// add");
   final QueryResult<User> addResult = db.executeQuery<User>(q1);
-  debugPrint("dbLength:${addResult.dbLength}");
+  print("dbLength:${addResult.dbLength}");
 
   // search
   final Query q2 = QueryBuilder.search(
@@ -104,11 +102,11 @@ void main() async {
   final QueryResult<User> r2 = db.executeQuery<User>(q2);
   // convert to class
   final List<User> searchResult = r2.convert(User.fromDict);
-  debugPrint("// search");
-  debugPrint("return:${searchResult.length}");
-  debugPrint("hitCount:${r2.hitCount}");
+  print("// search");
+  print("return:${searchResult.length}");
+  print("hitCount:${r2.hitCount}");
   for (User i in searchResult) {
-    debugPrint(i.name);
+    print(i.name);
   }
   // paging option
   final Query q2Paging = QueryBuilder.search(
@@ -120,11 +118,11 @@ void main() async {
   ).build();
   final QueryResult<User> r2Paging = db.executeQuery<User>(q2Paging);
   final List<User> searchResultPaging = r2Paging.convert(User.fromDict);
-  debugPrint("// search (paging)");
-  debugPrint("return:${searchResultPaging.length}");
-  debugPrint("hitCount:${r2Paging.hitCount}");
+  print("// search (paging)");
+  print("return:${searchResultPaging.length}");
+  print("hitCount:${r2Paging.hitCount}");
   for (User i in searchResultPaging) {
-    debugPrint(i.name);
+    print(i.name);
   }
 
   // nested param search
@@ -137,11 +135,11 @@ void main() async {
   final QueryResult<User> r2Nested = db.executeQuery<User>(q2Nested);
   // convert to class
   final List<User> searchNestedResult = r2Nested.convert(User.fromDict);
-  debugPrint("// nested param search");
-  debugPrint("return:${searchNestedResult.length}");
-  debugPrint("hitCount:${r2Nested.hitCount}");
+  print("// nested param search");
+  print("return:${searchNestedResult.length}");
+  print("hitCount:${r2Nested.hitCount}");
   for (User i in searchNestedResult) {
-    debugPrint(i.name);
+    print(i.name);
   }
 
   // update
@@ -158,10 +156,10 @@ void main() async {
   final QueryResult<User> r3 = db.executeQuery<User>(q3);
   // convert to class
   final List<User> updateResult = r3.convert(User.fromDict);
-  debugPrint("// update");
-  debugPrint("updateCount:${r3.updateCount}");
+  print("// update");
+  print("updateCount:${r3.updateCount}");
   for (User i in updateResult) {
-    debugPrint(i.toDict().toString());
+    print(i.toDict().toString());
   }
 
   // delete
@@ -172,8 +170,8 @@ void main() async {
     returnData: false,
   ).build();
   final QueryResult<User> deleteResult = db.executeQuery<User>(q4);
-  debugPrint("// delete");
-  debugPrint("dbLength:${deleteResult.dbLength}");
+  print("// delete");
+  print("dbLength:${deleteResult.dbLength}");
 
   // save and load
   // You can save it using your favorite package or using standard input and
@@ -184,6 +182,6 @@ void main() async {
 
   // Restoring the database can be completed simply by loading the map.
   final DeltaTraceDatabase resumedDB = DeltaTraceDatabase.fromDict(jsonMap);
-  debugPrint("// save and load");
-  debugPrint("resumedDB users length:${resumedDB.collection('users').length}");
+  print("// save and load");
+  print("resumedDB users length:${resumedDB.collection('users').length}");
 }

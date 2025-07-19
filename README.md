@@ -29,36 +29,36 @@ The test conditions were chosen to take a sufficiently long time, but I think it
 any problems in practical use.  
 
 ```text
-speed test for 100000 records                                                                                                                                                                                
+speed test for 100000 records                                                                                                                                                                               
 start add
-end add: 169 ms
+end add: 172 ms
 start getAll (with object convert)
-end getAll: 277 ms
+end getAll: 274 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 332 ms
+end save: 331 ms
 start load (with json string convert)
-end load: 248 ms
+end load: 249 ms
 start search (with object convert)
-end search: 514 ms
+end search: 462 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 414 ms
+end search paging: 376 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 419 ms
+end search paging by obj: 369 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 395 ms
+end search paging by offset: 345 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 59 ms
+end update: 56 ms
 start updateOne of half index object
-end updateOne: 13 ms
+end updateOne: 12 ms
 start conformToTemplate
-end conformToTemplate: 68 ms
+end conformToTemplate: 67 ms
 start delete half object (with object convert)
-end delete: 241 ms
+end delete: 220 ms
 returnsLength:50000
 ```
 

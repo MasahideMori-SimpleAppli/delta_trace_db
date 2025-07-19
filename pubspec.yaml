@@ -1,14 +1,12 @@
 name: delta_trace_db
 description: "A secure, in-memory database built on Dart with class-based functionality and detailed operation history tracking."
-version: 0.0.2
+version: 0.0.3
 repository: https://github.com/MasahideMori-SimpleAppli/delta_trace_db
 
 environment:
   sdk: ^3.8.1
 
 dependencies:
-  flutter:
-    sdk: flutter
   file_state_manager: ^2.0.0
   collection: ^1.19.1
 
