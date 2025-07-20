@@ -121,22 +121,23 @@ class DeltaTraceDatabase extends CloneableFile {
 
   /// (en) This is a callback setting function that can be used when linking
   /// the UI and DB.
-  /// The callback set here will be called when the contents of this collection
-  /// are changed.
+  /// The callback set here will be called when the contents of the [target]
+  /// collection are changed.
   /// In other words, if you register it, you will be able to update the screen,
   /// etc. when the contents of the DB change.
   /// Normally you would register it in initState and then use removeListener
   /// to remove it when disposing.
-  /// If you use this on the server side, you can also set up a function to
-  /// write the backup to storage.
+  /// If you use this on the server side, it may be a good idea to set up a
+  /// function that writes the backup to storage.
   /// Please note that notifications will not be restored even if the DB is
   /// deserialized. You will need to set them every time.
   ///
   /// (ja) UIとDBを連携する際に利用できる、コールバックの設定関数です。
-  /// ここで設定したコールバックは、このコレクションの内容が変更されると呼び出されます。
+  /// ここで設定したコールバックは、[target]のコレクションの内容が変更されると呼び出されます。
   /// つまり、登録しておくとDBの内容変更時に画面更新等ができるようになります。
   /// 通常はinitStateで登録し、dispose時にremoveListenerを使って解除してください。
-  /// これをサーバー側で使用する場合は、バックアップをストレージに書き込む機能も設定できます。
+  /// これをサーバー側で使用する場合は、バックアップをストレージに書き込む関数などを設定
+  /// するのも良いかもしれません。
   /// なお、通知に関してはDBをデシリアライズしても復元されません。毎回設定する必要があります。
   ///
   /// * [target] : The target collection name.
