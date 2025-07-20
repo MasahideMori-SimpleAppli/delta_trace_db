@@ -16,8 +16,11 @@ abstract class CollectionBase extends CloneableFile {}
 /// DBに対する操作などが実装されています。
 class Collection extends CollectionBase {
   static const String className = "Collection";
-  static const String version = "1";
+  static const String version = "2";
   List<Map<String, dynamic>> _data = [];
+
+  // Flutterなどとの連携時に通知するためのコールバックのセット
+  final Set<void Function()> _listeners = {};
 
   /// (en) The constructor.
   ///
@@ -62,6 +65,47 @@ class Collection extends CollectionBase {
   /// (ja) コレクションのデータ数を返します。
   int get length => _data.length;
 
+  /// (en) This is a callback setting function that can be used when linking
+  /// the UI and DB.
+  /// The callback set here will be called when the contents of this collection
+  /// are changed.
+  /// In other words, if you register it, you will be able to update the screen,
+  /// etc. when the contents of the DB change.
+  /// Normally you would register it in initState and then use removeListener
+  /// to remove it when disposing.
+  /// If you use this on the server side, you can also set up a function to
+  /// write the backup to storage.
+  /// Please note that notifications will not be restored even if the DB is
+  /// deserialized. You will need to set them every time.
+  ///
+  /// (ja) UIとDBを連携する際に利用できる、コールバックの設定関数です。
+  /// ここで設定したコールバックは、このコレクションの内容が変更されると呼び出されます。
+  /// つまり、登録しておくとDBの内容変更時に画面更新等ができるようになります。
+  /// 通常はinitStateで登録し、dispose時にremoveListenerを使って解除してください。
+  /// これをサーバー側で使用する場合は、バックアップをストレージに書き込む機能も設定できます。
+  /// なお、通知に関してはDBをデシリアライズしても復元されません。毎回設定する必要があります。
+  ///
+  /// * [cb] : The function to execute when the DB is changed.
+  void addListener(void Function() cb) => _listeners.add(cb);
+
+  /// (en) This function is used to cancel the set callback.
+  /// Call it in the UI using dispose etc.
+  ///
+  /// (ja) 設定したコールバックを解除するための関数です。
+  /// UIではdisposeなどで呼び出します。
+  ///
+  /// * [cb] : The function for which you want to cancel the notification.
+  void removeListener(void Function() cb) => _listeners.remove(cb);
+
+  /// (en) Executes a registered callback.
+  ///
+  /// (ja) 登録済みのコールバックを実行します。
+  void _notifyListeners() {
+    for (final cb in _listeners) {
+      cb();
+    }
+  }
+
   /// (en) Adds the data specified by the query.
   ///
   /// (ja) クエリで指定されたデータを追加します。
@@ -72,6 +116,7 @@ class Collection extends CollectionBase {
       (UtilCopy.jsonableDeepCopy(q.addData!) as List)
           .cast<Map<String, dynamic>>(),
     );
+    _notifyListeners();
     return QueryResult<T>(
       isNoErrors: true,
       result: [],
@@ -103,6 +148,9 @@ class Collection extends CollectionBase {
       if (q.sortObj != null) {
         r.sort(q.sortObj!.getComparator());
       }
+      if (r.length > 0) {
+        _notifyListeners();
+      }
       return QueryResult<T>(
         isNoErrors: true,
         result: (UtilCopy.jsonableDeepCopy(r) as List)
@@ -120,6 +168,9 @@ class Collection extends CollectionBase {
           );
           count += 1;
         }
+      }
+      if (count > 0) {
+        _notifyListeners();
       }
       return QueryResult<T>(
         isNoErrors: true,
@@ -152,6 +203,7 @@ class Collection extends CollectionBase {
             UtilCopy.jsonableDeepCopy(q.overrideData!) as Map<String, dynamic>,
           );
           r.add(_data[i]);
+          _notifyListeners();
           return QueryResult<T>(
             isNoErrors: true,
             result: (UtilCopy.jsonableDeepCopy(r) as List)
@@ -175,6 +227,7 @@ class Collection extends CollectionBase {
           _data[i].addAll(
             UtilCopy.jsonableDeepCopy(q.overrideData!) as Map<String, dynamic>,
           );
+          _notifyListeners();
           return QueryResult<T>(
             isNoErrors: true,
             result: [],
@@ -212,6 +265,9 @@ class Collection extends CollectionBase {
       if (q.sortObj != null) {
         deletedItems.sort(q.sortObj!.getComparator());
       }
+      if (deletedItems.length > 0) {
+        _notifyListeners();
+      }
       return QueryResult<T>(
         isNoErrors: true,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
@@ -229,6 +285,9 @@ class Collection extends CollectionBase {
         }
         return shouldDelete;
       });
+      if (count > 0) {
+        _notifyListeners();
+      }
       return QueryResult<T>(
         isNoErrors: true,
         result: [],
@@ -355,6 +414,7 @@ class Collection extends CollectionBase {
         }
       }
     }
+    _notifyListeners();
     return QueryResult<T>(
       isNoErrors: true,
       result: [],
@@ -403,6 +463,7 @@ class Collection extends CollectionBase {
         r.add(item);
       }
     }
+    _notifyListeners();
     return QueryResult<T>(
       isNoErrors: true,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
@@ -432,6 +493,7 @@ class Collection extends CollectionBase {
   QueryResult<T> clear<T>() {
     final int preLen = _data.length;
     _data.clear();
+    _notifyListeners();
     return QueryResult<T>(
       isNoErrors: true,
       result: [],
@@ -457,6 +519,7 @@ class Collection extends CollectionBase {
       (UtilCopy.jsonableDeepCopy(q.addData!) as List)
           .cast<Map<String, dynamic>>(),
     );
+    _notifyListeners();
     return QueryResult<T>(
       isNoErrors: true,
       result: [],

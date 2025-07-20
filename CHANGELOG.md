@@ -1,3 +1,7 @@
+## 0.0.4
+
+* A listener has been added that will call back when the DB state changes.
+
 ## 0.0.3
 
 * Fixed an issue where a dependency on Flutter was still present.

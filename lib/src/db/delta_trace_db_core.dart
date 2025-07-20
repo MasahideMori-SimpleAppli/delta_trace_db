@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "1";
+  static const String version = "2";
 
   late final Map<String, CollectionBase> _collections;
 
@@ -117,6 +117,46 @@ class DeltaTraceDatabase extends CloneableFile {
       "version": version,
       "collections": mCollections,
     };
+  }
+
+  /// (en) This is a callback setting function that can be used when linking
+  /// the UI and DB.
+  /// The callback set here will be called when the contents of this collection
+  /// are changed.
+  /// In other words, if you register it, you will be able to update the screen,
+  /// etc. when the contents of the DB change.
+  /// Normally you would register it in initState and then use removeListener
+  /// to remove it when disposing.
+  /// If you use this on the server side, you can also set up a function to
+  /// write the backup to storage.
+  /// Please note that notifications will not be restored even if the DB is
+  /// deserialized. You will need to set them every time.
+  ///
+  /// (ja) UIとDBを連携する際に利用できる、コールバックの設定関数です。
+  /// ここで設定したコールバックは、このコレクションの内容が変更されると呼び出されます。
+  /// つまり、登録しておくとDBの内容変更時に画面更新等ができるようになります。
+  /// 通常はinitStateで登録し、dispose時にremoveListenerを使って解除してください。
+  /// これをサーバー側で使用する場合は、バックアップをストレージに書き込む機能も設定できます。
+  /// なお、通知に関してはDBをデシリアライズしても復元されません。毎回設定する必要があります。
+  ///
+  /// * [target] : The target collection name.
+  /// * [cb] : The function to execute when the DB is changed.
+  void addListener(String target, void Function() cb) {
+    Collection col = collection(target);
+    col.addListener(cb);
+  }
+
+  /// (en) This function is used to cancel the set callback.
+  /// Call it in the UI using dispose etc.
+  ///
+  /// (ja) 設定したコールバックを解除するための関数です。
+  /// UIではdisposeなどで呼び出します。
+  ///
+  /// * [target] : The target collection name.
+  /// * [cb] : The function for which you want to cancel the notification.
+  void removeListener(String target, void Function() cb) {
+    Collection col = collection(target);
+    col.removeListener(cb);
   }
 
   /// (en) Execute the query.
