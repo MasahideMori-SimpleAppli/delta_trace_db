@@ -1,3 +1,7 @@
+## 0.0.5
+
+* The SingleSort class has been improved to allow sorting on null and Boolean values.
+
 ## 0.0.4
 
 * A listener has been added that will call back when the DB state changes.
