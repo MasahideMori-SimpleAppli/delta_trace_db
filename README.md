@@ -123,6 +123,8 @@ final users = [
 ];
 
 final query = QueryBuilder.add(target: 'users', addData: users).build();
+// <User> here is not needed on the server.
+// This is a type specification for conversion processing when retrieving data.
 final result = db.executeQuery<User>(query);
 ```
 
@@ -136,6 +138,7 @@ final result = db.executeQuery<User>(query);
   the same query structure.
 - Most of what is required on the server side is user permission confirmation and logging, and
   logging is also very easy since you can just save the query as is.
+- To return results from the server to the frontend, simply toDict the QueryResult of executeQuery and return it.
 
 ### 🔍 3. Data search (filter + sort + paging)
 

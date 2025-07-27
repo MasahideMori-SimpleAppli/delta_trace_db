@@ -186,8 +186,19 @@ void main() {
     expect(result2.length == 2, true);
     expect(result2[0].name == 'サンプル三郎', true);
 
+    // query result serialize test
+    final QueryResult r2S = db.executeQuery(q2);
+    final resumeResult = QueryResult<User>.fromDict(
+      jsonDecode(jsonEncode(r2S.toDict())),
+    );
+    expect(resumeResult.dbLength == 4, true);
+    expect(resumeResult.hitCount == 4, true);
+    List<User> result2Resume = resumeResult.convert(User.fromDict);
+    expect(result2Resume.length == 2, true);
+    expect(result2Resume[0].name == 'サンプル三郎', true);
+
     // search by datetime
-    final Query q2_dt = QueryBuilder.search(
+    final Query q2Dt = QueryBuilder.search(
       target: 'users',
       queryNode: AndNode([
         FieldGreaterThanOrEqual("createdAt", now.add(Duration(days: 1))),
@@ -196,7 +207,7 @@ void main() {
       sortObj: SingleSort(field: 'createdAt', reversed: true),
     ).build();
     final QueryResult<User> r2_dt = db.executeQuery<User>(
-      Query.fromDict(q2_dt.toDict()),
+      Query.fromDict(q2Dt.toDict()),
     );
     expect(r2_dt.dbLength == 4, true);
     expect(r2_dt.hitCount == 2, true);

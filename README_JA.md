@@ -110,6 +110,7 @@ final users = [
 ];
 
 final query = QueryBuilder.add(target: 'users', addData: users).build();
+// ここの<User>はサーバーでは不要。これはデータ取得時のコンバート処理のための型指定です。
 final result = db.executeQuery<User>(query);
 ```
 
@@ -120,6 +121,7 @@ final result = db.executeQuery<User>(query);
   としてシリアライズ可能なため、必要に応じてそのままサーバーに送信してリモートのデータベースに反映させることができます。
 - サーバー側では executeQuery 相当の処理を用意すれば、同じクエリ構造で処理が可能です。
 - サーバー側で必要なのはほぼユーザーの権限確認やロギングだけで、ログもクエリをそのまま保存すれば良いので非常に簡単です。
+- サーバーからフロントエンドへの結果の返却はexecuteQueryの結果のQueryResultをtoDictして返すだけです。
 
 ### 🔍 3. データ検索（フィルタ + ソート + ページング）
 
