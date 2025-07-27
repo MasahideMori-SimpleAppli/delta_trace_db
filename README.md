@@ -219,7 +219,6 @@ at any point in time.
 - All data operations are recorded by Query.
 - The same state can be obtained by re-executing the saved query logs in order on an empty DB in the
   initial state.
-- Git-like "reconstruction by difference" is possible.
 
 I recommend a configuration where normal saving is done as a date and time snapshot, and the query
 itself is logged.  
