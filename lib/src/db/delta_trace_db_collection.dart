@@ -149,7 +149,7 @@ class Collection extends CollectionBase {
       if (q.sortObj != null) {
         r.sort(q.sortObj!.getComparator());
       }
-      if (r.length > 0) {
+      if (r.isNotEmpty) {
         _notifyListeners();
       }
       return QueryResult<T>(
@@ -266,7 +266,7 @@ class Collection extends CollectionBase {
       if (q.sortObj != null) {
         deletedItems.sort(q.sortObj!.getComparator());
       }
-      if (deletedItems.length > 0) {
+      if (deletedItems.isNotEmpty) {
         _notifyListeners();
       }
       return QueryResult<T>(

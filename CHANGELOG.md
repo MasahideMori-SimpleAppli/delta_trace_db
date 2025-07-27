@@ -1,3 +1,7 @@
+## 0.0.7
+
+* I performed a refactoring.
+
 ## 0.0.6
 
 * Added RawQueryBuilder class, which is useful for certain purposes.
