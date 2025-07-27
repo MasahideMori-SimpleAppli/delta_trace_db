@@ -29,18 +29,20 @@ For this reason, the user is barely aware of the difference between the front en
 end,  
 and can concentrate on the operation of "obtaining the required class object."
 
+```
 📦 Database (DeltaTraceDB)
 ├── 🗂️ CollectionA (key: "collection_a")
-│ ├── 📄 Item (ClassA)
-│ │ ├── id: int
-│ │ ├── name: String
-│ │ └── timestamp: String
-│ └── ...
+│   ├── 📄 Item (ClassA)
+│   │   ├── id: int
+│   │   ├── name: String
+│   │   └── timestamp: String
+│   └── ...
 ├── 🗂️ CollectionB (key: "collection_b")
-│ ├── 📄 Item (ClassB)
-│ │ ├── uid: String
-│ │ └── data: Map<String, dynamic>
+│   ├── 📄 Item (ClassB)
+│   │   ├── uid: String
+│   │   └── data: Map<String, dynamic>
 └── ...
+```
 
 ## Basic DB operations
 
@@ -90,7 +92,6 @@ class User extends CloneableFile {
         'name': name,
         'age': age,
         'createdAt': createdAt.toIso8601String(),
-        // This will automatically update the update date.
         'updatedAt': DateTime.now().toIso8601String(),
         'nestedObj': {...nestedObj},
       };
@@ -231,9 +232,9 @@ so if you set this appropriately, it will be even easier to identify the problem
 For nested fields, you can specify the key separated by a ".", such as "nestedObj.a".  
 The nodes that can be used in searches are "LogicalNode (And and Or)" and "ComparisonNode (Equals,
 etc.)".
-Please check the following for available types.
+Please check the following for available types.  
 [logicalNode](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/lib/src/query/nodes/logical_node.dart)  
-[comparisonNode](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/lib/src/query/nodes/comparison_node.dart)
+[comparisonNode](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/lib/src/query/nodes/comparison_node.dart)  
 
 ### 🧬 8. Type conversion/template conversion (conformToTemplate)
 
@@ -334,7 +335,7 @@ usability and creating peripheral tools will take priority.
 
 ## Support
 
-There is essentially no support at this time, but bugs will likely be fixed.
+There is essentially no support at this time, but bugs will likely be fixed.  
 If you find any issues, please open an issue on Github.
 
 ## About version control
