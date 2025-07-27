@@ -1,3 +1,9 @@
+## 0.0.6
+
+* Added RawQueryBuilder class, which is useful for certain purposes.
+* Several query nodes now support automatic DateTime conversion, improving search speed when comparing DateTime values.
+* Added operation instructions to the README.
+
 ## 0.0.5
 
 * The SingleSort class has been improved to allow sorting on null and Boolean values.

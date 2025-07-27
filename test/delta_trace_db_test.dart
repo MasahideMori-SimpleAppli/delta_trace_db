@@ -24,8 +24,8 @@ class User extends CloneableFile {
     id: src['id'],
     name: src['name'],
     age: src['age'],
-    createdAt: DateTime.fromMillisecondsSinceEpoch(src['createdAt']),
-    updatedAt: DateTime.fromMillisecondsSinceEpoch(src['updatedAt']),
+    createdAt: DateTime.parse(src['createdAt']),
+    updatedAt: DateTime.parse(src['updatedAt']),
     nestedObj: src['nestedObj'],
   );
 
@@ -34,9 +34,9 @@ class User extends CloneableFile {
     'id': id,
     'name': name,
     'age': age,
-    'createdAt': createdAt.millisecondsSinceEpoch,
+    'createdAt': createdAt.toIso8601String(),
     // This will automatically update the update date.
-    'updatedAt': DateTime.now().millisecondsSinceEpoch,
+    'updatedAt': DateTime.now().toIso8601String(),
     'nestedObj': {...nestedObj},
   };
 
@@ -123,32 +123,32 @@ void main() {
         id: '1',
         name: 'サンプル太郎',
         age: 25,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: now.add(Duration(days: 0)),
+        updatedAt: now.add(Duration(days: 0)),
         nestedObj: {},
       ),
       User(
         id: '2',
         name: 'サンプル次郎',
         age: 28,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: now.add(Duration(days: 1)),
+        updatedAt: now.add(Duration(days: 1)),
         nestedObj: {},
       ),
       User(
         id: '3',
         name: 'サンプル三郎',
         age: 31,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: now.add(Duration(days: 2)),
+        updatedAt: now.add(Duration(days: 2)),
         nestedObj: {},
       ),
       User(
         id: '4',
         name: 'サンプル花子',
         age: 17,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: now.add(Duration(days: 3)),
+        updatedAt: now.add(Duration(days: 3)),
         nestedObj: {},
       ),
     ];
@@ -185,10 +185,26 @@ void main() {
     List<User> result2 = r2.convert(User.fromDict);
     expect(result2.length == 2, true);
     expect(result2[0].name == 'サンプル三郎', true);
-    expect(
-      result2[0].createdAt.millisecondsSinceEpoch == now.millisecondsSinceEpoch,
-      true,
+
+    // search by datetime
+    final Query q2_dt = QueryBuilder.search(
+      target: 'users',
+      queryNode: AndNode([
+        FieldGreaterThanOrEqual("createdAt", now.add(Duration(days: 1))),
+        FieldLessThanOrEqual("createdAt", now.add(Duration(days: 2))),
+      ]),
+      sortObj: SingleSort(field: 'createdAt', reversed: true),
+    ).build();
+    final QueryResult<User> r2_dt = db.executeQuery<User>(
+      Query.fromDict(q2_dt.toDict()),
     );
+    expect(r2_dt.dbLength == 4, true);
+    expect(r2_dt.hitCount == 2, true);
+    List<User> result2_dt = r2_dt.convert(User.fromDict);
+    expect(result2_dt.length == 2, true);
+    expect(result2_dt[0].name == 'サンプル三郎', true);
+    expect(result2_dt[1].name == 'サンプル次郎', true);
+
     // paging
     final Query q3 = QueryBuilder.search(
       target: 'users',

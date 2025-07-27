@@ -7,17 +7,23 @@ import '../util_filed.dart';
 class FieldEquals extends QueryNode {
   final String field;
   final dynamic value;
-  final EnumValueType vType;
+  EnumValueType vType;
 
   /// Query node for Equals (filed == value) operation.
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
+  /// If DateTime is specified, it will be automatically converted to
+  /// Iso8601String and vType will be set to EnumValueType.datetime_.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldEquals(this.field, this.value, {this.vType = EnumValueType.auto_});
+  FieldEquals(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+    if (value is DateTime) {
+      vType = EnumValueType.datetime_;
+    }
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -25,10 +31,13 @@ class FieldEquals extends QueryNode {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory FieldEquals.fromDict(Map<String, dynamic> src) {
+    final EnumValueType t = EnumValueType.values.byName(src['vType']);
     return FieldEquals(
       src['field'],
-      src['value'],
-      vType: EnumValueType.values.byName(src['vType']),
+      t == EnumValueType.datetime_
+          ? DateTime.parse(src['value'])
+          : src['value'],
+      vType: t,
     );
   }
 
@@ -40,8 +49,7 @@ class FieldEquals extends QueryNode {
         case EnumValueType.auto_:
           return fValue == value;
         case EnumValueType.datetime_:
-          return DateTime.parse(fValue.toString()) ==
-              DateTime.parse(value.toString());
+          return DateTime.parse(fValue.toString()) == (value as DateTime);
         case EnumValueType.int_:
           return int.parse(fValue.toString()) == int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -67,9 +75,9 @@ class FieldEquals extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.equals_.name,
     'field': field,
-    'value': value,
+    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
     'vType': vType.name,
-    'version': '1',
+    'version': '2',
   };
 }
 
@@ -79,17 +87,23 @@ class FieldEquals extends QueryNode {
 class FieldNotEquals extends QueryNode {
   final String field;
   final dynamic value;
-  final EnumValueType vType;
+  EnumValueType vType;
 
   /// Query node for NotEquals (filed != value) operation.
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
+  /// If DateTime is specified, it will be automatically converted to
+  /// Iso8601String and vType will be set to EnumValueType.datetime_.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldNotEquals(this.field, this.value, {this.vType = EnumValueType.auto_});
+  FieldNotEquals(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+    if (value is DateTime) {
+      vType = EnumValueType.datetime_;
+    }
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -97,10 +111,13 @@ class FieldNotEquals extends QueryNode {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory FieldNotEquals.fromDict(Map<String, dynamic> src) {
+    final EnumValueType t = EnumValueType.values.byName(src['vType']);
     return FieldNotEquals(
       src['field'],
-      src['value'],
-      vType: EnumValueType.values.byName(src['vType']),
+      t == EnumValueType.datetime_
+          ? DateTime.parse(src['value'])
+          : src['value'],
+      vType: t,
     );
   }
 
@@ -112,8 +129,7 @@ class FieldNotEquals extends QueryNode {
         case EnumValueType.auto_:
           return fValue != value;
         case EnumValueType.datetime_:
-          return DateTime.parse(fValue.toString()) !=
-              DateTime.parse(value.toString());
+          return DateTime.parse(fValue.toString()) != (value as DateTime);
         case EnumValueType.int_:
           return int.parse(fValue.toString()) != int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -139,9 +155,9 @@ class FieldNotEquals extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.notEquals_.name,
     'field': field,
-    'value': value,
+    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
     'vType': vType.name,
-    'version': '1',
+    'version': '2',
   };
 }
 
@@ -151,7 +167,7 @@ class FieldNotEquals extends QueryNode {
 class FieldGreaterThan extends QueryNode {
   final String field;
   final dynamic value;
-  final EnumValueType vType;
+  EnumValueType vType;
 
   /// Query node for "field > value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -159,12 +175,18 @@ class FieldGreaterThan extends QueryNode {
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
+  /// If DateTime is specified, it will be automatically converted to
+  /// Iso8601String and vType will be set to EnumValueType.datetime_.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldGreaterThan(this.field, this.value, {this.vType = EnumValueType.auto_});
+  FieldGreaterThan(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+    if (value is DateTime) {
+      vType = EnumValueType.datetime_;
+    }
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -172,10 +194,13 @@ class FieldGreaterThan extends QueryNode {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory FieldGreaterThan.fromDict(Map<String, dynamic> src) {
+    final EnumValueType t = EnumValueType.values.byName(src['vType']);
     return FieldGreaterThan(
       src['field'],
-      src['value'],
-      vType: EnumValueType.values.byName(src['vType']),
+      t == EnumValueType.datetime_
+          ? DateTime.parse(src['value'])
+          : src['value'],
+      vType: t,
     );
   }
 
@@ -186,9 +211,7 @@ class FieldGreaterThan extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          return DateTime.parse(
-            fValue.toString(),
-          ).isAfter(DateTime.parse(value.toString()));
+          return DateTime.parse(fValue.toString()).isAfter(value as DateTime);
         case EnumValueType.int_:
           return int.parse(fValue.toString()) > int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -214,9 +237,9 @@ class FieldGreaterThan extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.greaterThan_.name,
     'field': field,
-    'value': value,
+    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
     'vType': vType.name,
-    'version': '1',
+    'version': '2',
   };
 }
 
@@ -226,7 +249,7 @@ class FieldGreaterThan extends QueryNode {
 class FieldLessThan extends QueryNode {
   final String field;
   final dynamic value;
-  final EnumValueType vType;
+  EnumValueType vType;
 
   /// Query node for "field < value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -234,12 +257,18 @@ class FieldLessThan extends QueryNode {
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
+  /// If DateTime is specified, it will be automatically converted to
+  /// Iso8601String and vType will be set to EnumValueType.datetime_.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldLessThan(this.field, this.value, {this.vType = EnumValueType.auto_});
+  FieldLessThan(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+    if (value is DateTime) {
+      vType = EnumValueType.datetime_;
+    }
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -247,10 +276,13 @@ class FieldLessThan extends QueryNode {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory FieldLessThan.fromDict(Map<String, dynamic> src) {
+    final EnumValueType t = EnumValueType.values.byName(src['vType']);
     return FieldLessThan(
       src['field'],
-      src['value'],
-      vType: EnumValueType.values.byName(src['vType']),
+      t == EnumValueType.datetime_
+          ? DateTime.parse(src['value'])
+          : src['value'],
+      vType: t,
     );
   }
 
@@ -261,9 +293,7 @@ class FieldLessThan extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          return DateTime.parse(
-            fValue.toString(),
-          ).isBefore(DateTime.parse(value.toString()));
+          return DateTime.parse(fValue.toString()).isBefore(value as DateTime);
         case EnumValueType.int_:
           return int.parse(fValue.toString()) < int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -289,9 +319,9 @@ class FieldLessThan extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.lessThan_.name,
     'field': field,
-    'value': value,
+    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
     'vType': vType.name,
-    'version': '1',
+    'version': '2',
   };
 }
 
@@ -301,7 +331,7 @@ class FieldLessThan extends QueryNode {
 class FieldGreaterThanOrEqual extends QueryNode {
   final String field;
   final dynamic value;
-  final EnumValueType vType;
+  EnumValueType vType;
 
   /// Query node for "field >= value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -309,6 +339,8 @@ class FieldGreaterThanOrEqual extends QueryNode {
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
+  /// If DateTime is specified, it will be automatically converted to
+  /// Iso8601String and vType will be set to EnumValueType.datetime_.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
@@ -318,7 +350,11 @@ class FieldGreaterThanOrEqual extends QueryNode {
     this.field,
     this.value, {
     this.vType = EnumValueType.auto_,
-  });
+  }) {
+    if (value is DateTime) {
+      vType = EnumValueType.datetime_;
+    }
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -326,10 +362,13 @@ class FieldGreaterThanOrEqual extends QueryNode {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory FieldGreaterThanOrEqual.fromDict(Map<String, dynamic> src) {
+    final EnumValueType t = EnumValueType.values.byName(src['vType']);
     return FieldGreaterThanOrEqual(
       src['field'],
-      src['value'],
-      vType: EnumValueType.values.byName(src['vType']),
+      t == EnumValueType.datetime_
+          ? DateTime.parse(src['value'])
+          : src['value'],
+      vType: t,
     );
   }
 
@@ -340,9 +379,8 @@ class FieldGreaterThanOrEqual extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          final d1 = DateTime.parse(fValue.toString());
-          final d2 = DateTime.parse(value.toString());
-          return !d1.isBefore(d2); // d1 >= d2
+          final d = DateTime.parse(fValue.toString());
+          return !d.isBefore(value as DateTime); // d1 >= d2
         case EnumValueType.int_:
           return int.parse(fValue.toString()) >= int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -368,9 +406,9 @@ class FieldGreaterThanOrEqual extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.greaterThanOrEqual_.name,
     'field': field,
-    'value': value,
+    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
     'vType': vType.name,
-    'version': '1',
+    'version': '2',
   };
 }
 
@@ -380,7 +418,7 @@ class FieldGreaterThanOrEqual extends QueryNode {
 class FieldLessThanOrEqual extends QueryNode {
   final String field;
   final dynamic value;
-  final EnumValueType vType;
+  EnumValueType vType;
 
   /// Query node for "field <= value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -388,6 +426,8 @@ class FieldLessThanOrEqual extends QueryNode {
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
+  /// If DateTime is specified, it will be automatically converted to
+  /// Iso8601String and vType will be set to EnumValueType.datetime_.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
@@ -397,7 +437,11 @@ class FieldLessThanOrEqual extends QueryNode {
     this.field,
     this.value, {
     this.vType = EnumValueType.auto_,
-  });
+  }) {
+    if (value is DateTime) {
+      vType = EnumValueType.datetime_;
+    }
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -405,10 +449,13 @@ class FieldLessThanOrEqual extends QueryNode {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory FieldLessThanOrEqual.fromDict(Map<String, dynamic> src) {
+    final EnumValueType t = EnumValueType.values.byName(src['vType']);
     return FieldLessThanOrEqual(
       src['field'],
-      src['value'],
-      vType: EnumValueType.values.byName(src['vType']),
+      t == EnumValueType.datetime_
+          ? DateTime.parse(src['value'])
+          : src['value'],
+      vType: t,
     );
   }
 
@@ -419,9 +466,8 @@ class FieldLessThanOrEqual extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          final d1 = DateTime.parse(fValue.toString());
-          final d2 = DateTime.parse(value.toString());
-          return !d1.isAfter(d2); // d1 <= d2
+          final d = DateTime.parse(fValue.toString());
+          return !d.isAfter(value as DateTime); // d1 <= d2
         case EnumValueType.int_:
           return int.parse(fValue.toString()) <= int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -447,9 +493,9 @@ class FieldLessThanOrEqual extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.lessThanOrEqual_.name,
     'field': field,
-    'value': value,
+    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
     'vType': vType.name,
-    'version': '1',
+    'version': '2',
   };
 }
 
