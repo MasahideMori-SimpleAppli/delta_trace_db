@@ -283,6 +283,90 @@ final conformedUser = ClassB.fromDict(db
     .raw[0]);
 ```
 
+### 🔁 9. トランザクション処理
+
+複数のクエリを１つの処理として扱いたい場合にはトランザクションクエリが利用できます。  
+このクエリで処理を行った場合、戻り値のisNoErrorsがfalseになる条件では、  
+DBがトランザクションクエリ実行前の状態に巻き戻されます。  
+内部的には更新対象のコレクションが一時的にメモリ上にバッファされるので、  
+その分のメモリを追加で確保しておく必要があることに注意してください。
+
+```dart
+    final now = DateTime.now();
+    final db = DeltaTraceDatabase();
+    List<User> users = [
+      User(
+        id: '1',
+        name: 'Taro',
+        age: 25,
+        createdAt: now.add(Duration(days: 0)),
+        updatedAt: now.add(Duration(days: 0)),
+        nestedObj: {},
+      ),
+      User(
+        id: '2',
+        name: 'Jiro',
+        age: 28,
+        createdAt: now.add(Duration(days: 1)),
+        updatedAt: now.add(Duration(days: 1)),
+        nestedObj: {},
+      ),
+      User(
+        id: '3',
+        name: 'Saburo',
+        age: 31,
+        createdAt: now.add(Duration(days: 2)),
+        updatedAt: now.add(Duration(days: 2)),
+        nestedObj: {},
+      ),
+      User(
+        id: '4',
+        name: 'Hanako',
+        age: 17,
+        createdAt: now.add(Duration(days: 3)),
+        updatedAt: now.add(Duration(days: 3)),
+        nestedObj: {},
+      ),
+    ];
+    // add
+    final Query q1 = QueryBuilder.add(target: 'users1', addData: users).build();
+    final Query q2 = QueryBuilder.add(target: 'users2', addData: users).build();
+    QueryResult<User> _ = db.executeQuery<User>(q1);
+    QueryResult<User> _ = db.executeQuery<User>(q2);
+    // Failed transactions
+    final TransactionQuery tq1 = TransactionQuery(
+      queries: [
+        QueryBuilder.update(
+          target: 'users1',
+          // type error
+          queryNode: FieldEquals("id", 3),
+          overrideData: {"id": 5},
+          returnData: true,
+          mustAffectAtLeastOne: true,
+        ).build(),
+        QueryBuilder.clear(target: 'users2').build(),
+      ],
+    );
+    // result.isNoErrors is false. The DB hasn't changed.
+    // The rewind applies to all collections in the DB (in this case, users1 and users2).
+    QueryExecutionResult result = db.executeQueryObject(tq1);
+    // Success　transactions
+    final TransactionQuery tq2 = TransactionQuery(
+      queries: [
+        QueryBuilder.update(
+          target: 'users1',
+          queryNode: FieldEquals("id", "3"),
+          // Be careful with the overriding type: This library allows overriding with other types.
+          overrideData: {"id": "5"},
+          returnData: true,
+          mustAffectAtLeastOne: true,
+        ).build(),
+        QueryBuilder.clear(target: 'users2').build(),
+      ],
+    );
+    QueryExecutionResult result2 = db.executeQueryObject(tq2);
+```
+
 ## Speed
 
 This package is an in-memory database, so it is generally fast.  

@@ -267,9 +267,80 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
 その分のメモリを追加で確保しておく必要があることに注意してください。  
 
 ```dart
+    final now = DateTime.now();
+    final db = DeltaTraceDatabase();
+    List<User> users = [
+      User(
+        id: '1',
+        name: 'Taro',
+        age: 25,
+        createdAt: now.add(Duration(days: 0)),
+        updatedAt: now.add(Duration(days: 0)),
+        nestedObj: {},
+      ),
+      User(
+        id: '2',
+        name: 'Jiro',
+        age: 28,
+        createdAt: now.add(Duration(days: 1)),
+        updatedAt: now.add(Duration(days: 1)),
+        nestedObj: {},
+      ),
+      User(
+        id: '3',
+        name: 'Saburo',
+        age: 31,
+        createdAt: now.add(Duration(days: 2)),
+        updatedAt: now.add(Duration(days: 2)),
+        nestedObj: {},
+      ),
+      User(
+        id: '4',
+        name: 'Hanako',
+        age: 17,
+        createdAt: now.add(Duration(days: 3)),
+        updatedAt: now.add(Duration(days: 3)),
+        nestedObj: {},
+      ),
+    ];
+    // 追加
+    final Query q1 = QueryBuilder.add(target: 'users1', addData: users).build();
+    final Query q2 = QueryBuilder.add(target: 'users2', addData: users).build();
+    QueryResult<User> _ = db.executeQuery<User>(q1);
+    QueryResult<User> _ = db.executeQuery<User>(q2);
+    // 失敗するトランザクション
+    final TransactionQuery tq1 = TransactionQuery(
+      queries: [
+        QueryBuilder.update(
+          target: 'users1',
+          // 型が違う
+          queryNode: FieldEquals("id", 3),
+          overrideData: {"id": 5},
+          returnData: true,
+          mustAffectAtLeastOne: true,
+        ).build(),
+        QueryBuilder.clear(target: 'users2').build(),
+      ],
+    );
+    // result.isNoErrors は falseで失敗になります。 DBは変更されません。
+    // 巻き戻しは、DB 内のすべてのコレクション (この場合は、users1 と users2) に適用されます。
+    QueryExecutionResult result = db.executeQueryObject(tq1);
+    // 成功するトランザクション
+    final TransactionQuery tq2 = TransactionQuery(
+      queries: [
+        QueryBuilder.update(
+          target: 'users1',
+          queryNode: FieldEquals("id", "3"),
+          // オーバーライドする型にも注意してください。このライブラリでは、他の型によるオーバーライドが可能です。
+          overrideData: {"id": "5"},
+          returnData: true,
+          mustAffectAtLeastOne: true,
+        ).build(),
+        QueryBuilder.clear(target: 'users2').build(),
+      ],
+    );
+    QueryExecutionResult result2 = db.executeQueryObject(tq2);
 ```
-
-
 
 ## 速度
 
