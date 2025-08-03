@@ -1,3 +1,14 @@
+## 0.0.8
+
+* The TransactionQuery class and TransactionQueryResult class have been added.
+* The DeltaTraceDatabase class now has an executeQueryObject method that can execute Query, TransactionQuery, or Map.
+* The executeTransactionQuery method has now been added to the DeltaTraceDatabase class.
+* The Query class now has a new parameter, mustAffectAtLeastOne. This value is initially set to true so that the DB behaves differently than before.
+* The description of the QueryResult class has been adjusted to match the new specifications.
+* For add queries, the return value updateCount has been changed to describe the number of objects appended.
+* deleteOne has been added to the query types.
+* Runtime errors in renameField are now checked before execution. This prevents the possibility of partial updates.
+
 ## 0.0.7
 
 * I performed a refactoring.

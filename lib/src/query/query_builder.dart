@@ -20,20 +20,29 @@ class QueryBuilder {
   String? renameAfter;
   int? limit;
   bool returnData = false;
+  bool mustAffectAtLeastOne = true;
   Cause? cause;
 
   /// * [target] : The collection name in DB.
   /// * [addData] : Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
   /// a subclass of ClonableFile.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
   /// program autonomously using artificial intelligence.
   /// By saving the entire query including this as a log,
   /// the DB history is recorded.
-  QueryBuilder.add({required this.target, required this.addData, this.cause})
-    : type = EnumQueryType.add;
+  QueryBuilder.add({
+    required this.target,
+    required this.addData,
+    this.mustAffectAtLeastOne = true,
+    this.cause,
+  }) : type = EnumQueryType.add;
 
   /// * [target] : The collection name in DB.
   /// * [overrideData] : This is not a serialized version of the full class,
@@ -46,6 +55,10 @@ class QueryBuilder {
   /// If you set returnData to true, the return values of an update or delete
   /// query will be sorted by this object.
   /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -58,6 +71,7 @@ class QueryBuilder {
     required this.overrideData,
     required this.returnData,
     this.sortObj,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   }) : type = EnumQueryType.update;
 
@@ -68,6 +82,10 @@ class QueryBuilder {
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
   /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -79,6 +97,7 @@ class QueryBuilder {
     required this.queryNode,
     required this.overrideData,
     required this.returnData,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   }) : type = EnumQueryType.updateOne;
 
@@ -89,6 +108,10 @@ class QueryBuilder {
   /// * [sortObj] : An object for sorting the return values.
   /// SingleSort or MultiSort can be used.
   /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -100,8 +123,32 @@ class QueryBuilder {
     required this.queryNode,
     required this.returnData,
     this.sortObj,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   }) : type = EnumQueryType.delete;
+
+  /// * [target] : The collection name in DB.
+  /// * [queryNode] : This is the node object used for the search.
+  /// You can build queries by combining the various nodes defined in
+  /// comparison_node.dart.
+  /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
+  /// * [cause] : You can add further parameters such as why this query was
+  /// made and who made it.
+  /// This is useful if you have high security requirements or want to run the
+  /// program autonomously using artificial intelligence.
+  /// By saving the entire query including this as a log,
+  /// the DB history is recorded.
+  QueryBuilder.deleteOne({
+    required this.target,
+    required this.queryNode,
+    required this.returnData,
+    this.mustAffectAtLeastOne = true,
+    this.cause,
+  }) : type = EnumQueryType.deleteOne;
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -166,6 +213,10 @@ class QueryBuilder {
   /// Fields that do not exist in the existing structure but exist in the
   /// template will be added with the template value as the initial value.
   /// Fields that do not exist in the template will be deleted.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -175,6 +226,7 @@ class QueryBuilder {
   QueryBuilder.conformToTemplate({
     required this.target,
     required this.template,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   }) : type = EnumQueryType.conformToTemplate;
 
@@ -182,6 +234,10 @@ class QueryBuilder {
   /// * [renameBefore] : The old variable name when querying for a rename.
   /// * [renameAfter] : The new name of the variable when querying for a rename.
   /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -193,6 +249,7 @@ class QueryBuilder {
     required this.renameBefore,
     required this.renameAfter,
     required this.returnData,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   }) : type = EnumQueryType.renameField;
 
@@ -207,19 +264,30 @@ class QueryBuilder {
     : type = EnumQueryType.count;
 
   /// * [target] : The collection name in DB.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
   /// program autonomously using artificial intelligence.
   /// By saving the entire query including this as a log,
   /// the DB history is recorded.
-  QueryBuilder.clear({required this.target, this.cause})
-    : type = EnumQueryType.clear;
+  QueryBuilder.clear({
+    required this.target,
+    this.mustAffectAtLeastOne = true,
+    this.cause,
+  }) : type = EnumQueryType.clear;
 
   /// * [target] : The collection name in DB.
   /// * [addData] : Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
   /// a subclass of ClonableFile.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -229,6 +297,7 @@ class QueryBuilder {
   QueryBuilder.clearAddAll({
     required this.target,
     required this.addData,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   }) : type = EnumQueryType.clearAdd;
 
@@ -259,6 +328,7 @@ class QueryBuilder {
       renameAfter: renameAfter,
       limit: limit,
       returnData: returnData,
+      mustAffectAtLeastOne: mustAffectAtLeastOne,
       cause: cause,
     );
   }

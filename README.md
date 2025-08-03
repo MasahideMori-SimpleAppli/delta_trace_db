@@ -297,37 +297,40 @@ cause
 any problems in practical use.
 
 ```text
-speed test for 100000 records                                                                                                                                                                              
+speed test for 100000 records
 start add
-end add: 167 ms
+end add: 169 ms
 start getAll (with object convert)
-end getAll: 276 ms
+end getAll: 254 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 323 ms
+end save: 324 ms
 start load (with json string convert)
-end load: 246 ms
+end load: 244 ms
 start search (with object convert)
-end search: 474 ms
+end search: 516 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 371 ms
+end search paging: 409 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 378 ms
+end search paging by obj: 408 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 351 ms
+end search paging by offset: 385 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 57 ms
+end update: 53 ms
 start updateOne of half index object
-end updateOne: 9 ms
+end updateOne: 10 ms
 start conformToTemplate
-end conformToTemplate: 72 ms
+end conformToTemplate: 67 ms
 start delete half object (with object convert)
-end delete: 219 ms
+end delete: 240 ms
 returnsLength:50000
+start deleteOne for last object (with object convert)
+end deleteOne: 9 ms
+returnsLength:1
 ```
 
 ## Future plans

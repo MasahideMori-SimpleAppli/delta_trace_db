@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "2";
+  static const String version = "3";
 
   late final Map<String, CollectionBase> _collections;
 
@@ -160,6 +160,36 @@ class DeltaTraceDatabase extends CloneableFile {
     col.removeListener(cb);
   }
 
+  /// (en) Executes a query of any type.
+  /// This function can execute a regular query, a transactional query,
+  /// or a Map of any of these.
+  /// Server side, verify that the call is legitimate
+  /// (e.g. by checking the JWT and/or the caller's user permissions)
+  /// before making this call.
+  ///
+  /// (ja) 型を問わずにクエリを実行します。
+  /// この関数は、通常のクエリ、トランザクションクエリ、
+  /// またはそれらをMapにしたもののいずれでも実行できます。
+  /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
+  /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
+  QueryExecutionResult executeQueryObject(Object query) {
+    if (query is Query) {
+      return executeQuery(query);
+    } else if (query is TransactionQuery) {
+      return executeTransactionQuery(query);
+    } else if (query is Map<String, dynamic>) {
+      if (query["className"] == "Query") {
+        return executeQuery(Query.fromDict(query));
+      } else if (query["className"] == "TransactionQuery") {
+        return executeTransactionQuery(TransactionQuery.fromDict(query));
+      } else {
+        throw ArgumentError("Unsupported query class: ${query["className"]}");
+      }
+    } else {
+      throw ArgumentError("Unsupported query type: ${query.runtimeType}");
+    }
+  }
+
   /// (en) Execute the query.
   /// Server side, verify that the call is legitimate
   /// (e.g. by checking the JWT and/or the caller's user permissions)
@@ -171,29 +201,64 @@ class DeltaTraceDatabase extends CloneableFile {
   QueryResult<T> executeQuery<T>(Query q) {
     Collection col = collection(q.target);
     try {
+      QueryResult<T>? r;
       switch (q.type) {
         case EnumQueryType.add:
-          return col.addAll(q);
+          r = col.addAll(q);
         case EnumQueryType.update:
-          return col.update(q);
+          r = col.update(q, isSingleTarget: false);
         case EnumQueryType.updateOne:
-          return col.updateOne(q);
+          r = col.update(q, isSingleTarget: true);
         case EnumQueryType.delete:
-          return col.delete(q);
+          r = col.delete(q);
+        case EnumQueryType.deleteOne:
+          r = col.deleteOne(q);
         case EnumQueryType.search:
-          return col.search(q);
+          r = col.search(q);
         case EnumQueryType.getAll:
-          return col.getAll(q);
+          r = col.getAll(q);
         case EnumQueryType.conformToTemplate:
-          return col.conformToTemplate(q);
+          r = col.conformToTemplate(q);
         case EnumQueryType.renameField:
-          return col.renameField(q);
+          r = col.renameField(q);
         case EnumQueryType.count:
-          return col.count();
+          r = col.count();
         case EnumQueryType.clear:
-          return col.clear();
+          r = col.clear();
         case EnumQueryType.clearAdd:
-          return col.clearAdd(q);
+          r = col.clearAdd(q);
+      }
+      switch (q.type) {
+        case EnumQueryType.add:
+        case EnumQueryType.update:
+        case EnumQueryType.updateOne:
+        case EnumQueryType.delete:
+        case EnumQueryType.deleteOne:
+        case EnumQueryType.conformToTemplate:
+        case EnumQueryType.renameField:
+        case EnumQueryType.clear:
+        case EnumQueryType.clearAdd:
+          if (q.mustAffectAtLeastOne) {
+            if (r.updateCount == 0) {
+              return QueryResult<T>(
+                isNoErrors: false,
+                result: [],
+                dbLength: col.raw.length,
+                updateCount: 0,
+                hitCount: r.hitCount,
+                errorMessage:
+                    "No data matched the condition (mustAffectAtLeastOne=true).",
+              );
+            } else {
+              return r;
+            }
+          } else {
+            return r;
+          }
+        case EnumQueryType.search:
+        case EnumQueryType.getAll:
+        case EnumQueryType.count:
+          return r;
       }
     } on ArgumentError catch (e) {
       return QueryResult<T>(
@@ -203,6 +268,81 @@ class DeltaTraceDatabase extends CloneableFile {
         updateCount: -1,
         hitCount: -1,
         errorMessage: e.message.toString(),
+      );
+    } catch (e) {
+      print(className + ",executeQuery: " + e.toString());
+      return QueryResult<T>(
+        isNoErrors: false,
+        result: [],
+        dbLength: col.raw.length,
+        updateCount: -1,
+        hitCount: -1,
+        errorMessage: "Unexpected Error",
+      );
+    }
+  }
+
+  /// (en) Execute the transaction query.
+  /// Server side, verify that the call is legitimate
+  /// (e.g. by checking the JWT and/or the caller's user permissions)
+  /// before making this call.
+  ///
+  /// (ja) トランザクションクエリを実行します。
+  /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
+  /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
+  TransactionQueryResult<T> executeTransactionQuery<T>(TransactionQuery q) {
+    List<QueryResult> rq = [];
+    try {
+      // 一時的に保存が必要なコレクションを計算してバッファします。
+      Map<String, Map<String, dynamic>> buff = {};
+      for (Query i in q.queries) {
+        if (buff.containsKey(i.target)) {
+          continue;
+        } else {
+          buff[i.target] = collectionToDict(i.target);
+        }
+      }
+      // クエリを実行します。
+      try {
+        for (Query i in q.queries) {
+          rq.add(executeQuery(i));
+        }
+      } catch (e) {
+        // エラーの場合は全ての変更を元に戻し、エラー扱いにします。
+        // DBの変更を元に戻す。
+        for (String key in buff.keys) {
+          collectionFromDict(key, buff[key]!);
+        }
+        print(className + ",executeTransactionQuery: Transaction failed");
+        return TransactionQueryResult(
+          isNoErrors: false,
+          results: [],
+          errorMessage: "Transaction failed",
+        );
+      }
+      // 問題がある場合は全ての変更を元に戻し、エラー扱いにします。
+      for (QueryResult i in rq) {
+        if (i.isNoErrors == false) {
+          // DBの変更を元に戻す。
+          for (String key in buff.keys) {
+            collectionFromDict(key, buff[key]!);
+          }
+          print(className + ",executeTransactionQuery: Transaction failed");
+          return TransactionQueryResult(
+            isNoErrors: false,
+            results: [],
+            errorMessage: "Transaction failed",
+          );
+        }
+      }
+      // 問題がなければそのまま返します。
+      return TransactionQueryResult(isNoErrors: true, results: rq);
+    } catch (e) {
+      print(className + ",executeTransactionQuery: " + e.toString());
+      return TransactionQueryResult(
+        isNoErrors: false,
+        results: [],
+        errorMessage: "Unexpected Error",
       );
     }
   }

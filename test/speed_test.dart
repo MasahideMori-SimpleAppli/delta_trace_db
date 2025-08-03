@@ -283,5 +283,21 @@ void main() {
       "end delete: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
     print("returnsLength:${r6.result.length}");
+
+    // deleteOne
+    final Query q7 = QueryBuilder.deleteOne(
+      target: 'users',
+      queryNode: FieldEquals('age', (recordsCount ~/ 2) - 1),
+      returnData: true,
+    ).build();
+    print("start deleteOne for last object (with object convert)");
+    dt1 = DateTime.now();
+    final r7 = db.executeQuery<User>(q7);
+    List<User> _ = r7.convert(User.fromDict);
+    dt2 = DateTime.now();
+    print(
+      "end deleteOne: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
+    );
+    print("returnsLength:${r7.result.length}");
   });
 }

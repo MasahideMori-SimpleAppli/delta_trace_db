@@ -14,7 +14,7 @@ import '../../delta_trace_db.dart';
 /// そのログは完全なDB操作の履歴になります。
 class Query extends CloneableFile {
   static const String className = "Query";
-  static const String version = "1";
+  static const String version = "2";
 
   String target;
   EnumQueryType type;
@@ -30,6 +30,7 @@ class Query extends CloneableFile {
   String? renameAfter;
   int? limit;
   bool returnData;
+  bool mustAffectAtLeastOne;
   Cause? cause;
 
   /// Note: I recommend not using this class as is,
@@ -86,6 +87,10 @@ class Query extends CloneableFile {
   /// limit number of objects before the specified object will be returned.
   /// * [returnData] : If true, return the changed objs.
   /// Not valid for clear and clearAdd.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -107,6 +112,7 @@ class Query extends CloneableFile {
     this.renameAfter,
     this.limit,
     this.returnData = false,
+    this.mustAffectAtLeastOne = true,
     this.cause,
   });
 
@@ -137,6 +143,7 @@ class Query extends CloneableFile {
       renameAfter: src["renameAfter"],
       limit: src["limit"],
       returnData: src["returnData"],
+      mustAffectAtLeastOne: src["mustAffectAtLeastOne"],
       cause: src["cause"] != null ? Cause.fromDict(src["cause"]) : null,
     );
   }
@@ -163,6 +170,7 @@ class Query extends CloneableFile {
       "renameAfter": renameAfter,
       "limit": limit,
       "returnData": returnData,
+      "mustAffectAtLeastOne": mustAffectAtLeastOne,
       "cause": cause?.toDict(),
     };
   }

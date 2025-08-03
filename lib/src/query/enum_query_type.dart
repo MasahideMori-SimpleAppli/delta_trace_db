@@ -6,6 +6,7 @@ enum EnumQueryType {
   update,
   updateOne,
   delete,
+  deleteOne,
   search,
   getAll,
   conformToTemplate, // DB shape change.

@@ -16,7 +16,7 @@ abstract class CollectionBase extends CloneableFile {}
 /// DBに対する操作などが実装されています。
 class Collection extends CollectionBase {
   static const String className = "Collection";
-  static const String version = "2";
+  static const String version = "3";
   List<Map<String, dynamic>> _data = [];
 
   // Flutterなどとの連携時に通知するためのコールバックのセット
@@ -113,16 +113,15 @@ class Collection extends CollectionBase {
   ///
   /// * [q] : The query.
   QueryResult<T> addAll<T>(Query q) {
-    _data.addAll(
-      (UtilCopy.jsonableDeepCopy(q.addData!) as List)
-          .cast<Map<String, dynamic>>(),
-    );
+    final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
+        .cast<Map<String, dynamic>>();
+    _data.addAll(addData);
     _notifyListeners();
     return QueryResult<T>(
       isNoErrors: true,
       result: [],
       dbLength: _data.length,
-      updateCount: 0,
+      updateCount: addData.length,
       hitCount: 0,
     );
   }
@@ -135,7 +134,8 @@ class Collection extends CollectionBase {
   /// 与えたパラメータのみが上書き対象になり、与えなかったパラメータは変化しません。
   ///
   /// * [q] : The query.
-  QueryResult<T> update<T>(Query q) {
+  /// * [isSingleTarget] : If true, the target is single object.
+  QueryResult<T> update<T>(Query q, {required bool isSingleTarget}) {
     if (q.returnData) {
       List<Map<String, dynamic>> r = [];
       for (int i = 0; i < _data.length; i++) {
@@ -144,6 +144,7 @@ class Collection extends CollectionBase {
             UtilCopy.jsonableDeepCopy(q.overrideData!) as Map<String, dynamic>,
           );
           r.add(_data[i]);
+          if (isSingleTarget) break;
         }
       }
       if (q.sortObj != null) {
@@ -168,6 +169,7 @@ class Collection extends CollectionBase {
             UtilCopy.jsonableDeepCopy(q.overrideData!) as Map<String, dynamic>,
           );
           count += 1;
+          if (isSingleTarget) break;
         }
       }
       if (count > 0) {
@@ -179,71 +181,6 @@ class Collection extends CollectionBase {
         dbLength: _data.length,
         updateCount: count,
         hitCount: count,
-      );
-    }
-  }
-
-  /// (en) Updates the first object that matches the query.
-  /// If you know there is only one object,
-  /// such as when searching by serial number, this works faster than update.
-  /// However, sorting is disabled, so please use this when there is
-  /// only one item.
-  ///
-  /// (ja) クエリーにマッチするオブジェクトを最初の１件だけ更新します。
-  /// シリアル番号を含めて探索している場合など、対象が１件であることが分かっている場合は
-  /// updateよりも高速に動作します。
-  /// ただしソートは無効なため、対象が１件だけである場合に使用してください。
-  ///
-  /// * [q] : The query.
-  QueryResult<T> updateOne<T>(Query q) {
-    if (q.returnData) {
-      List<Map<String, dynamic>> r = [];
-      for (int i = 0; i < _data.length; i++) {
-        if (_evaluate(_data[i], q.queryNode!)) {
-          _data[i].addAll(
-            UtilCopy.jsonableDeepCopy(q.overrideData!) as Map<String, dynamic>,
-          );
-          r.add(_data[i]);
-          _notifyListeners();
-          return QueryResult<T>(
-            isNoErrors: true,
-            result: (UtilCopy.jsonableDeepCopy(r) as List)
-                .cast<Map<String, dynamic>>(),
-            dbLength: _data.length,
-            updateCount: r.length,
-            hitCount: r.length,
-          );
-        }
-      }
-      return QueryResult<T>(
-        isNoErrors: true,
-        result: [],
-        dbLength: _data.length,
-        updateCount: 0,
-        hitCount: 0,
-      );
-    } else {
-      for (int i = 0; i < _data.length; i++) {
-        if (_evaluate(_data[i], q.queryNode!)) {
-          _data[i].addAll(
-            UtilCopy.jsonableDeepCopy(q.overrideData!) as Map<String, dynamic>,
-          );
-          _notifyListeners();
-          return QueryResult<T>(
-            isNoErrors: true,
-            result: [],
-            dbLength: _data.length,
-            updateCount: 1,
-            hitCount: 1,
-          );
-        }
-      }
-      return QueryResult<T>(
-        isNoErrors: true,
-        result: [],
-        dbLength: _data.length,
-        updateCount: 0,
-        hitCount: 0,
       );
     }
   }
@@ -282,10 +219,65 @@ class Collection extends CollectionBase {
       _data.removeWhere((item) {
         final shouldDelete = _evaluate(item, q.queryNode!);
         if (shouldDelete) {
-          count += 1;
+          count++;
         }
         return shouldDelete;
       });
+      if (count > 0) {
+        _notifyListeners();
+      }
+      return QueryResult<T>(
+        isNoErrors: true,
+        result: [],
+        dbLength: _data.length,
+        updateCount: count,
+        hitCount: count,
+      );
+    }
+  }
+
+  /// (en) Removes only the first object that matches the query.
+  ///
+  /// (ja) クエリーにマッチするオブジェクトのうち、最初の１つだけを削除します。
+  ///
+  /// * [q] : The query.
+  QueryResult<T> deleteOne<T>(Query q) {
+    if (q.returnData) {
+      final List<Map<String, dynamic>> deletedItems = [];
+      for (int i = 0; i < _data.length; i++) {
+        final item = _data[i];
+        final shouldDelete = _evaluate(item, q.queryNode!);
+        if (shouldDelete) {
+          deletedItems.add(item);
+          _data.removeAt(i);
+          break;
+        }
+      }
+      if (q.sortObj != null) {
+        deletedItems.sort(q.sortObj!.getComparator());
+      }
+      if (deletedItems.isNotEmpty) {
+        _notifyListeners();
+      }
+      return QueryResult<T>(
+        isNoErrors: true,
+        result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
+            .cast<Map<String, dynamic>>(),
+        dbLength: _data.length,
+        updateCount: deletedItems.length,
+        hitCount: deletedItems.length,
+      );
+    } else {
+      int count = 0;
+      for (int i = 0; i < _data.length; i++) {
+        final item = _data[i];
+        final shouldDelete = _evaluate(item, q.queryNode!);
+        if (shouldDelete) {
+          _data.removeAt(i);
+          count++;
+          break;
+        }
+      }
       if (count > 0) {
         _notifyListeners();
       }
@@ -437,26 +429,26 @@ class Collection extends CollectionBase {
       if (!item.containsKey(q.renameBefore!)) {
         return QueryResult<T>(
           isNoErrors: false,
-          result: (UtilCopy.jsonableDeepCopy(r) as List)
-              .cast<Map<String, dynamic>>(),
+          result: [],
           dbLength: _data.length,
-          updateCount: updateCount,
-          hitCount: updateCount,
+          updateCount: 0,
+          hitCount: 0,
           errorMessage: 'The target key does not exist. key:${q.renameBefore!}',
         );
       }
       if (item.containsKey(q.renameAfter!)) {
         return QueryResult<T>(
           isNoErrors: false,
-          result: (UtilCopy.jsonableDeepCopy(r) as List)
-              .cast<Map<String, dynamic>>(),
+          result: [],
           dbLength: _data.length,
-          updateCount: updateCount,
-          hitCount: updateCount,
+          updateCount: 0,
+          hitCount: 0,
           errorMessage:
               'An existing key was specified as the new key. key:${q.renameAfter!}',
         );
       }
+    }
+    for (Map<String, dynamic> item in _data) {
       item[q.renameAfter!] = item[q.renameBefore!];
       item.remove(q.renameBefore!);
       updateCount += 1;

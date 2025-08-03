@@ -21,8 +21,11 @@ export 'src/query/sort/single_sort.dart';
 export 'src/query/enum_query_type.dart';
 export 'src/query/query.dart';
 export 'src/query/query_builder.dart';
+export 'src/query/query_execution_result.dart';
 export 'src/query/query_result.dart';
 export 'src/query/raw_query_builder.dart';
+export 'src/query/transaction_query.dart';
+export 'src/query/transaction_query_result.dart';
 
 // internal only
 // export 'src/query/util_filed.dart';
