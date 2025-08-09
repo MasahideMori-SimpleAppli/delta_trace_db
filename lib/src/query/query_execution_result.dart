@@ -7,9 +7,9 @@ import 'package:file_state_manager/file_state_manager.dart';
 /// (ja) QueryResult と TransactionQueryResult の両方を
 /// まとめて処理するための抽象クラス。
 abstract class QueryExecutionResult extends CloneableFile {
-  bool isNoErrors;
+  bool isSuccess;
 
-  /// * [isNoErrors] : A flag indicating whether the operation was successful.
+  /// * [isSuccess] : A flag indicating whether the operation was successful.
   /// This also changes depending on the value of the optional argument
   /// mustAffectAtLeastOne when creating a query.
   /// When mustAffectAtLeastOne is true,
@@ -18,7 +18,7 @@ abstract class QueryExecutionResult extends CloneableFile {
   /// When false, the value will be true even if the number of updates is 0.
   /// In other cases, if an exception occurs internally,
   /// it will be treated as an error.
-  QueryExecutionResult({required this.isNoErrors});
+  QueryExecutionResult({required this.isSuccess});
 
   /// (en) Restore this object from the dictionary.
   ///

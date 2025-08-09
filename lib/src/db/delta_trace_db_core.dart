@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "3";
+  static const String version = "4";
 
   late final Map<String, CollectionBase> _collections;
 
@@ -241,7 +241,7 @@ class DeltaTraceDatabase extends CloneableFile {
           if (q.mustAffectAtLeastOne) {
             if (r.updateCount == 0) {
               return QueryResult<T>(
-                isNoErrors: false,
+                isSuccess: false,
                 result: [],
                 dbLength: col.raw.length,
                 updateCount: 0,
@@ -262,7 +262,7 @@ class DeltaTraceDatabase extends CloneableFile {
       }
     } on ArgumentError catch (e) {
       return QueryResult<T>(
-        isNoErrors: false,
+        isSuccess: false,
         result: [],
         dbLength: col.raw.length,
         updateCount: -1,
@@ -272,7 +272,7 @@ class DeltaTraceDatabase extends CloneableFile {
     } catch (e) {
       print(className + ",executeQuery: " + e.toString());
       return QueryResult<T>(
-        isNoErrors: false,
+        isSuccess: false,
         result: [],
         dbLength: col.raw.length,
         updateCount: -1,
@@ -315,32 +315,32 @@ class DeltaTraceDatabase extends CloneableFile {
         }
         print(className + ",executeTransactionQuery: Transaction failed");
         return TransactionQueryResult(
-          isNoErrors: false,
+          isSuccess: false,
           results: [],
           errorMessage: "Transaction failed",
         );
       }
       // 問題がある場合は全ての変更を元に戻し、エラー扱いにします。
       for (QueryResult i in rq) {
-        if (i.isNoErrors == false) {
+        if (i.isSuccess == false) {
           // DBの変更を元に戻す。
           for (String key in buff.keys) {
             collectionFromDict(key, buff[key]!);
           }
           print(className + ",executeTransactionQuery: Transaction failed");
           return TransactionQueryResult(
-            isNoErrors: false,
+            isSuccess: false,
             results: [],
             errorMessage: "Transaction failed",
           );
         }
       }
       // 問題がなければそのまま返します。
-      return TransactionQueryResult(isNoErrors: true, results: rq);
+      return TransactionQueryResult(isSuccess: true, results: rq);
     } catch (e) {
       print(className + ",executeTransactionQuery: " + e.toString());
       return TransactionQueryResult(
-        isNoErrors: false,
+        isSuccess: false,
         results: [],
         errorMessage: "Unexpected Error",
       );

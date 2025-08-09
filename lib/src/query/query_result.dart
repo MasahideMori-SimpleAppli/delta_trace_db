@@ -6,14 +6,14 @@ import '../../delta_trace_db.dart';
 /// (ja) DBへのクエリ結果や付加情報を格納したクラスです。
 class QueryResult<T> extends QueryExecutionResult {
   static const String className = "QueryResult";
-  static const String version = "2";
+  static const String version = "3";
   List<Map<String, dynamic>> result;
   int dbLength;
   int updateCount;
   int hitCount;
   String? errorMessage;
 
-  /// * [isNoErrors] : A flag indicating whether the operation was successful.
+  /// * [isSuccess] : A flag indicating whether the operation was successful.
   /// This also changes depending on the value of the optional argument
   /// mustAffectAtLeastOne when creating a query.
   /// When mustAffectAtLeastOne is true,
@@ -28,7 +28,7 @@ class QueryResult<T> extends QueryExecutionResult {
   /// * [hitCount] : The total number of records searched.
   /// * [errorMessage] : A message that is added only if an error occurs.
   QueryResult({
-    required super.isNoErrors,
+    required super.isSuccess,
     required this.result,
     required this.dbLength,
     required this.updateCount,
@@ -43,7 +43,7 @@ class QueryResult<T> extends QueryExecutionResult {
   /// * [src] : A dictionary made with toDict of this class.
   factory QueryResult.fromDict(Map<String, dynamic> src) {
     return QueryResult<T>(
-      isNoErrors: src["isNoErrors"],
+      isSuccess: src["isSuccess"],
       result: (src["result"] as List).cast<Map<String, dynamic>>(),
       dbLength: src["dbLength"],
       updateCount: src["updateCount"],
@@ -78,7 +78,7 @@ class QueryResult<T> extends QueryExecutionResult {
     return {
       "className": className,
       "version": version,
-      "isNoErrors": isNoErrors,
+      "isSuccess": isSuccess,
       "result": (UtilCopy.jsonableDeepCopy(result) as List)
           .cast<Map<String, dynamic>>(),
       "dbLength": dbLength,

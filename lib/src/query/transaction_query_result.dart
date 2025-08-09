@@ -5,16 +5,16 @@ import '../../delta_trace_db.dart';
 /// (ja) トランザクションクエリの結果クラスです。
 class TransactionQueryResult<T> extends QueryExecutionResult {
   static const String className = "TransactionQueryResult";
-  static const String version = "1";
+  static const String version = "2";
   List<QueryResult> results;
   String? errorMessage;
 
-  /// * [isNoErrors] : A flag indicating whether the operation was successful.
+  /// * [isSuccess] : A flag indicating whether the operation was successful.
   /// * [results] : The QueryResults for each execution are stored in the same
   /// order as they were specified in the transaction query.
   /// * [errorMessage] : A message that is added only if an error occurs.
   TransactionQueryResult({
-    required super.isNoErrors,
+    required super.isSuccess,
     required this.results,
     this.errorMessage,
   });
@@ -30,7 +30,7 @@ class TransactionQueryResult<T> extends QueryExecutionResult {
       qR.add(QueryResult.fromDict(i));
     }
     return TransactionQueryResult<T>(
-      isNoErrors: src["isNoErrors"],
+      isSuccess: src["isSuccess"],
       results: qR,
       errorMessage: src["errorMessage"],
     );
@@ -50,7 +50,7 @@ class TransactionQueryResult<T> extends QueryExecutionResult {
     return {
       "className": className,
       "version": version,
-      "isNoErrors": isNoErrors,
+      "isSuccess": isSuccess,
       "results": (UtilCopy.jsonableDeepCopy(qR) as List)
           .cast<Map<String, dynamic>>(),
       "errorMessage": errorMessage,

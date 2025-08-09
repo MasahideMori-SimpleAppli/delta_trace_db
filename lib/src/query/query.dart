@@ -89,7 +89,7 @@ class Query extends CloneableFile {
   /// Not valid for clear and clearAdd.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
-  /// If the operation is treated as a failure, the isNoErrors flag of the
+  /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.

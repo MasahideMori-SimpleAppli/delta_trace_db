@@ -283,13 +283,13 @@ final conformedUser = ClassB.fromDict(db
     .raw[0]);
 ```
 
-### 🔁 9. トランザクション処理
+### 🔁 9. Transaction Processing
 
-複数のクエリを１つの処理として扱いたい場合にはトランザクションクエリが利用できます。  
-このクエリで処理を行った場合、戻り値のisNoErrorsがfalseになる条件では、  
-DBがトランザクションクエリ実行前の状態に巻き戻されます。  
-内部的には更新対象のコレクションが一時的にメモリ上にバッファされるので、  
-その分のメモリを追加で確保しておく必要があることに注意してください。
+You can use a transaction query if you want to treat multiple queries as a single process.  
+When processing with this query, if the return value isSuccess is false,  
+the DB will be reverted to the state before the transaction query was executed.  
+Please note that internally, the collection to be updated is temporarily buffered in memory,  
+so you will need to allocate additional memory for this.  
 
 ```dart
     final now = DateTime.now();
@@ -347,7 +347,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
         QueryBuilder.clear(target: 'users2').build(),
       ],
     );
-    // result.isNoErrors is false. The DB hasn't changed.
+    // result.isSuccess is false. The DB hasn't changed.
     // The rewind applies to all collections in the DB (in this case, users1 and users2).
     QueryExecutionResult result = db.executeQueryObject(tq1);
     // Success　transactions
@@ -370,7 +370,8 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
 ## Speed
 
 This package is an in-memory database, so it is generally fast.  
-There is usually no problem with around 100,000 records.  
+Currently, there is no mechanism to speed it up, but it works almost the same as a for loop in a program,  
+so there is usually no problem with around 100,000 records.  
 I recommend that you test it in an actual environment using speed_test.dart in the test folder.  
 However, since it consumes RAM capacity according to the amount of data,  
 if you need an extremely large database, consider using a general database.  

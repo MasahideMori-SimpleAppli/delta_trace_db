@@ -16,7 +16,7 @@ abstract class CollectionBase extends CloneableFile {}
 /// DBに対する操作などが実装されています。
 class Collection extends CollectionBase {
   static const String className = "Collection";
-  static const String version = "3";
+  static const String version = "4";
   List<Map<String, dynamic>> _data = [];
 
   // Flutterなどとの連携時に通知するためのコールバックのセット
@@ -118,7 +118,7 @@ class Collection extends CollectionBase {
     _data.addAll(addData);
     _notifyListeners();
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: [],
       dbLength: _data.length,
       updateCount: addData.length,
@@ -154,7 +154,7 @@ class Collection extends CollectionBase {
         _notifyListeners();
       }
       return QueryResult<T>(
-        isNoErrors: true,
+        isSuccess: true,
         result: (UtilCopy.jsonableDeepCopy(r) as List)
             .cast<Map<String, dynamic>>(),
         dbLength: _data.length,
@@ -176,7 +176,7 @@ class Collection extends CollectionBase {
         _notifyListeners();
       }
       return QueryResult<T>(
-        isNoErrors: true,
+        isSuccess: true,
         result: [],
         dbLength: _data.length,
         updateCount: count,
@@ -207,7 +207,7 @@ class Collection extends CollectionBase {
         _notifyListeners();
       }
       return QueryResult<T>(
-        isNoErrors: true,
+        isSuccess: true,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
             .cast<Map<String, dynamic>>(),
         dbLength: _data.length,
@@ -227,7 +227,7 @@ class Collection extends CollectionBase {
         _notifyListeners();
       }
       return QueryResult<T>(
-        isNoErrors: true,
+        isSuccess: true,
         result: [],
         dbLength: _data.length,
         updateCount: count,
@@ -260,7 +260,7 @@ class Collection extends CollectionBase {
         _notifyListeners();
       }
       return QueryResult<T>(
-        isNoErrors: true,
+        isSuccess: true,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
             .cast<Map<String, dynamic>>(),
         dbLength: _data.length,
@@ -282,7 +282,7 @@ class Collection extends CollectionBase {
         _notifyListeners();
       }
       return QueryResult<T>(
-        isNoErrors: true,
+        isSuccess: true,
         result: [],
         dbLength: _data.length,
         updateCount: count,
@@ -344,7 +344,7 @@ class Collection extends CollectionBase {
       }
     }
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
@@ -371,7 +371,7 @@ class Collection extends CollectionBase {
       r = sorted;
     }
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
@@ -409,7 +409,7 @@ class Collection extends CollectionBase {
     }
     _notifyListeners();
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: [],
       dbLength: _data.length,
       updateCount: _data.length,
@@ -428,7 +428,7 @@ class Collection extends CollectionBase {
     for (Map<String, dynamic> item in _data) {
       if (!item.containsKey(q.renameBefore!)) {
         return QueryResult<T>(
-          isNoErrors: false,
+          isSuccess: false,
           result: [],
           dbLength: _data.length,
           updateCount: 0,
@@ -438,7 +438,7 @@ class Collection extends CollectionBase {
       }
       if (item.containsKey(q.renameAfter!)) {
         return QueryResult<T>(
-          isNoErrors: false,
+          isSuccess: false,
           result: [],
           dbLength: _data.length,
           updateCount: 0,
@@ -458,7 +458,7 @@ class Collection extends CollectionBase {
     }
     _notifyListeners();
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
@@ -472,7 +472,7 @@ class Collection extends CollectionBase {
   /// (ja) データベースに保存されているデータの総数を返します。
   QueryResult<T> count<T>() {
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: [],
       dbLength: _data.length,
       updateCount: 0,
@@ -488,7 +488,7 @@ class Collection extends CollectionBase {
     _data.clear();
     _notifyListeners();
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: [],
       dbLength: 0,
       updateCount: preLen,
@@ -514,7 +514,7 @@ class Collection extends CollectionBase {
     );
     _notifyListeners();
     return QueryResult<T>(
-      isNoErrors: true,
+      isSuccess: true,
       result: [],
       dbLength: _data.length,
       updateCount: preLen,

@@ -113,7 +113,7 @@ void main() {
     print(
       "end add: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    expect(r1.isNoErrors, true);
+    expect(r1.isSuccess, true);
 
     // getAll
     final Query q1Get = QueryBuilder.getAll(target: 'users').build();
@@ -125,7 +125,7 @@ void main() {
     print(
       "end getAll: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    expect(r1.isNoErrors, true);
+    expect(r1.isSuccess, true);
     print("returnsLength:${r1Get.result.length}");
 
     // save

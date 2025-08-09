@@ -1,3 +1,8 @@
+## 0.0.9
+
+* The isNoErrors variable of QueryResult and TransactionQueryResult has been changed to the isSuccess variable.
+* Fixed README.
+
 ## 0.0.8
 
 * The TransactionQuery class and TransactionQueryResult class have been added.

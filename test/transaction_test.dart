@@ -103,7 +103,7 @@ void main() {
       ],
     );
     QueryExecutionResult result = db.executeQueryObject(tq1);
-    expect(result.isNoErrors, false);
+    expect(result.isSuccess, false);
     expect(db.collection('users2').length != 0, true);
     // Success　transactions
     final TransactionQuery tq2 = TransactionQuery(
@@ -119,7 +119,7 @@ void main() {
       ],
     );
     QueryExecutionResult result2 = db.executeQueryObject(tq2);
-    expect(result2.isNoErrors, true);
+    expect(result2.isSuccess, true);
     expect(db.collection('users2').length == 0, true);
   });
 }

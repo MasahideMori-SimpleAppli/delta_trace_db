@@ -156,7 +156,7 @@ void main() {
     final Query q1 = QueryBuilder.add(target: 'users', addData: users).build();
     QueryResult<User> r1 = db.executeQuery<User>(Query.fromDict(q1.toDict()));
     r1 = QueryResult.fromDict(r1.toDict()); // QueryResult serialize test.
-    expect(r1.isNoErrors, true);
+    expect(r1.isSuccess, true);
     expect(r1.dbLength == 4, true);
 
     // clearAdd
@@ -167,7 +167,7 @@ void main() {
     final QueryResult<User> r1ex = db.executeQuery<User>(
       Query.fromDict(q1ex.toDict()),
     );
-    expect(r1ex.isNoErrors, true);
+    expect(r1ex.isSuccess, true);
     expect(r1ex.dbLength == 4, true);
 
     // search
@@ -471,7 +471,7 @@ void main() {
       true,
     );
     final QueryResult<User> r1 = db.executeQuery<User>(q);
-    expect(r1.isNoErrors, true);
+    expect(r1.isSuccess, true);
     // シリアライズと復元
     final usersDB = db.toDict();
     final db2 = DeltaTraceDatabase.fromDict(usersDB);
@@ -538,7 +538,7 @@ void main() {
       ],
     ).build();
     final QueryResult<User> r1 = db.executeQuery<User>(q1);
-    expect(r1.isNoErrors, true);
+    expect(r1.isSuccess, true);
     // ネストされたオブジェクトの検索（文字列）
     final Query q2 = QueryBuilder.search(
       target: 'users',
