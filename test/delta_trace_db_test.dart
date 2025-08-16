@@ -585,4 +585,22 @@ void main() {
     expect(r5.hitCount == 4, true);
     expect(r5.result.length == 4, true);
   });
+
+  test('query serialize test', () {
+    final Query q1 = QueryBuilder.search(
+      target: 'users',
+      queryNode: FieldEquals("nestedObj.a", "test"),
+      sortObj: SingleSort(field: 'id', reversed: false),
+    ).build();
+    final Query q2 = QueryBuilder.search(
+      target: 'users',
+      queryNode: FieldEquals("nestedObj.a", "test"),
+      sortObj: MultiSort([
+        SingleSort(field: 'id', reversed: false),
+        SingleSort(field: 'name', reversed: false),
+      ]),
+    ).build();
+    expect(Query.fromDict(q1.toDict()).sortObj is SingleSort, true);
+    expect(Query.fromDict(q2.toDict()).sortObj is MultiSort, true);
+  });
 }

@@ -1,3 +1,7 @@
+## 0.0.11
+
+* Fixed a bug that prevented multi-sort objects from being restored when restoring query objects.
+
 ## 0.0.10
 
 * I did some refactoring.
