@@ -1,5 +1,5 @@
 import 'package:file_state_manager/file_state_manager.dart';
-import '../util_filed.dart';
+import '../util_field.dart';
 import 'abstract_sort.dart';
 
 /// (en) This class allows you to specify single-key sorting for

@@ -1,3 +1,7 @@
+## 0.0.10
+
+* I did some refactoring.
+
 ## 0.0.9
 
 * The isNoErrors variable of QueryResult and TransactionQueryResult has been changed to the isSuccess variable.

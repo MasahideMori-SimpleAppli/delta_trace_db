@@ -28,4 +28,4 @@ export 'src/query/transaction_query.dart';
 export 'src/query/transaction_query_result.dart';
 
 // internal only
-// export 'src/query/util_filed.dart';
+// export 'src/query/util_field.dart';
