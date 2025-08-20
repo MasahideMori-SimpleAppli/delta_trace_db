@@ -10,9 +10,9 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "4";
+  static const String version = "5";
 
-  late final Map<String, CollectionBase> _collections;
+  late final Map<String, Collection> _collections;
 
   /// (en) Create a regular empty database.
   ///
@@ -30,16 +30,14 @@ class DeltaTraceDatabase extends CloneableFile {
     : _collections = _parseCollections(src);
 
   /// データベースのJSONからの復元処理。
-  static Map<String, CollectionBase> _parseCollections(
-    Map<String, dynamic> src,
-  ) {
+  static Map<String, Collection> _parseCollections(Map<String, dynamic> src) {
     final raw = src["collections"];
     if (raw is! Map<String, dynamic>) {
       throw FormatException(
         "Invalid format: 'collections' should be a Map<String, dynamic>.",
       );
     }
-    final Map<String, CollectionBase> r = {};
+    final Map<String, Collection> r = {};
     for (final entry in raw.entries) {
       final key = entry.key;
       final value = entry.value;
@@ -102,9 +100,16 @@ class DeltaTraceDatabase extends CloneableFile {
   }
 
   @override
-  CloneableFile clone() {
+  DeltaTraceDatabase clone() {
     return DeltaTraceDatabase.fromDict(toDict());
   }
+
+  /// (en) Returns the stored contents as a reference.
+  /// Be careful as it is dangerous to edit it directly.
+  ///
+  /// (ja) 保持している内容を参照として返します。
+  /// 直接編集すると危険なため注意してください。
+  Map<String, Collection> get raw => _collections;
 
   @override
   Map<String, dynamic> toDict() {

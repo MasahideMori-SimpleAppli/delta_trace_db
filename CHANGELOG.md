@@ -1,3 +1,8 @@
+## 0.0.12
+
+* Added raw variables to DeltaTraceDatabase. 
+* Refactoring has been performed.
+
 ## 0.0.11
 
 * Fixed a bug that prevented multi-sort objects from being restored when restoring query objects.

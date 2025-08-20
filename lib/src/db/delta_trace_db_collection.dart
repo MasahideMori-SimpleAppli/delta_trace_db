@@ -3,20 +3,14 @@ import 'package:file_state_manager/file_state_manager.dart';
 
 import '../../delta_trace_db.dart';
 
-/// (en) An abstract class for classes related to the contents of
-/// classes in the DB.
-///
-/// (ja) DB内のクラス単位の内容に関するクラスの抽象クラス。
-abstract class CollectionBase extends CloneableFile {}
-
 /// (en) This class relates to the contents of each class in the DB.
 /// It implements operations on the DB.
 ///
 /// (ja) DB内のクラス単位の内容に関するクラスです。
 /// DBに対する操作などが実装されています。
-class Collection extends CollectionBase {
+class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "4";
+  static const String version = "5";
   List<Map<String, dynamic>> _data = [];
 
   // Flutterなどとの連携時に通知するためのコールバックのセット
