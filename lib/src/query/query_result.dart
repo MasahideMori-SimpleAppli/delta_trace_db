@@ -6,7 +6,8 @@ import '../../delta_trace_db.dart';
 /// (ja) DBへのクエリ結果や付加情報を格納したクラスです。
 class QueryResult<T> extends QueryExecutionResult {
   static const String className = "QueryResult";
-  static const String version = "3";
+  static const String version = "4";
+  EnumQueryType type;
   List<Map<String, dynamic>> result;
   int dbLength;
   int updateCount;
@@ -22,6 +23,8 @@ class QueryResult<T> extends QueryExecutionResult {
   /// When false, the value will be true even if the number of updates is 0.
   /// In other cases, if an exception occurs internally,
   /// it will be treated as an error.
+  /// * [type] : The query type for this result.
+  /// The query type at the time of submission is entered as is.
   /// * [result] : Search results, update results, deleted objects, etc.
   /// * [dbLength] : The total number of records in the DB.
   /// * [updateCount] : The total number of records add, updated or deleted.
@@ -29,6 +32,7 @@ class QueryResult<T> extends QueryExecutionResult {
   /// * [errorMessage] : A message that is added only if an error occurs.
   QueryResult({
     required super.isSuccess,
+    required this.type,
     required this.result,
     required this.dbLength,
     required this.updateCount,
@@ -44,6 +48,7 @@ class QueryResult<T> extends QueryExecutionResult {
   factory QueryResult.fromDict(Map<String, dynamic> src) {
     return QueryResult<T>(
       isSuccess: src["isSuccess"],
+      type: EnumQueryType.values.byName(src["type"]),
       result: (src["result"] as List).cast<Map<String, dynamic>>(),
       dbLength: src["dbLength"],
       updateCount: src["updateCount"],
@@ -79,6 +84,7 @@ class QueryResult<T> extends QueryExecutionResult {
       "className": className,
       "version": version,
       "isSuccess": isSuccess,
+      "type": type.name,
       "result": (UtilCopy.jsonableDeepCopy(result) as List)
           .cast<Map<String, dynamic>>(),
       "dbLength": dbLength,

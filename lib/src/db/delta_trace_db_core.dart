@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "5";
+  static const String version = "6";
 
   late final Map<String, Collection> _collections;
 
@@ -96,6 +96,33 @@ class DeltaTraceDatabase extends CloneableFile {
   Collection collectionFromDict(String name, Map<String, dynamic> src) {
     final col = Collection.fromDict(src);
     _collections[name] = col;
+    return col;
+  }
+
+  /// (en) Restores a specific collection from a dictionary, re-registers it,
+  /// and retrieves it.
+  /// If a collection with the same name already exists, it will be overwritten.
+  /// This is typically used to restore data saved with collectionToDict.
+  /// This method preserves existing listeners when overwriting the specified
+  /// collection.
+  ///
+  /// (ja) 特定のコレクションを辞書から復元して再登録し、取得します。
+  /// 既存の同名のコレクションが既にある場合は上書きされます。
+  /// 通常は、collectionToDictで保存したデータを復元する際に使用します。
+  /// このメソッドでは、指定されたコレクションの上書き時、既存のリスナが維持されます。
+  ///
+  /// * [name] : The collection name.
+  /// * [src] : A dictionary made with collectionToDict of this class.
+  Collection collectionFromDictKeepListener(
+    String name,
+    Map<String, dynamic> src,
+  ) {
+    final col = Collection.fromDict(src);
+    Set<void Function()>? listenersBuf = _collections[name]?.listeners;
+    _collections[name] = col;
+    if (listenersBuf != null) {
+      _collections[name]!.listeners = listenersBuf;
+    }
     return col;
   }
 
@@ -227,9 +254,9 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.renameField:
           r = col.renameField(q);
         case EnumQueryType.count:
-          r = col.count();
+          r = col.count(q);
         case EnumQueryType.clear:
-          r = col.clear();
+          r = col.clear(q);
         case EnumQueryType.clearAdd:
           r = col.clearAdd(q);
       }
@@ -247,6 +274,7 @@ class DeltaTraceDatabase extends CloneableFile {
             if (r.updateCount == 0) {
               return QueryResult<T>(
                 isSuccess: false,
+                type: q.type,
                 result: [],
                 dbLength: col.raw.length,
                 updateCount: 0,
@@ -268,6 +296,7 @@ class DeltaTraceDatabase extends CloneableFile {
     } on ArgumentError catch (e) {
       return QueryResult<T>(
         isSuccess: false,
+        type: q.type,
         result: [],
         dbLength: col.raw.length,
         updateCount: -1,
@@ -278,6 +307,7 @@ class DeltaTraceDatabase extends CloneableFile {
       print(className + ",executeQuery: " + e.toString());
       return QueryResult<T>(
         isSuccess: false,
+        type: q.type,
         result: [],
         dbLength: col.raw.length,
         updateCount: -1,
@@ -291,10 +321,15 @@ class DeltaTraceDatabase extends CloneableFile {
   /// Server side, verify that the call is legitimate
   /// (e.g. by checking the JWT and/or the caller's user permissions)
   /// before making this call.
+  /// During a transaction, after all operations are completed successfully,
+  /// if there is a listener callback for each collection, it will be invoked.
+  /// If there is a failure, nothing will be done.
   ///
   /// (ja) トランザクションクエリを実行します。
   /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
+  /// トランザクション時は、全ての処理が正常に完了後、各コレクションに
+  /// リスナーのコールバックがあれば起動し、失敗の場合はなにもしません。
   TransactionQueryResult<T> executeTransactionQuery<T>(TransactionQuery q) {
     List<QueryResult> rq = [];
     try {
@@ -305,6 +340,8 @@ class DeltaTraceDatabase extends CloneableFile {
           continue;
         } else {
           buff[i.target] = collectionToDict(i.target);
+          // コレクションをトランザクションモードに変更する。
+          collection(i.target).changeTransactionMode(true);
         }
       }
       // クエリを実行します。
@@ -316,7 +353,9 @@ class DeltaTraceDatabase extends CloneableFile {
         // エラーの場合は全ての変更を元に戻し、エラー扱いにします。
         // DBの変更を元に戻す。
         for (String key in buff.keys) {
-          collectionFromDict(key, buff[key]!);
+          collectionFromDictKeepListener(key, buff[key]!);
+          // 念の為確実にfalseにする。
+          collection(key).changeTransactionMode(false);
         }
         print(className + ",executeTransactionQuery: Transaction failed");
         return TransactionQueryResult(
@@ -330,7 +369,9 @@ class DeltaTraceDatabase extends CloneableFile {
         if (i.isSuccess == false) {
           // DBの変更を元に戻す。
           for (String key in buff.keys) {
-            collectionFromDict(key, buff[key]!);
+            collectionFromDictKeepListener(key, buff[key]!);
+            // 念の為確実にfalseにする。
+            collection(key).changeTransactionMode(false);
           }
           print(className + ",executeTransactionQuery: Transaction failed");
           return TransactionQueryResult(
@@ -340,7 +381,21 @@ class DeltaTraceDatabase extends CloneableFile {
           );
         }
       }
-      // 問題がなければそのまま返します。
+      // コールバックが必要なコレクションのリスト。
+      List<String> needCallbackCollections = [];
+      // 問題がなければトランザクションモードを解除し、
+      // 適切にコールバックを処理してから返します。
+      for (String key in buff.keys) {
+        // コールバックが必要なコレクション名を保存。
+        if (collection(key).runNotifyListenersInTransaction) {
+          needCallbackCollections.add(key);
+        }
+        collection(key).changeTransactionMode(false);
+      }
+      // 必要なものについてはコールバックを実行する。
+      for (String key in needCallbackCollections) {
+        collection(key).notifyListeners();
+      }
       return TransactionQueryResult(isSuccess: true, results: rq);
     } catch (e) {
       print(className + ",executeTransactionQuery: " + e.toString());

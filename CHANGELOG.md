@@ -1,3 +1,11 @@
+## 0.0.13
+
+* Fixed a bug that caused callbacks to be lost when a transaction failed.
+* When processing a transaction, the notification functionality for each collection is now processed on a per-transaction basis.
+* QueryResult now has a type variable.
+* Added collectionFromDictKeepListener to DeltaTraceDatabase.
+* Other minor changes.
+
 ## 0.0.12
 
 * Added raw variables to DeltaTraceDatabase. 

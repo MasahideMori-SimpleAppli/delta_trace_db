@@ -10,11 +10,37 @@ import '../../delta_trace_db.dart';
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "5";
+  static const String version = "6";
   List<Map<String, dynamic>> _data = [];
 
-  // Flutterなどとの連携時に通知するためのコールバックのセット
-  final Set<void Function()> _listeners = {};
+  /// A set of callbacks to notify when linking with the UI, etc.
+  Set<void Function()> listeners = {};
+
+  /// A flag that is true only during a transaction.
+  /// When this is ON, notifications will not be delivered.
+  bool _isTransactionMode = false;
+
+  /// True if notification is required at the end of the transaction.
+  /// This is intended to be called only from DeltaTraceDB.
+  /// Do not normally use this.
+  bool runNotifyListenersInTransaction = false;
+
+  /// (en) Called when switching to or from transaction mode.
+  /// This is intended to be called only from DeltaTraceDB.
+  /// Do not normally use this.
+  ///
+  /// (ja) トランザクションモードへの変更時、及び解除時に呼び出します。
+  /// これはDeltaTraceDBからのみ呼び出されることを想定しています。
+  /// 通常は使用しないでください。
+  void changeTransactionMode(bool isTransactionMode) {
+    if (isTransactionMode) {
+      _isTransactionMode = true;
+      runNotifyListenersInTransaction = false;
+    } else {
+      _isTransactionMode = false;
+      runNotifyListenersInTransaction = false;
+    }
+  }
 
   /// (en) The constructor.
   ///
@@ -81,7 +107,7 @@ class Collection extends CloneableFile {
   /// なお、通知に関してはDBをデシリアライズしても復元されません。毎回設定する必要があります。
   ///
   /// * [cb] : The function to execute when the DB is changed.
-  void addListener(void Function() cb) => _listeners.add(cb);
+  void addListener(void Function() cb) => listeners.add(cb);
 
   /// (en) This function is used to cancel the set callback.
   /// Call it in the UI using dispose etc.
@@ -90,14 +116,18 @@ class Collection extends CloneableFile {
   /// UIではdisposeなどで呼び出します。
   ///
   /// * [cb] : The function for which you want to cancel the notification.
-  void removeListener(void Function() cb) => _listeners.remove(cb);
+  void removeListener(void Function() cb) => listeners.remove(cb);
 
   /// (en) Executes a registered callback.
   ///
   /// (ja) 登録済みのコールバックを実行します。
-  void _notifyListeners() {
-    for (final cb in _listeners) {
-      cb();
+  void notifyListeners() {
+    if (!_isTransactionMode) {
+      for (final cb in listeners) {
+        cb();
+      }
+    } else {
+      runNotifyListenersInTransaction = true;
     }
   }
 
@@ -110,9 +140,10 @@ class Collection extends CloneableFile {
     final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
         .cast<Map<String, dynamic>>();
     _data.addAll(addData);
-    _notifyListeners();
+    notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: [],
       dbLength: _data.length,
       updateCount: addData.length,
@@ -145,10 +176,11 @@ class Collection extends CloneableFile {
         r.sort(q.sortObj!.getComparator());
       }
       if (r.isNotEmpty) {
-        _notifyListeners();
+        notifyListeners();
       }
       return QueryResult<T>(
         isSuccess: true,
+        type: q.type,
         result: (UtilCopy.jsonableDeepCopy(r) as List)
             .cast<Map<String, dynamic>>(),
         dbLength: _data.length,
@@ -167,10 +199,11 @@ class Collection extends CloneableFile {
         }
       }
       if (count > 0) {
-        _notifyListeners();
+        notifyListeners();
       }
       return QueryResult<T>(
         isSuccess: true,
+        type: q.type,
         result: [],
         dbLength: _data.length,
         updateCount: count,
@@ -198,10 +231,11 @@ class Collection extends CloneableFile {
         deletedItems.sort(q.sortObj!.getComparator());
       }
       if (deletedItems.isNotEmpty) {
-        _notifyListeners();
+        notifyListeners();
       }
       return QueryResult<T>(
         isSuccess: true,
+        type: q.type,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
             .cast<Map<String, dynamic>>(),
         dbLength: _data.length,
@@ -218,10 +252,11 @@ class Collection extends CloneableFile {
         return shouldDelete;
       });
       if (count > 0) {
-        _notifyListeners();
+        notifyListeners();
       }
       return QueryResult<T>(
         isSuccess: true,
+        type: q.type,
         result: [],
         dbLength: _data.length,
         updateCount: count,
@@ -251,10 +286,11 @@ class Collection extends CloneableFile {
         deletedItems.sort(q.sortObj!.getComparator());
       }
       if (deletedItems.isNotEmpty) {
-        _notifyListeners();
+        notifyListeners();
       }
       return QueryResult<T>(
         isSuccess: true,
+        type: q.type,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
             .cast<Map<String, dynamic>>(),
         dbLength: _data.length,
@@ -273,10 +309,11 @@ class Collection extends CloneableFile {
         }
       }
       if (count > 0) {
-        _notifyListeners();
+        notifyListeners();
       }
       return QueryResult<T>(
         isSuccess: true,
+        type: q.type,
         result: [],
         dbLength: _data.length,
         updateCount: count,
@@ -339,6 +376,7 @@ class Collection extends CloneableFile {
     }
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
@@ -366,6 +404,7 @@ class Collection extends CloneableFile {
     }
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
@@ -401,9 +440,10 @@ class Collection extends CloneableFile {
         }
       }
     }
-    _notifyListeners();
+    notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: [],
       dbLength: _data.length,
       updateCount: _data.length,
@@ -423,6 +463,7 @@ class Collection extends CloneableFile {
       if (!item.containsKey(q.renameBefore!)) {
         return QueryResult<T>(
           isSuccess: false,
+          type: q.type,
           result: [],
           dbLength: _data.length,
           updateCount: 0,
@@ -433,6 +474,7 @@ class Collection extends CloneableFile {
       if (item.containsKey(q.renameAfter!)) {
         return QueryResult<T>(
           isSuccess: false,
+          type: q.type,
           result: [],
           dbLength: _data.length,
           updateCount: 0,
@@ -450,9 +492,10 @@ class Collection extends CloneableFile {
         r.add(item);
       }
     }
-    _notifyListeners();
+    notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
@@ -464,9 +507,11 @@ class Collection extends CloneableFile {
   /// (en) Returns the total number of records stored in the database.
   ///
   /// (ja) データベースに保存されているデータの総数を返します。
-  QueryResult<T> count<T>() {
+  /// * [q] : The query.
+  QueryResult<T> count<T>(Query q) {
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: [],
       dbLength: _data.length,
       updateCount: 0,
@@ -477,12 +522,14 @@ class Collection extends CloneableFile {
   /// (en) Clear the contents of the database.
   ///
   /// (ja) データベースの保存内容を破棄します。
-  QueryResult<T> clear<T>() {
+  /// * [q] : The query.
+  QueryResult<T> clear<T>(Query q) {
     final int preLen = _data.length;
     _data.clear();
-    _notifyListeners();
+    notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: [],
       dbLength: 0,
       updateCount: preLen,
@@ -506,9 +553,10 @@ class Collection extends CloneableFile {
       (UtilCopy.jsonableDeepCopy(q.addData!) as List)
           .cast<Map<String, dynamic>>(),
     );
-    _notifyListeners();
+    notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      type: q.type,
       result: [],
       dbLength: _data.length,
       updateCount: preLen,
