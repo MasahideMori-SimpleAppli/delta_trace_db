@@ -8,7 +8,6 @@ import '../../delta_trace_db.dart';
 /// このバージョンは通常のQueryBuilderと異なり、ClonableFileを使用せずにMapを直接渡します。
 class RawQueryBuilder extends QueryBuilder {
   List<Map<String, dynamic>>? rawAddData;
-  Map<String, dynamic>? rawTemplate;
 
   /// * [target] : The collection name in DB.
   /// * [rawAddData] : Data specified when performing an add operation.
@@ -24,10 +23,11 @@ class RawQueryBuilder extends QueryBuilder {
   /// the DB history is recorded.
   RawQueryBuilder.add({
     required super.target,
-    required this.rawAddData,
+    required List<Map<String, dynamic>> rawAddData,
     super.mustAffectAtLeastOne,
     super.cause,
-  }) : super.add(addData: null);
+  }) : this.rawAddData = rawAddData,
+       super.add(addData: []);
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -194,7 +194,7 @@ class RawQueryBuilder extends QueryBuilder {
     : super.getAll();
 
   /// * [target] : The collection name in DB.
-  /// * [rawTemplate] : Specify this when changing the structure of the DB class.
+  /// * [template] : Specify this when changing the structure of the DB class.
   /// Fields that do not exist in the existing structure but exist in the
   /// template will be added with the template value as the initial value.
   /// Fields that do not exist in the template will be deleted.
@@ -210,10 +210,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// the DB history is recorded.
   RawQueryBuilder.conformToTemplate({
     required super.target,
-    required this.rawTemplate,
+    required Map<String, dynamic> template,
     super.mustAffectAtLeastOne,
     super.cause,
-  }) : super.conformToTemplate(template: null);
+  }) : super.conformToTemplate(template: template);
 
   /// * [target] : The collection name in DB.
   /// * [renameBefore] : The old variable name when querying for a rename.
@@ -278,10 +278,11 @@ class RawQueryBuilder extends QueryBuilder {
   /// the DB history is recorded.
   RawQueryBuilder.clearAddAll({
     required super.target,
-    required this.rawAddData,
+    required List<Map<String, dynamic>> rawAddData,
     super.mustAffectAtLeastOne,
     super.cause,
-  }) : super.clearAddAll(addData: null);
+  }) : this.rawAddData = rawAddData,
+       super.clearAddAll(addData: []);
 
   /// (en) Commit the content and convert it into a query object.
   ///
@@ -292,7 +293,7 @@ class RawQueryBuilder extends QueryBuilder {
       type: type,
       addData: rawAddData,
       overrideData: overrideData,
-      template: rawTemplate,
+      template: template,
       queryNode: queryNode,
       sortObj: sortObj,
       offset: offset,

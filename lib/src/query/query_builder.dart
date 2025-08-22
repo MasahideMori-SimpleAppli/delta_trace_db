@@ -10,7 +10,7 @@ class QueryBuilder {
   EnumQueryType type;
   List<CloneableFile>? addData;
   Map<String, dynamic>? overrideData;
-  CloneableFile? template;
+  Map<String, dynamic>? template;
   QueryNode? queryNode;
   AbstractSort? sortObj;
   int? offset;
@@ -39,10 +39,11 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.add({
     required this.target,
-    required this.addData,
+    required List<CloneableFile> addData,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.add;
+  }) : this.addData = addData,
+       type = EnumQueryType.add;
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -67,13 +68,15 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.update({
     required this.target,
-    required this.queryNode,
-    required this.overrideData,
+    required QueryNode queryNode,
+    required Map<String, dynamic> overrideData,
     required this.returnData,
     this.sortObj,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.update;
+  }) : this.queryNode = queryNode,
+       this.overrideData = overrideData,
+       type = EnumQueryType.update;
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -94,12 +97,14 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.updateOne({
     required this.target,
-    required this.queryNode,
-    required this.overrideData,
+    required QueryNode queryNode,
+    required Map<String, dynamic> overrideData,
     required this.returnData,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.updateOne;
+  }) : this.queryNode = queryNode,
+       this.overrideData = overrideData,
+       type = EnumQueryType.updateOne;
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -120,12 +125,13 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.delete({
     required this.target,
-    required this.queryNode,
+    required QueryNode queryNode,
     required this.returnData,
     this.sortObj,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.delete;
+  }) : this.queryNode = queryNode,
+       type = EnumQueryType.delete;
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -144,11 +150,12 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.deleteOne({
     required this.target,
-    required this.queryNode,
+    required QueryNode queryNode,
     required this.returnData,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.deleteOne;
+  }) : this.queryNode = queryNode,
+       type = EnumQueryType.deleteOne;
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -187,14 +194,15 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.search({
     required this.target,
-    required this.queryNode,
+    required QueryNode queryNode,
     this.sortObj,
     this.offset,
     this.startAfter,
     this.endBefore,
     this.limit,
     this.cause,
-  }) : type = EnumQueryType.search;
+  }) : this.queryNode = queryNode,
+       type = EnumQueryType.search;
 
   /// * [target] : The collection name in DB.
   /// * [sortObj] : An object for sorting the return values.
@@ -213,6 +221,8 @@ class QueryBuilder {
   /// Fields that do not exist in the existing structure but exist in the
   /// template will be added with the template value as the initial value.
   /// Fields that do not exist in the template will be deleted.
+  /// Usually, you pass a dictionary created by converting CloneableFile to
+  /// Map (call toDict).
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -225,10 +235,11 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.conformToTemplate({
     required this.target,
-    required this.template,
+    required Map<String, dynamic> template,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.conformToTemplate;
+  }) : this.template = template,
+       type = EnumQueryType.conformToTemplate;
 
   /// * [target] : The collection name in DB.
   /// * [renameBefore] : The old variable name when querying for a rename.
@@ -246,12 +257,14 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.renameField({
     required this.target,
-    required this.renameBefore,
-    required this.renameAfter,
+    required String renameBefore,
+    required String renameAfter,
     required this.returnData,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.renameField;
+  }) : this.renameBefore = renameBefore,
+       this.renameAfter = renameAfter,
+       type = EnumQueryType.renameField;
 
   /// * [target] : The collection name in DB.
   /// * [cause] : You can add further parameters such as why this query was
@@ -296,10 +309,11 @@ class QueryBuilder {
   /// the DB history is recorded.
   QueryBuilder.clearAddAll({
     required this.target,
-    required this.addData,
+    required List<CloneableFile> addData,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : type = EnumQueryType.clearAdd;
+  }) : this.addData = addData,
+       type = EnumQueryType.clearAdd;
 
   /// (en) Commit the content and convert it into a query object.
   ///
@@ -318,7 +332,7 @@ class QueryBuilder {
       type: type,
       addData: mData,
       overrideData: overrideData,
-      template: template?.toDict(),
+      template: template,
       queryNode: queryNode,
       sortObj: sortObj,
       offset: offset,

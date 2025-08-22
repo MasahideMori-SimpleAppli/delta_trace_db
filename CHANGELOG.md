@@ -1,3 +1,7 @@
+## 0.0.16
+
+* Improved type safety when using QueryBuilder and RawQueryBuilder. The conformToTemplate method now takes a Map as an argument.
+
 ## 0.0.15
 
 * Added missing mustAffectAtLeastOne to RawQueryBuilder.

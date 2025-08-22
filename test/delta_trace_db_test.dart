@@ -353,7 +353,12 @@ void main() {
     // conformToTemplate (User to User2)
     final Query q10 = QueryBuilder.conformToTemplate(
       target: 'users',
-      template: User2(id: '5', name: 'NoData', age: -1, gender: 'NoData'),
+      template: User2(
+        id: '5',
+        name: 'NoData',
+        age: -1,
+        gender: 'NoData',
+      ).toDict(),
     ).build();
     final QueryResult<User2> r10 = db.executeQuery<User2>(
       Query.fromDict(q10.toDict()),

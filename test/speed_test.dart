@@ -256,10 +256,10 @@ void main() {
         age: -1,
         nestedObj: {"num": -1},
         gender: "None",
-      ),
+      ).toDict(),
     ).build();
     print("start conformToTemplate");
-    final db2 = db.clone() as DeltaTraceDatabase;
+    final db2 = db.clone();
     dt1 = DateTime.now();
     final _ = db2.executeQuery<User2>(q5);
     dt2 = DateTime.now();
