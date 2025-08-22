@@ -12,6 +12,10 @@ class RawQueryBuilder extends QueryBuilder {
 
   /// * [target] : The collection name in DB.
   /// * [rawAddData] : Data specified when performing an add operation.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -21,20 +25,25 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.add({
     required super.target,
     required this.rawAddData,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.add(addData: null);
 
   /// * [target] : The collection name in DB.
-  /// * [overrideData] : This is not a serialized version of the full class,
-  /// but a dictionary containing only the parameters you want to update.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
+  /// * [overrideData] : This is not a serialized version of the full class,
+  /// but a dictionary containing only the parameters you want to update.
+  /// * [returnData] : If true, return the changed objs.
   /// * [sortObj] : An object for sorting the search return values.
   /// SingleSort or MultiSort can be used.
   /// If you set returnData to true, the return values of an update or delete
   /// query will be sorted by this object.
-  /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -47,16 +56,21 @@ class RawQueryBuilder extends QueryBuilder {
     required super.overrideData,
     required super.returnData,
     super.sortObj,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.update();
 
   /// * [target] : The collection name in DB.
-  /// * [overrideData] : This is not a serialized version of the full class,
-  /// but a dictionary containing only the parameters you want to update.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
+  /// * [overrideData] : This is not a serialized version of the full class,
+  /// but a dictionary containing only the parameters you want to update.
   /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -68,6 +82,7 @@ class RawQueryBuilder extends QueryBuilder {
     required super.queryNode,
     required super.overrideData,
     required super.returnData,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.updateOne();
 
@@ -75,9 +90,13 @@ class RawQueryBuilder extends QueryBuilder {
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
+  /// * [returnData] : If true, return the changed objs.
   /// * [sortObj] : An object for sorting the return values.
   /// SingleSort or MultiSort can be used.
-  /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -89,8 +108,32 @@ class RawQueryBuilder extends QueryBuilder {
     required super.queryNode,
     required super.returnData,
     super.sortObj,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.delete();
+
+  /// * [target] : The collection name in DB.
+  /// * [queryNode] : This is the node object used for the search.
+  /// You can build queries by combining the various nodes defined in
+  /// comparison_node.dart.
+  /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
+  /// * [cause] : You can add further parameters such as why this query was
+  /// made and who made it.
+  /// This is useful if you have high security requirements or want to run the
+  /// program autonomously using artificial intelligence.
+  /// By saving the entire query including this as a log,
+  /// the DB history is recorded.
+  RawQueryBuilder.deleteOne({
+    required super.target,
+    required super.queryNode,
+    required super.returnData,
+    super.mustAffectAtLeastOne = true,
+    super.cause,
+  }) : super.deleteOne();
 
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
@@ -155,6 +198,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// Fields that do not exist in the existing structure but exist in the
   /// template will be added with the template value as the initial value.
   /// Fields that do not exist in the template will be deleted.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -164,6 +211,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.conformToTemplate({
     required super.target,
     required this.rawTemplate,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.conformToTemplate(template: null);
 
@@ -171,6 +219,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// * [renameBefore] : The old variable name when querying for a rename.
   /// * [renameAfter] : The new name of the variable when querying for a rename.
   /// * [returnData] : If true, return the changed objs.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -182,6 +234,7 @@ class RawQueryBuilder extends QueryBuilder {
     required super.renameBefore,
     required super.renameAfter,
     required super.returnData,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.renameField();
 
@@ -195,16 +248,28 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.count({required super.target, super.cause}) : super.count();
 
   /// * [target] : The collection name in DB.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
   /// program autonomously using artificial intelligence.
   /// By saving the entire query including this as a log,
   /// the DB history is recorded.
-  RawQueryBuilder.clear({required super.target, super.cause}) : super.clear();
+  RawQueryBuilder.clear({
+    required super.target,
+    super.mustAffectAtLeastOne,
+    super.cause,
+  }) : super.clear();
 
   /// * [target] : The collection name in DB.
   /// * [rawAddData] : Data specified when performing an add operation.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -214,6 +279,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.clearAddAll({
     required super.target,
     required this.rawAddData,
+    super.mustAffectAtLeastOne,
     super.cause,
   }) : super.clearAddAll(addData: null);
 
@@ -236,6 +302,7 @@ class RawQueryBuilder extends QueryBuilder {
       renameAfter: renameAfter,
       limit: limit,
       returnData: returnData,
+      mustAffectAtLeastOne: mustAffectAtLeastOne,
       cause: cause,
     );
   }

@@ -45,16 +45,16 @@ class QueryBuilder {
   }) : type = EnumQueryType.add;
 
   /// * [target] : The collection name in DB.
-  /// * [overrideData] : This is not a serialized version of the full class,
-  /// but a dictionary containing only the parameters you want to update.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
+  /// * [overrideData] : This is not a serialized version of the full class,
+  /// but a dictionary containing only the parameters you want to update.
+  /// * [returnData] : If true, return the changed objs.
   /// * [sortObj] : An object for sorting the search return values.
   /// SingleSort or MultiSort can be used.
   /// If you set returnData to true, the return values of an update or delete
   /// query will be sorted by this object.
-  /// * [returnData] : If true, return the changed objs.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -76,11 +76,11 @@ class QueryBuilder {
   }) : type = EnumQueryType.update;
 
   /// * [target] : The collection name in DB.
-  /// * [overrideData] : This is not a serialized version of the full class,
-  /// but a dictionary containing only the parameters you want to update.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
+  /// * [overrideData] : This is not a serialized version of the full class,
+  /// but a dictionary containing only the parameters you want to update.
   /// * [returnData] : If true, return the changed objs.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
@@ -105,9 +105,9 @@ class QueryBuilder {
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
+  /// * [returnData] : If true, return the changed objs.
   /// * [sortObj] : An object for sorting the return values.
   /// SingleSort or MultiSort can be used.
-  /// * [returnData] : If true, return the changed objs.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the

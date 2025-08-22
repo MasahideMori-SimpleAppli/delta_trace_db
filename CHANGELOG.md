@@ -1,3 +1,8 @@
+## 0.0.15
+
+* Added missing mustAffectAtLeastOne to RawQueryBuilder.
+* Improved documentation text for QueryBuilder and RawQueryBuilder.
+
 ## 0.0.14
 
 + Changed the initial offset value to null when initializing a QueryBuilder.
@@ -5,14 +10,15 @@
 ## 0.0.13
 
 * Fixed a bug that caused callbacks to be lost when a transaction failed.
-* When processing a transaction, the notification functionality for each collection is now processed on a per-transaction basis.
+* When processing a transaction, the notification functionality for each collection is now processed
+  on a per-transaction basis.
 * QueryResult now has a type variable.
 * Added collectionFromDictKeepListener to DeltaTraceDatabase.
 * Other minor changes.
 
 ## 0.0.12
 
-* Added raw variables to DeltaTraceDatabase. 
+* Added raw variables to DeltaTraceDatabase.
 * Refactoring has been performed.
 
 ## 0.0.11
@@ -25,19 +31,24 @@
 
 ## 0.0.9
 
-* The isNoErrors variable of QueryResult and TransactionQueryResult has been changed to the isSuccess variable.
+* The isNoErrors variable of QueryResult and TransactionQueryResult has been changed to the
+  isSuccess variable.
 * Fixed README.
 
 ## 0.0.8
 
 * The TransactionQuery class and TransactionQueryResult class have been added.
-* The DeltaTraceDatabase class now has an executeQueryObject method that can execute Query, TransactionQuery, or Map.
+* The DeltaTraceDatabase class now has an executeQueryObject method that can execute Query,
+  TransactionQuery, or Map.
 * The executeTransactionQuery method has now been added to the DeltaTraceDatabase class.
-* The Query class now has a new parameter, mustAffectAtLeastOne. This value is initially set to true so that the DB behaves differently than before.
+* The Query class now has a new parameter, mustAffectAtLeastOne. This value is initially set to true
+  so that the DB behaves differently than before.
 * The description of the QueryResult class has been adjusted to match the new specifications.
-* For add queries, the return value updateCount has been changed to describe the number of objects appended.
+* For add queries, the return value updateCount has been changed to describe the number of objects
+  appended.
 * deleteOne has been added to the query types.
-* Runtime errors in renameField are now checked before execution. This prevents the possibility of partial updates.
+* Runtime errors in renameField are now checked before execution. This prevents the possibility of
+  partial updates.
 
 ## 0.0.7
 
@@ -46,7 +57,8 @@
 ## 0.0.6
 
 * Added RawQueryBuilder class, which is useful for certain purposes.
-* Several query nodes now support automatic DateTime conversion, improving search speed when comparing DateTime values.
+* Several query nodes now support automatic DateTime conversion, improving search speed when
+  comparing DateTime values.
 * Added operation instructions to the README.
 
 ## 0.0.5
