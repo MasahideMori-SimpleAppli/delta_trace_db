@@ -1,3 +1,7 @@
+## 0.0.14
+
++ Changed the initial offset value to null when initializing a QueryBuilder.
+
 ## 0.0.13
 
 * Fixed a bug that caused callbacks to be lost when a transaction failed.

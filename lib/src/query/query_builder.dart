@@ -13,7 +13,7 @@ class QueryBuilder {
   CloneableFile? template;
   QueryNode? queryNode;
   AbstractSort? sortObj;
-  int? offset = 0;
+  int? offset;
   Map<String, dynamic>? startAfter;
   Map<String, dynamic>? endBefore;
   String? renameBefore;
