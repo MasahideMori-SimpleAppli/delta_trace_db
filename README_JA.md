@@ -351,41 +351,42 @@ testフォルダのspeed_test.dartを利用して実際の環境でテストし�
 ただし、データ量の分RAM容量を消費するため、極めて大規模なデータベースが必要な場合は一般的なデータベースの使用を検討してください。
 参考までに、少し古めの、Ryzen 3600 CPU搭載PCを使ったスピードテスト(test/speed_test.dart)の実行結果は以下の通りです。
 十分に時間がかかる条件をチョイスしてテストしていますが、実用上問題になることは稀だと思います。
+速度はデータ容量にも依存するので、大きなデータが大量にある場合はより遅くなることに注意してください。
 
 ```text
 speed test for 100000 records
 start add
-end add: 176 ms
+end add: 214 ms
 start getAll (with object convert)
-end getAll: 270 ms
+end getAll: 655 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 326 ms
+end save: 354 ms
 start load (with json string convert)
-end load: 239 ms
+end load: 263 ms
 start search (with object convert)
-end search: 429 ms
+end search: 763 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 346 ms
+end search paging: 430 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 340 ms
+end search paging by obj: 527 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 322 ms
+end search paging by offset: 447 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 55 ms
+end update: 30 ms
 start updateOne of half index object
 end updateOne: 12 ms
 start conformToTemplate
-end conformToTemplate: 69 ms
+end conformToTemplate: 64 ms
 start delete half object (with object convert)
-end delete: 205 ms
+end delete: 414 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 7 ms
+end deleteOne: 8 ms
 returnsLength:1
 ```
 

@@ -1,3 +1,8 @@
+## 0.0.17
+
+* The speed test code was out of date so I updated it.
+* The new test stores dates and times in the more commonly used ISO 8601 format, which means the amount of data increases and the test takes longer.
+
 ## 0.0.16
 
 * Improved type safety when using QueryBuilder and RawQueryBuilder. The conformToTemplate method now takes a Map as an argument.

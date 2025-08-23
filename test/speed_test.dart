@@ -24,8 +24,8 @@ class User extends CloneableFile {
     id: src['id'],
     name: src['name'],
     age: src['age'],
-    createdAt: DateTime.fromMillisecondsSinceEpoch(src['createdAt']),
-    updatedAt: DateTime.fromMillisecondsSinceEpoch(src['updatedAt']),
+    createdAt: DateTime.parse(src['createdAt']),
+    updatedAt: DateTime.parse(src['updatedAt']),
     nestedObj: src['nestedObj'],
   );
 
@@ -34,9 +34,9 @@ class User extends CloneableFile {
     'id': id,
     'name': name,
     'age': age,
-    'createdAt': createdAt.millisecondsSinceEpoch,
+    'createdAt': createdAt.toIso8601String(),
     // This will automatically update the update date.
-    'updatedAt': DateTime.now().millisecondsSinceEpoch,
+    'updatedAt': DateTime.now().toIso8601String(),
     'nestedObj': {...nestedObj},
   };
 
