@@ -8,7 +8,10 @@
 シリアライズして保存すれば、セキュリティ監査や利用状況の分析において非常にリッチな情報源を提供します。
 これは特に医療用などの様々な制約のあるプロジェクトにおいて、威力を発揮します。
 また、whenについては、TemporalTraceクラスによる通信経路、 及び各到達時間の完全なトレース機能を持ちます。
-これは例えば、光の速度でも無視できない遅延が発生する宇宙規模の通信網や中継サーバーなどで便利ではないかと考えています。
+これは例えば、光の速度でも無視できない遅延が発生する宇宙規模の通信網や中継サーバーなどで便利ではないかと考えています。  
+
+このパッケージには、バックエンド用のPython版もあります。  
+[Python ver.](https://pypi.org/project/delta-trace-db/)
 
 ## DBの構造
 
@@ -397,7 +400,7 @@ DBの高速化は可能ですが優先度はかなり低いので、使い勝手
 ## サポート
 
 現時点では基本的にサポートはありませんが、バグは修正される可能性が高いです。  
-もし問題を見つけた場合はGithubのissueを開いてください。
+もし問題を見つけた場合はGitHubのissueを開いてください。
 
 ## バージョン管理について
 
@@ -429,7 +432,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## 著作権表示
+## Trademarks
 
-The “Dart” name and “Flutter” name are trademarks of Google LLC.  
-*The developer of this package is not Google LLC.
+- “Dart” and “Flutter” are trademarks of Google LLC.  
+  *This package is not developed or endorsed by Google LLC.*
+
+- “Python” is a trademark of the Python Software Foundation.  
+  *This package is not affiliated with the Python Software Foundation.*
+
+- GitHub and the GitHub logo are trademarks of GitHub, Inc.  
+  *This package is not affiliated with GitHub, Inc.*

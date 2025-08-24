@@ -19,7 +19,10 @@ This is particularly useful in projects with various constraints, such as medica
 In addition, for when, the TemporalTrace class has a complete tracing function for   
 the communication path and each arrival time.  
 I think this would be useful, for example, in space-scale communication networks and relay servers,
-where non-negligible delays occur even at the speed of light.
+where non-negligible delays occur even at the speed of light.  
+
+This package also has a Python backend implementation.
+[Python ver.](https://pypi.org/project/delta-trace-db/)
 
 ## DB structure
 
@@ -427,7 +430,7 @@ usability and creating peripheral tools will take priority.
 ## Support
 
 There is essentially no support at this time, but bugs will likely be fixed.  
-If you find any issues, please open an issue on Github.
+If you find any issues, please open an issue on GitHub.
 
 ## About version control
 
@@ -460,7 +463,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## Copyright notice
+## Trademarks
 
-The “Dart” name and “Flutter” name are trademarks of Google LLC.  
-*The developer of this package is not Google LLC.
+- “Dart” and “Flutter” are trademarks of Google LLC.  
+  *This package is not developed or endorsed by Google LLC.*
+
+- “Python” is a trademark of the Python Software Foundation.  
+  *This package is not affiliated with the Python Software Foundation.*
+
+- GitHub and the GitHub logo are trademarks of GitHub, Inc.  
+  *This package is not affiliated with GitHub, Inc.*

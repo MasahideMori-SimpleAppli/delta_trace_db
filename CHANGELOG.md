@@ -1,3 +1,7 @@
+## 0.0.19
+
+* The README has been tweaked.
+
 ## 0.0.18
 
 * Fixed a bug where specifying an endBefore in a search query would result in unexpected behavior if user accidentally specified an offset or startAfter, which are not actually required.
