@@ -26,6 +26,7 @@ export 'src/query/query_result.dart';
 export 'src/query/raw_query_builder.dart';
 export 'src/query/transaction_query.dart';
 export 'src/query/transaction_query_result.dart';
+export 'src/query/util_query.dart';
 
 // internal only
 // export 'src/query/util_field.dart';
