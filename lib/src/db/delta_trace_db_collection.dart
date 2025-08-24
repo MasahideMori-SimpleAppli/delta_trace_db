@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "6";
+  static const String version = "7";
   List<Map<String, dynamic>> _data = [];
 
   /// A set of callbacks to notify when linking with the UI, etc.
@@ -368,7 +368,7 @@ class Collection extends CloneableFile {
       }
     }
     if (q.limit != null) {
-      if (q.endBefore != null) {
+      if (q.offset == null && q.startAfter == null && q.endBefore != null) {
         r = r.length > q.limit! ? r.sublist(r.length - q.limit!) : r;
       } else {
         r = r.take(q.limit!).toList();

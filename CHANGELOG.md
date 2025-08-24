@@ -1,3 +1,7 @@
+## 0.0.18
+
+* Fixed a bug where specifying an endBefore in a search query would result in unexpected behavior if user accidentally specified an offset or startAfter, which are not actually required.
+
 ## 0.0.17
 
 * The speed test code was out of date so I updated it.
