@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "6";
+  static const String version = "7";
 
   late final Map<String, Collection> _collections;
 
@@ -204,16 +204,27 @@ class DeltaTraceDatabase extends CloneableFile {
   /// またはそれらをMapにしたもののいずれでも実行できます。
   /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
-  QueryExecutionResult executeQueryObject(Object query) {
+  ///
+  /// * [query] : Query、TransactionQuery、Map<String, dynamic>のいずれか。
+  /// * [prohibit] : Specifies the query type that should not be executed.
+  /// If you try to process a query of the type specified here,
+  /// false will be returned in QueryResult.
+  QueryExecutionResult executeQueryObject(
+    Object query, {
+    List<EnumQueryType>? prohibit,
+  }) {
     if (query is Query) {
-      return executeQuery(query);
+      return executeQuery(query, prohibit: prohibit);
     } else if (query is TransactionQuery) {
-      return executeTransactionQuery(query);
+      return executeTransactionQuery(query, prohibit: prohibit);
     } else if (query is Map<String, dynamic>) {
       if (query["className"] == "Query") {
-        return executeQuery(Query.fromDict(query));
+        return executeQuery(Query.fromDict(query), prohibit: prohibit);
       } else if (query["className"] == "TransactionQuery") {
-        return executeTransactionQuery(TransactionQuery.fromDict(query));
+        return executeTransactionQuery(
+          TransactionQuery.fromDict(query),
+          prohibit: prohibit,
+        );
       } else {
         throw ArgumentError("Unsupported query class: ${query["className"]}");
       }
@@ -230,7 +241,26 @@ class DeltaTraceDatabase extends CloneableFile {
   /// (ja) クエリを実行します。
   /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
-  QueryResult<T> executeQuery<T>(Query q) {
+  ///
+  /// * [q] : The query.
+  /// * [prohibit] : Specifies the query type that should not be executed.
+  /// If you try to process a query of the type specified here,
+  /// false will be returned in QueryResult.
+  QueryResult<T> executeQuery<T>(Query q, {List<EnumQueryType>? prohibit}) {
+    // prohibitのチェック。
+    if (prohibit != null) {
+      if (prohibit.contains(q.type)) {
+        return QueryResult<T>(
+          isSuccess: false,
+          type: q.type,
+          result: [],
+          dbLength: -1,
+          updateCount: 0,
+          hitCount: 0,
+          errorMessage: "Operation not permitted.",
+        );
+      }
+    }
     Collection col = collection(q.target);
     try {
       QueryResult<T>? r;
@@ -330,7 +360,15 @@ class DeltaTraceDatabase extends CloneableFile {
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
   /// トランザクション時は、全ての処理が正常に完了後、各コレクションに
   /// リスナーのコールバックがあれば起動し、失敗の場合はなにもしません。
-  TransactionQueryResult<T> executeTransactionQuery<T>(TransactionQuery q) {
+  ///
+  /// * [q] : The query.
+  /// * [prohibit] : Specifies the query type that should not be executed.
+  /// If you try to process a query of the type specified here,
+  /// false will be returned in QueryResult.
+  TransactionQueryResult<T> executeTransactionQuery<T>(
+    TransactionQuery q, {
+    List<EnumQueryType>? prohibit,
+  }) {
     List<QueryResult> rq = [];
     try {
       // 一時的に保存が必要なコレクションを計算してバッファします。
@@ -347,7 +385,7 @@ class DeltaTraceDatabase extends CloneableFile {
       // クエリを実行します。
       try {
         for (Query i in q.queries) {
-          rq.add(executeQuery(i));
+          rq.add(executeQuery(i, prohibit: prohibit));
         }
       } catch (e) {
         // エラーの場合は全ての変更を元に戻し、エラー扱いにします。
