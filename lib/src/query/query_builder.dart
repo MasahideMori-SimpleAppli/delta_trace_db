@@ -21,6 +21,7 @@ class QueryBuilder {
   int? limit;
   bool returnData = false;
   bool mustAffectAtLeastOne = true;
+  String? serialKey;
   Cause? cause;
 
   /// * [target] : The collection name in DB.
@@ -31,6 +32,11 @@ class QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// Note that only variables directly under the class can be specified as
+  /// keys, not nested fields.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -41,6 +47,7 @@ class QueryBuilder {
     required this.target,
     required List<CloneableFile> addData,
     this.mustAffectAtLeastOne = true,
+    this.serialKey,
     this.cause,
   }) : this.addData = addData,
        type = EnumQueryType.add;
@@ -301,16 +308,22 @@ class QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// Note that only variables directly under the class can be specified as
+  /// keys, not nested fields.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
   /// program autonomously using artificial intelligence.
   /// By saving the entire query including this as a log,
   /// the DB history is recorded.
-  QueryBuilder.clearAddAll({
+  QueryBuilder.clearAdd({
     required this.target,
     required List<CloneableFile> addData,
     this.mustAffectAtLeastOne = true,
+    this.serialKey,
     this.cause,
   }) : this.addData = addData,
        type = EnumQueryType.clearAdd;
@@ -343,6 +356,7 @@ class QueryBuilder {
       limit: limit,
       returnData: returnData,
       mustAffectAtLeastOne: mustAffectAtLeastOne,
+      serialKey: serialKey,
       cause: cause,
     );
   }

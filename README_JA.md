@@ -49,7 +49,7 @@ ClonableFileを継承したく無い場合はRawQueryBuilderでMap<String,dynami
 
 ```dart
 class User extends CloneableFile {
-  final String id;
+  final int id;
   final String name;
   final int age;
   final DateTime createdAt;
@@ -98,13 +98,13 @@ class User extends CloneableFile {
 final db = DeltaTraceDatabase();
 final now = DateTime.now();
 final users = [
-  User(id: '1',
+  User(id: -1, // ダミーの値を入力。
       name: 'Taro',
       age: 25,
       createdAt: now,
       updatedAt: now,
       nestedObj: {"a": "a"}),
-  User(id: '2',
+  User(id: -1,
       name: 'Jiro',
       age: 30,
       createdAt: now,
@@ -112,7 +112,8 @@ final users = [
       nestedObj: {"a": "b"}),
 ];
 
-final query = QueryBuilder.add(target: 'users', addData: users).build();
+// ここでは、シリアルキーを指定してidを自動付与できます。
+final query = QueryBuilder.add(target: 'users', addData: users, serialKey: "id").build();
 // ここの<User>はサーバーでは不要。これはデータ取得時のコンバート処理のための型指定です。
 final result = db.executeQuery<User>(query);
 ```
@@ -274,7 +275,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
     final db = DeltaTraceDatabase();
     List<User> users = [
       User(
-        id: '1',
+        id: 1,
         name: 'Taro',
         age: 25,
         createdAt: now.add(Duration(days: 0)),
@@ -282,7 +283,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
         nestedObj: {},
       ),
       User(
-        id: '2',
+        id: 2,
         name: 'Jiro',
         age: 28,
         createdAt: now.add(Duration(days: 1)),
@@ -290,7 +291,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
         nestedObj: {},
       ),
       User(
-        id: '3',
+        id: 3,
         name: 'Saburo',
         age: 31,
         createdAt: now.add(Duration(days: 2)),
@@ -298,7 +299,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
         nestedObj: {},
       ),
       User(
-        id: '4',
+        id: 4,
         name: 'Hanako',
         age: 17,
         createdAt: now.add(Duration(days: 3)),
@@ -317,8 +318,8 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
         QueryBuilder.update(
           target: 'users1',
           // 型が違う
-          queryNode: FieldEquals("id", 3),
-          overrideData: {"id": 5},
+          queryNode: FieldEquals("id", "3"),
+          overrideData: {"id": "5"},
           returnData: true,
           mustAffectAtLeastOne: true,
         ).build(),
@@ -333,9 +334,9 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
       queries: [
         QueryBuilder.update(
           target: 'users1',
-          queryNode: FieldEquals("id", "3"),
+          queryNode: FieldEquals("id", 3),
           // オーバーライドする型にも注意してください。このライブラリでは、他の型によるオーバーライドが可能です。
-          overrideData: {"id": "5"},
+          overrideData: {"id": 5},
           returnData: true,
           mustAffectAtLeastOne: true,
         ).build(),
@@ -357,40 +358,43 @@ testフォルダのspeed_test.dartを利用して実際の環境でテストし�
 速度はデータ容量にも依存するので、大きなデータが大量にある場合はより遅くなることに注意してください。
 
 ```text
-speed test for 100000 records
+speed test for 100000 records                                                                                                                                                                      
 start add
-end add: 214 ms
+end add: 205 ms
 start getAll (with object convert)
-end getAll: 655 ms
+end getAll: 680 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 354 ms
+end save: 351 ms
 start load (with json string convert)
-end load: 263 ms
+end load: 247 ms
 start search (with object convert)
-end search: 763 ms
+end search: 777 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 430 ms
+end search paging: 450 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 527 ms
+end search paging by obj: 524 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 447 ms
+end search paging by offset: 457 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 30 ms
+end update: 24 ms
 start updateOne of half index object
-end updateOne: 12 ms
+end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 64 ms
+end conformToTemplate: 59 ms
 start delete half object (with object convert)
-end delete: 414 ms
+end delete: 392 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 8 ms
+end deleteOne: 11 ms
 returnsLength:1
+start add with serialKey
+end add with serialKey: 53 ms
+addedCount:100000
 ```
 
 ## 今後の予定について

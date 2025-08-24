@@ -10,8 +10,12 @@ import '../../delta_trace_db.dart';
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "7";
+  static const String version = "8";
   List<Map<String, dynamic>> _data = [];
+
+  /// A serial number is automatically assigned when a serial key is specified.
+  /// It is automatically incremented and saved as the DB status.
+  int _serialNum = 0;
 
   /// A set of callbacks to notify when linking with the UI, etc.
   Set<void Function()> listeners = {};
@@ -56,6 +60,7 @@ class Collection extends CloneableFile {
   /// * [src] : A dictionary made with toDict of this class.
   Collection.fromDict(Map<String, dynamic> src) {
     _data = (src["data"] as List).cast<Map<String, dynamic>>();
+    _serialNum = src.containsKey("serialNum") ? src["serialNum"] : 0;
   }
 
   @override
@@ -65,6 +70,7 @@ class Collection extends CloneableFile {
       "version": version,
       "data": (UtilCopy.jsonableDeepCopy(_data) as List)
           .cast<Map<String, dynamic>>(),
+      "serialNum": _serialNum,
     };
   }
 
@@ -139,7 +145,31 @@ class Collection extends CloneableFile {
   QueryResult<T> addAll<T>(Query q) {
     final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
         .cast<Map<String, dynamic>>();
-    _data.addAll(addData);
+    if (q.serialKey != null) {
+      // 対象キーの存在チェック
+      for (Map<String, dynamic> i in addData) {
+        if (!i.containsKey(q.serialKey!)) {
+          return QueryResult<T>(
+            isSuccess: false,
+            type: q.type,
+            result: [],
+            dbLength: _data.length,
+            updateCount: 0,
+            hitCount: 0,
+            errorMessage:
+                'The target serialKey does not exist. serialKey:${q.serialKey!}',
+          );
+        }
+      }
+      for (Map<String, dynamic> i in addData) {
+        final int serialNum = _serialNum;
+        i[q.serialKey!] = serialNum;
+        _serialNum++;
+        _data.add(i);
+      }
+    } else {
+      _data.addAll(addData);
+    }
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,

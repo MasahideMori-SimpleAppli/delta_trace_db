@@ -62,7 +62,7 @@ Here is an example of how to inherit ClonableFile.
 
 ```dart
 class User extends CloneableFile {
-  final String id;
+  final int id;
   final String name;
   final int age;
   final DateTime createdAt;
@@ -111,13 +111,13 @@ class User extends CloneableFile {
 final db = DeltaTraceDatabase();
 final now = DateTime.now();
 final users = [
-  User(id: '1',
+  User(id: -1, // Dummy Value
       name: 'Taro',
       age: 25,
       createdAt: now,
       updatedAt: now,
       nestedObj: {"a": "a"}),
-  User(id: '2',
+  User(id: -1,
       name: 'Jiro',
       age: 30,
       createdAt: now,
@@ -125,7 +125,8 @@ final users = [
       nestedObj: {"a": "b"}),
 ];
 
-final query = QueryBuilder.add(target: 'users', addData: users).build();
+// Here, you can specify a serial key to automatically assign an ID.
+final query = QueryBuilder.add(target: 'users', addData: users, serialKey: "id").build();
 // <User> here is not needed on the server.
 // This is a type specification for conversion processing when retrieving data.
 final result = db.executeQuery<User>(query);
@@ -299,7 +300,7 @@ so you will need to allocate additional memory for this.
     final db = DeltaTraceDatabase();
     List<User> users = [
       User(
-        id: '1',
+        id: 1,
         name: 'Taro',
         age: 25,
         createdAt: now.add(Duration(days: 0)),
@@ -307,7 +308,7 @@ so you will need to allocate additional memory for this.
         nestedObj: {},
       ),
       User(
-        id: '2',
+        id: 2,
         name: 'Jiro',
         age: 28,
         createdAt: now.add(Duration(days: 1)),
@@ -315,7 +316,7 @@ so you will need to allocate additional memory for this.
         nestedObj: {},
       ),
       User(
-        id: '3',
+        id: 3,
         name: 'Saburo',
         age: 31,
         createdAt: now.add(Duration(days: 2)),
@@ -323,7 +324,7 @@ so you will need to allocate additional memory for this.
         nestedObj: {},
       ),
       User(
-        id: '4',
+        id: 4,
         name: 'Hanako',
         age: 17,
         createdAt: now.add(Duration(days: 3)),
@@ -342,8 +343,8 @@ so you will need to allocate additional memory for this.
         QueryBuilder.update(
           target: 'users1',
           // type error
-          queryNode: FieldEquals("id", 3),
-          overrideData: {"id": 5},
+          queryNode: FieldEquals("id", "3"),
+          overrideData: {"id": "5"},
           returnData: true,
           mustAffectAtLeastOne: true,
         ).build(),
@@ -358,9 +359,9 @@ so you will need to allocate additional memory for this.
       queries: [
         QueryBuilder.update(
           target: 'users1',
-          queryNode: FieldEquals("id", "3"),
+          queryNode: FieldEquals("id", 3),
           // Be careful with the overriding type: This library allows overriding with other types.
-          overrideData: {"id": "5"},
+          overrideData: {"id": 5},
           returnData: true,
           mustAffectAtLeastOne: true,
         ).build(),
@@ -386,40 +387,43 @@ any problems in practical use.
 Please note that speeds also depend on the amount of data, so if you have a lot of large data, it will be slower.
 
 ```text
-speed test for 100000 records
+speed test for 100000 records                                                                                                                                                                      
 start add
-end add: 214 ms
+end add: 205 ms
 start getAll (with object convert)
-end getAll: 655 ms
+end getAll: 680 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 354 ms
+end save: 351 ms
 start load (with json string convert)
-end load: 263 ms
+end load: 247 ms
 start search (with object convert)
-end search: 763 ms
+end search: 777 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 430 ms
+end search paging: 450 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 527 ms
+end search paging by obj: 524 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 447 ms
+end search paging by offset: 457 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 30 ms
+end update: 24 ms
 start updateOne of half index object
-end updateOne: 12 ms
+end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 64 ms
+end conformToTemplate: 59 ms
 start delete half object (with object convert)
-end delete: 414 ms
+end delete: 392 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 8 ms
+end deleteOne: 11 ms
 returnsLength:1
+start add with serialKey
+end add with serialKey: 53 ms
+addedCount:100000
 ```
 
 ## Future plans

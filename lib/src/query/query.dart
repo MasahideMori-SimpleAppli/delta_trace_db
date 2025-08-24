@@ -14,7 +14,7 @@ import '../../delta_trace_db.dart';
 /// そのログは完全なDB操作の履歴になります。
 class Query extends CloneableFile {
   static const String className = "Query";
-  static const String version = "3";
+  static const String version = "4";
 
   String target;
   EnumQueryType type;
@@ -31,6 +31,7 @@ class Query extends CloneableFile {
   int? limit;
   bool returnData;
   bool mustAffectAtLeastOne;
+  String? serialKey;
   Cause? cause;
 
   /// Note: I recommend not using this class as is,
@@ -91,6 +92,11 @@ class Query extends CloneableFile {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// Note that only variables directly under the class can be specified as
+  /// keys, not nested fields.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -113,6 +119,7 @@ class Query extends CloneableFile {
     this.limit,
     this.returnData = false,
     this.mustAffectAtLeastOne = true,
+    this.serialKey,
     this.cause,
   });
 
@@ -144,6 +151,7 @@ class Query extends CloneableFile {
       limit: src["limit"],
       returnData: src["returnData"],
       mustAffectAtLeastOne: src["mustAffectAtLeastOne"],
+      serialKey: src.containsKey("serialKey") ? src["serialKey"] : null,
       cause: src["cause"] != null ? Cause.fromDict(src["cause"]) : null,
     );
   }
@@ -171,6 +179,7 @@ class Query extends CloneableFile {
       "limit": limit,
       "returnData": returnData,
       "mustAffectAtLeastOne": mustAffectAtLeastOne,
+      "serialKey": serialKey,
       "cause": cause?.toDict(),
     };
   }

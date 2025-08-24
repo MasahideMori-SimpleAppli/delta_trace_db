@@ -15,6 +15,11 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// Note that only variables directly under the class can be specified as
+  /// keys, not nested fields.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -25,6 +30,7 @@ class RawQueryBuilder extends QueryBuilder {
     required super.target,
     required List<Map<String, dynamic>> rawAddData,
     super.mustAffectAtLeastOne,
+    super.serialKey,
     super.cause,
   }) : this.rawAddData = rawAddData,
        super.add(addData: []);
@@ -270,19 +276,25 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// Note that only variables directly under the class can be specified as
+  /// keys, not nested fields.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
   /// program autonomously using artificial intelligence.
   /// By saving the entire query including this as a log,
   /// the DB history is recorded.
-  RawQueryBuilder.clearAddAll({
+  RawQueryBuilder.clearAdd({
     required super.target,
     required List<Map<String, dynamic>> rawAddData,
     super.mustAffectAtLeastOne,
+    super.serialKey,
     super.cause,
   }) : this.rawAddData = rawAddData,
-       super.clearAddAll(addData: []);
+       super.clearAdd(addData: []);
 
   /// (en) Commit the content and convert it into a query object.
   ///
@@ -304,6 +316,7 @@ class RawQueryBuilder extends QueryBuilder {
       limit: limit,
       returnData: returnData,
       mustAffectAtLeastOne: mustAffectAtLeastOne,
+      serialKey: serialKey,
       cause: cause,
     );
   }

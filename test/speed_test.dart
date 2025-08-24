@@ -84,6 +84,24 @@ class User2 extends CloneableFile {
   }
 }
 
+class Item1 extends CloneableFile {
+  String name;
+  int? serialKey;
+
+  Item1({required this.name, this.serialKey});
+
+  static Item1 fromDict(Map<String, dynamic> src) =>
+      Item1(serialKey: src['serialKey'], name: src['name']);
+
+  @override
+  Map<String, dynamic> toDict() => {'serialKey': serialKey, 'name': name};
+
+  @override
+  Item1 clone() {
+    return Item1.fromDict(toDict());
+  }
+}
+
 void main() {
   test('speed test', () {
     final int recordsCount = 100000;
@@ -299,5 +317,21 @@ void main() {
       "end deleteOne: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
     print("returnsLength:${r7.result.length}");
+
+    // add with serialKey.
+    List<Item1> items = [];
+    for (int i = 0; i < recordsCount; i++) {
+      items.add(Item1(name: i.toString()));
+    }
+    final Query q8 = QueryBuilder.add(target: 'items', addData: items).build();
+    print("start add with serialKey");
+    dt1 = DateTime.now();
+    final QueryResult<Item1> r8 = db.executeQuery<Item1>(q8);
+    dt2 = DateTime.now();
+    print(
+      "end add with serialKey: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
+    );
+    expect(r8.isSuccess, true);
+    print("addedCount:" + r8.dbLength.toString());
   });
 }

@@ -114,6 +114,24 @@ class User3 extends CloneableFile {
   }
 }
 
+class Item1 extends CloneableFile {
+  String name;
+  int? serialKey;
+
+  Item1({required this.name, this.serialKey});
+
+  static Item1 fromDict(Map<String, dynamic> src) =>
+      Item1(serialKey: src['serialKey'], name: src['name']);
+
+  @override
+  Map<String, dynamic> toDict() => {'serialKey': serialKey, 'name': name};
+
+  @override
+  Item1 clone() {
+    return Item1.fromDict(toDict());
+  }
+}
+
 void main() {
   test('DB basic operation test', () {
     final now = DateTime.now();
@@ -160,7 +178,7 @@ void main() {
     expect(r1.dbLength == 4, true);
 
     // clearAdd
-    final Query q1ex = QueryBuilder.clearAddAll(
+    final Query q1ex = QueryBuilder.clearAdd(
       target: 'users',
       addData: users,
     ).build();
@@ -607,5 +625,40 @@ void main() {
     ).build();
     expect(Query.fromDict(q1.toDict()).sortObj is SingleSort, true);
     expect(Query.fromDict(q2.toDict()).sortObj is MultiSort, true);
+  });
+
+  test('add test with serialKey', () {
+    // データベース作成とデータ追加
+    DeltaTraceDatabase db = DeltaTraceDatabase();
+    // add
+    final Query q1 = QueryBuilder.add(
+      target: 'items',
+      addData: [
+        Item1(name: "itemA"),
+        Item1(name: "itemB"),
+      ],
+      serialKey: "serialKey",
+    ).build();
+    final QueryResult<User> r1 = db.executeQuery<User>(q1);
+    expect(r1.isSuccess, true);
+    // シリアルキーが付与されているかのチェック
+    expect(db.collection("items").raw[0]["serialKey"] == 0, true);
+    expect(db.collection("items").raw[1]["serialKey"] == 1, true);
+    // シリアライズ・デシリアライズでの復元チェック。
+    db = DeltaTraceDatabase.fromDict(db.toDict());
+    // add
+    final Query q2 = QueryBuilder.add(
+      target: 'items',
+      addData: [
+        Item1(name: "itemC"),
+        Item1(name: "itemD"),
+      ],
+      serialKey: "serialKey",
+    ).build();
+    final QueryResult<User> r2 = db.executeQuery<User>(q2);
+    expect(r2.isSuccess, true);
+    // シリアルキーが付与されているかのチェック
+    expect(db.collection("items").raw[2]["serialKey"] == 2, true);
+    expect(db.collection("items").raw[3]["serialKey"] == 3, true);
   });
 }
