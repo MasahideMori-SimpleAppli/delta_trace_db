@@ -579,10 +579,33 @@ class Collection extends CloneableFile {
   QueryResult<T> clearAdd<T>(Query q) {
     final int preLen = _data.length;
     _data.clear();
-    _data.addAll(
-      (UtilCopy.jsonableDeepCopy(q.addData!) as List)
-          .cast<Map<String, dynamic>>(),
-    );
+    final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
+        .cast<Map<String, dynamic>>();
+    if (q.serialKey != null) {
+      // 対象キーの存在チェック
+      for (Map<String, dynamic> i in addData) {
+        if (!i.containsKey(q.serialKey!)) {
+          return QueryResult<T>(
+            isSuccess: false,
+            type: q.type,
+            result: [],
+            dbLength: _data.length,
+            updateCount: 0,
+            hitCount: 0,
+            errorMessage:
+                'The target serialKey does not exist. serialKey:${q.serialKey!}',
+          );
+        }
+      }
+      for (Map<String, dynamic> i in addData) {
+        final int serialNum = _serialNum;
+        i[q.serialKey!] = serialNum;
+        _serialNum++;
+        _data.add(i);
+      }
+    } else {
+      _data.addAll(addData);
+    }
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
