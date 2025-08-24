@@ -323,7 +323,11 @@ void main() {
     for (int i = 0; i < recordsCount; i++) {
       items.add(Item1(name: i.toString()));
     }
-    final Query q8 = QueryBuilder.add(target: 'items', addData: items).build();
+    final Query q8 = QueryBuilder.add(
+      target: 'items',
+      addData: items,
+      serialKey: "serialKey",
+    ).build();
     print("start add with serialKey");
     dt1 = DateTime.now();
     final QueryResult<Item1> r8 = db.executeQuery<Item1>(q8);

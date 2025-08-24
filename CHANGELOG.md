@@ -1,3 +1,7 @@
+## 0.0.23
+
+* Bugfix of speed test.
+
 ## 0.0.22
 
 * The serialKey parameter has been added to Query(add, clearAdd).

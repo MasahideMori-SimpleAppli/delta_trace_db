@@ -387,42 +387,42 @@ any problems in practical use.
 Please note that speeds also depend on the amount of data, so if you have a lot of large data, it will be slower.
 
 ```text
-speed test for 100000 records                                                                                                                                                                      
+speed test for 100000 records
 start add
-end add: 205 ms
+end add: 190 ms
 start getAll (with object convert)
-end getAll: 680 ms
+end getAll: 696 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 351 ms
+end save: 355 ms
 start load (with json string convert)
-end load: 247 ms
+end load: 269 ms
 start search (with object convert)
-end search: 777 ms
+end search: 759 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 450 ms
+end search paging: 445 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 524 ms
+end search paging by obj: 535 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 457 ms
+end search paging by offset: 440 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 24 ms
+end update: 28 ms
 start updateOne of half index object
-end updateOne: 8 ms
+end updateOne: 10 ms
 start conformToTemplate
-end conformToTemplate: 59 ms
+end conformToTemplate: 63 ms
 start delete half object (with object convert)
-end delete: 392 ms
+end delete: 395 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 11 ms
+end deleteOne: 15 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 53 ms
+end add with serialKey: 68 ms
 addedCount:100000
 ```
 
