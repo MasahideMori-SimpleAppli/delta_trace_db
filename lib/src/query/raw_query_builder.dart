@@ -258,6 +258,8 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [resetSerial] : If true, resets the managed serial number to 0 on
+  /// a clear or clearAdd query.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -267,6 +269,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.clear({
     required super.target,
     super.mustAffectAtLeastOne,
+    super.resetSerial,
     super.cause,
   }) : super.clear();
 
@@ -281,6 +284,8 @@ class RawQueryBuilder extends QueryBuilder {
   /// This value is unique per collection.
   /// Note that only variables directly under the class can be specified as
   /// keys, not nested fields.
+  /// * [resetSerial] : If true, resets the managed serial number to 0 on
+  /// a clear or clearAdd query.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -292,6 +297,7 @@ class RawQueryBuilder extends QueryBuilder {
     required List<Map<String, dynamic>> rawAddData,
     super.mustAffectAtLeastOne,
     super.serialKey,
+    super.resetSerial,
     super.cause,
   }) : this.rawAddData = rawAddData,
        super.clearAdd(addData: []);

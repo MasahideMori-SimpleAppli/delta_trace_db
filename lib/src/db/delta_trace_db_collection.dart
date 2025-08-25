@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "8";
+  static const String version = "9";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.
@@ -556,6 +556,9 @@ class Collection extends CloneableFile {
   QueryResult<T> clear<T>(Query q) {
     final int preLen = _data.length;
     _data.clear();
+    if (q.resetSerial) {
+      _serialNum = 0;
+    }
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
@@ -579,6 +582,9 @@ class Collection extends CloneableFile {
   QueryResult<T> clearAdd<T>(Query q) {
     final int preLen = _data.length;
     _data.clear();
+    if (q.resetSerial) {
+      _serialNum = 0;
+    }
     final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
         .cast<Map<String, dynamic>>();
     if (q.serialKey != null) {

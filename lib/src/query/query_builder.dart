@@ -22,6 +22,7 @@ class QueryBuilder {
   bool returnData = false;
   bool mustAffectAtLeastOne = true;
   String? serialKey;
+  bool resetSerial = false;
   Cause? cause;
 
   /// * [target] : The collection name in DB.
@@ -288,6 +289,8 @@ class QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
+  /// * [resetSerial] : If true, resets the managed serial number to 0 on
+  /// a clear or clearAdd query.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -297,6 +300,7 @@ class QueryBuilder {
   QueryBuilder.clear({
     required this.target,
     this.mustAffectAtLeastOne = true,
+    this.resetSerial = false,
     this.cause,
   }) : type = EnumQueryType.clear;
 
@@ -313,6 +317,8 @@ class QueryBuilder {
   /// This value is unique per collection.
   /// Note that only variables directly under the class can be specified as
   /// keys, not nested fields.
+  /// * [resetSerial] : If true, resets the managed serial number to 0 on
+  /// a clear or clearAdd query.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -324,6 +330,7 @@ class QueryBuilder {
     required List<CloneableFile> addData,
     this.mustAffectAtLeastOne = true,
     this.serialKey,
+    this.resetSerial = false,
     this.cause,
   }) : this.addData = addData,
        type = EnumQueryType.clearAdd;
@@ -357,6 +364,7 @@ class QueryBuilder {
       returnData: returnData,
       mustAffectAtLeastOne: mustAffectAtLeastOne,
       serialKey: serialKey,
+      resetSerial: resetSerial,
       cause: cause,
     );
   }

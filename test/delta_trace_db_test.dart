@@ -639,7 +639,7 @@ void main() {
       ],
       serialKey: "serialKey",
     ).build();
-    final QueryResult<User> r1 = db.executeQuery<User>(q1);
+    final QueryResult<Item1> r1 = db.executeQuery<Item1>(q1);
     expect(r1.isSuccess, true);
     // シリアルキーが付与されているかのチェック
     expect(db.collection("items").raw[0]["serialKey"] == 0, true);
@@ -655,10 +655,42 @@ void main() {
       ],
       serialKey: "serialKey",
     ).build();
-    final QueryResult<User> r2 = db.executeQuery<User>(q2);
+    final QueryResult<Item1> r2 = db.executeQuery<Item1>(q2);
     expect(r2.isSuccess, true);
     // シリアルキーが付与されているかのチェック
     expect(db.collection("items").raw[2]["serialKey"] == 2, true);
     expect(db.collection("items").raw[3]["serialKey"] == 3, true);
+    // clear and add
+    final Query q3 = QueryBuilder.clearAdd(
+      target: 'items',
+      addData: [
+        Item1(name: "itemA"),
+        Item1(name: "itemB"),
+      ],
+      serialKey: "serialKey",
+    ).build();
+    final QueryResult<Item1> r3 = db.executeQuery<Item1>(q3);
+    expect(r3.isSuccess, true);
+    // シリアルキーが付与されているかのチェック
+    expect(r3.dbLength == 2, true);
+    expect(db.collection("items").length == 2, true);
+    expect(db.collection("items").raw[0]["serialKey"] == 4, true);
+    expect(db.collection("items").raw[1]["serialKey"] == 5, true);
+    final Query q4 = QueryBuilder.clearAdd(
+      target: 'items',
+      addData: [
+        Item1(name: "itemA"),
+        Item1(name: "itemB"),
+      ],
+      serialKey: "serialKey",
+      resetSerial: true,
+    ).build();
+    final QueryResult<Item1> r4 = db.executeQuery<Item1>(q4);
+    expect(r4.isSuccess, true);
+    // シリアルキーがリセット後に付与されているかのチェック
+    expect(r4.dbLength == 2, true);
+    expect(db.collection("items").length == 2, true);
+    expect(db.collection("items").raw[0]["serialKey"] == 0, true);
+    expect(db.collection("items").raw[1]["serialKey"] == 1, true);
   });
 }
