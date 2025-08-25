@@ -41,6 +41,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// comparison_node.dart.
   /// * [overrideData] : This is not a serialized version of the full class,
   /// but a dictionary containing only the parameters you want to update.
+  /// The parameters directly below will be updated.
+  /// For example, if the original data is {"a": 0, "b": {"c": 1}},
+  /// and you update it by data of {"b": {"d": 2}},
+  /// the result will be {"a": 0, "b": {"d": 2}}.
   /// * [returnData] : If true, return the changed objs.
   /// * [sortObj] : An object for sorting the search return values.
   /// SingleSort or MultiSort can be used.
@@ -72,6 +76,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// comparison_node.dart.
   /// * [overrideData] : This is not a serialized version of the full class,
   /// but a dictionary containing only the parameters you want to update.
+  /// The parameters directly below will be updated.
+  /// For example, if the original data is {"a": 0, "b": {"c": 1}},
+  /// and you update it by data of {"b": {"d": 2}},
+  /// the result will be {"a": 0, "b": {"d": 2}}.
   /// * [returnData] : If true, return the changed objs.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.

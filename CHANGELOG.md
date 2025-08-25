@@ -1,3 +1,10 @@
+## 0.0.26
+
+* Several methods in the DeltaTraceDatabase class now have an allows parameter to grant permission
+  to execute queries.
+* When sorting, you can now convert to a specified type.
+* The code documentation has been improved.
+
 ## 0.0.25
 
 * Updated document in code.
@@ -20,7 +27,8 @@
 
 ## 0.0.20
 
-* When executing a query, users can now specify which queries are explicitly disallowed via optional arguments.
+* When executing a query, users can now specify which queries are explicitly disallowed via optional
+  arguments.
 
 ## 0.0.19
 
@@ -28,16 +36,19 @@
 
 ## 0.0.18
 
-* Fixed a bug where specifying an endBefore in a search query would result in unexpected behavior if user accidentally specified an offset or startAfter, which are not actually required.
+* Fixed a bug where specifying an endBefore in a search query would result in unexpected behavior if
+  user accidentally specified an offset or startAfter, which are not actually required.
 
 ## 0.0.17
 
 * The speed test code was out of date so I updated it.
-* The new test stores dates and times in the more commonly used ISO 8601 format, which means the amount of data increases and the test takes longer.
+* The new test stores dates and times in the more commonly used ISO 8601 format, which means the
+  amount of data increases and the test takes longer.
 
 ## 0.0.16
 
-* Improved type safety when using QueryBuilder and RawQueryBuilder. The conformToTemplate method now takes a Map as an argument.
+* Improved type safety when using QueryBuilder and RawQueryBuilder. The conformToTemplate method now
+  takes a Map as an argument.
 
 ## 0.0.15
 

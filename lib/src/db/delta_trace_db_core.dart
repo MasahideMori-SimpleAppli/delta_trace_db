@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "7";
+  static const String version = "8";
 
   late final Map<String, Collection> _collections;
 
@@ -206,24 +206,35 @@ class DeltaTraceDatabase extends CloneableFile {
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
   ///
   /// * [query] : Query、TransactionQuery、Map\<String, dynamic\>のいずれか。
-  /// * [prohibit] : Specifies the query type that should not be executed.
+  /// * [prohibit] : It is invalid when it is null.
+  /// Specifies the query type that should not be executed.
   /// If you try to process a query of the type specified here,
   /// false will be returned in QueryResult.
+  /// * [allows] : It is invalid when it is null.
+  /// Only calls of the specified type are allowed.
+  /// If you attempt to process a query of a type not specified here,
+  /// the QueryResult will return false.
   QueryExecutionResult executeQueryObject(
     Object query, {
     List<EnumQueryType>? prohibit,
+    List<EnumQueryType>? allows,
   }) {
     if (query is Query) {
-      return executeQuery(query, prohibit: prohibit);
+      return executeQuery(query, prohibit: prohibit, allows: allows);
     } else if (query is TransactionQuery) {
-      return executeTransactionQuery(query, prohibit: prohibit);
+      return executeTransactionQuery(query, prohibit: prohibit, allows: allows);
     } else if (query is Map<String, dynamic>) {
       if (query["className"] == "Query") {
-        return executeQuery(Query.fromDict(query), prohibit: prohibit);
+        return executeQuery(
+          Query.fromDict(query),
+          prohibit: prohibit,
+          allows: allows,
+        );
       } else if (query["className"] == "TransactionQuery") {
         return executeTransactionQuery(
           TransactionQuery.fromDict(query),
           prohibit: prohibit,
+          allows: allows,
         );
       } else {
         throw ArgumentError("Unsupported query class: ${query["className"]}");
@@ -243,13 +254,36 @@ class DeltaTraceDatabase extends CloneableFile {
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
   ///
   /// * [q] : The query.
-  /// * [prohibit] : Specifies the query type that should not be executed.
+  /// * [prohibit] : It is invalid when it is null.
+  /// Specifies the query type that should not be executed.
   /// If you try to process a query of the type specified here,
   /// false will be returned in QueryResult.
-  QueryResult<T> executeQuery<T>(Query q, {List<EnumQueryType>? prohibit}) {
+  /// * [allows] : It is invalid when it is null.
+  /// Only calls of the specified type are allowed.
+  /// If you attempt to process a query of a type not specified here,
+  /// the QueryResult will return false.
+  QueryResult<T> executeQuery<T>(
+    Query q, {
+    List<EnumQueryType>? prohibit,
+    List<EnumQueryType>? allows,
+  }) {
     // prohibitのチェック。
     if (prohibit != null) {
       if (prohibit.contains(q.type)) {
+        return QueryResult<T>(
+          isSuccess: false,
+          type: q.type,
+          result: [],
+          dbLength: -1,
+          updateCount: 0,
+          hitCount: 0,
+          errorMessage: "Operation not permitted.",
+        );
+      }
+    }
+    // allowsのチェック。
+    if (allows != null) {
+      if (!allows.contains(q.type)) {
         return QueryResult<T>(
           isSuccess: false,
           type: q.type,
@@ -362,12 +396,18 @@ class DeltaTraceDatabase extends CloneableFile {
   /// リスナーのコールバックがあれば起動し、失敗の場合はなにもしません。
   ///
   /// * [q] : The query.
-  /// * [prohibit] : Specifies the query type that should not be executed.
+  /// * [prohibit] : It is invalid when it is null.
+  /// Specifies the query type that should not be executed.
   /// If you try to process a query of the type specified here,
   /// false will be returned in QueryResult.
+  /// * [allows] : It is invalid when it is null.
+  /// Only calls of the specified type are allowed.
+  /// If you attempt to process a query of a type not specified here,
+  /// the QueryResult will return false.
   TransactionQueryResult<T> executeTransactionQuery<T>(
     TransactionQuery q, {
     List<EnumQueryType>? prohibit,
+    List<EnumQueryType>? allows,
   }) {
     List<QueryResult> rq = [];
     try {
@@ -385,7 +425,7 @@ class DeltaTraceDatabase extends CloneableFile {
       // クエリを実行します。
       try {
         for (Query i in q.queries) {
-          rq.add(executeQuery(i, prohibit: prohibit));
+          rq.add(executeQuery(i, prohibit: prohibit, allows: allows));
         }
       } catch (e) {
         // エラーの場合は全ての変更を元に戻し、エラー扱いにします。

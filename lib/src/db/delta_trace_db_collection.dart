@@ -184,9 +184,17 @@ class Collection extends CloneableFile {
   /// (en) Updates the contents of all objects that match the query.
   /// Only provided parameters will be overwritten;
   /// unprovided parameters will remain unchanged.
+  /// The parameters directly below will be updated.
+  /// For example, if the original data is {"a": 0, "b": {"c": 1}},
+  /// and you update it by data of {"b": {"d": 2}},
+  /// the result will be {"a": 0, "b": {"d": 2}}.
   ///
   /// (ja) クエリーにマッチする全てのオブジェクトの内容を更新します。
   /// 与えたパラメータのみが上書き対象になり、与えなかったパラメータは変化しません。
+  /// 直下のパラメータが更新対象になるため、
+  /// 例えば元のデータが {"a" : 0 , "b" : {"c" : 1} }の場合に、
+  /// {"b" : {"d" : 2} }で更新すると、
+  /// 結果は {"a" : 0, "b" : {"d" : 2} } になります。
   ///
   /// * [q] : The query.
   /// * [isSingleTarget] : If true, the target is single object.
