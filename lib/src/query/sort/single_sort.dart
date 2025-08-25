@@ -108,11 +108,9 @@ class SingleSort extends CloneableFile implements AbstractSort {
   @override
   Comparator<Map<String, dynamic>> getComparator() {
     return (Map<String, dynamic> a, Map<String, dynamic> b) {
-      dynamic aValue = UtilField.getNestedFieldValue(a, field);
-      dynamic bValue = UtilField.getNestedFieldValue(b, field);
       // 型変換を適用
-      aValue = _convertValue(aValue);
-      bValue = _convertValue(bValue);
+      final aValue = _convertValue(UtilField.getNestedFieldValue(a, field));
+      final bValue = _convertValue(UtilField.getNestedFieldValue(b, field));
       // null値対応用の処理。
       // 両方nullなら同等
       if (aValue == null && bValue == null) return 0;
@@ -133,8 +131,8 @@ class SingleSort extends CloneableFile implements AbstractSort {
           break;
         default:
           if (aValue is bool && bValue is bool) {
-            int aInt = aValue ? 1 : 0;
-            int bInt = bValue ? 1 : 0;
+            final int aInt = aValue ? 1 : 0;
+            final int bInt = bValue ? 1 : 0;
             result = aInt.compareTo(bInt);
           } else if (aValue is Comparable && bValue is Comparable) {
             if (aValue.runtimeType != bValue.runtimeType) {
