@@ -205,7 +205,7 @@ class DeltaTraceDatabase extends CloneableFile {
   /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
   ///
-  /// * [query] : Query、TransactionQuery、Map<String, dynamic>のいずれか。
+  /// * [query] : Query、TransactionQuery、Map\<String, dynamic\>のいずれか。
   /// * [prohibit] : Specifies the query type that should not be executed.
   /// If you try to process a query of the type specified here,
   /// false will be returned in QueryResult.

@@ -1,3 +1,7 @@
+## 0.0.25
+
+* Updated document in code.
+
 ## 0.0.24
 
 * Added reset serial option to the clear and clearAdd queries.
