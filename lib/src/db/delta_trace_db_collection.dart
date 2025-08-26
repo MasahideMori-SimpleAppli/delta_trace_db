@@ -145,6 +145,7 @@ class Collection extends CloneableFile {
   QueryResult<T> addAll<T>(Query q) {
     final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
         .cast<Map<String, dynamic>>();
+    List<Map<String, dynamic>> addedItems = [];
     if (q.serialKey != null) {
       // 対象キーの存在チェック
       for (Map<String, dynamic> i in addData) {
@@ -166,15 +167,22 @@ class Collection extends CloneableFile {
         i[q.serialKey!] = serialNum;
         _serialNum++;
         _data.add(i);
+        if (q.returnData) {
+          addedItems.add(i);
+        }
       }
     } else {
       _data.addAll(addData);
+      if (q.returnData) {
+        addedItems.addAll(addData);
+      }
     }
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
       type: q.type,
-      result: [],
+      result: (UtilCopy.jsonableDeepCopy(addedItems) as List)
+          .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
       updateCount: addData.length,
       hitCount: 0,
@@ -593,6 +601,7 @@ class Collection extends CloneableFile {
     if (q.resetSerial) {
       _serialNum = 0;
     }
+    List<Map<String, dynamic>> addedItems = [];
     final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
         .cast<Map<String, dynamic>>();
     if (q.serialKey != null) {
@@ -616,15 +625,22 @@ class Collection extends CloneableFile {
         i[q.serialKey!] = serialNum;
         _serialNum++;
         _data.add(i);
+        if (q.returnData) {
+          addedItems.add(i);
+        }
       }
     } else {
       _data.addAll(addData);
+      if (q.returnData) {
+        addedItems.addAll(addData);
+      }
     }
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
       type: q.type,
-      result: [],
+      result: (UtilCopy.jsonableDeepCopy(addedItems) as List)
+          .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
       updateCount: preLen,
       hitCount: preLen,

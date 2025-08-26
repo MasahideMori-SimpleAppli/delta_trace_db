@@ -7,6 +7,7 @@ export 'src/query/cause/temporal_trace/timestamp_node.dart';
 export 'src/query/cause/actor.dart';
 export 'src/query/cause/cause.dart';
 export 'src/query/cause/enum_actor_type.dart';
+export 'src/query/cause/permission.dart';
 
 export 'src/query/nodes/comparison_node.dart';
 export 'src/query/nodes/enum_node_type.dart';

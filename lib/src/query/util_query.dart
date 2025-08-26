@@ -24,4 +24,33 @@ class UtilQuery {
       throw ArgumentError("Unsupported object");
     }
   }
+
+  /// (en) Checks the collection operation permissions for the target query and
+  /// returns true if there are no problems.
+  ///
+  /// (ja) 対象クエリに関するコレクションの操作権限をチェックし、問題なければtrueを返します。
+  ///
+  /// * [q] : The query you want to look up.
+  /// * [collectionPermissions] : The permissions of the user performing
+  /// this operation.
+  /// Use null on the frontend, if this is null then everything is allowed.
+  static bool checkPermissions(
+    Query q,
+    Map<String, Permission>? collectionPermissions,
+  ) {
+    if (collectionPermissions == null) {
+      return true;
+    } else {
+      if (!collectionPermissions.containsKey(q.target)) {
+        return false;
+      } else {
+        // allowsのチェック。
+        final Permission p = collectionPermissions[q.target]!;
+        if (p.allows.contains(q.type)) {
+          return true;
+        }
+        return false;
+      }
+    }
+  }
 }

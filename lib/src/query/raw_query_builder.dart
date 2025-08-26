@@ -11,6 +11,9 @@ class RawQueryBuilder extends QueryBuilder {
 
   /// * [target] : The collection name in DB.
   /// * [rawAddData] : Data specified when performing an add operation.
+  /// * [returnData] : If true, return the changed objs.
+  /// If serialKey is set, the object will be returned with
+  /// the serial number added.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -29,6 +32,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.add({
     required super.target,
     required List<Map<String, dynamic>> rawAddData,
+    super.returnData = false,
     super.mustAffectAtLeastOne,
     super.serialKey,
     super.cause,
@@ -64,7 +68,7 @@ class RawQueryBuilder extends QueryBuilder {
     required super.target,
     required super.queryNode,
     required super.overrideData,
-    required super.returnData,
+    super.returnData = false,
     super.sortObj,
     super.mustAffectAtLeastOne,
     super.cause,
@@ -95,7 +99,7 @@ class RawQueryBuilder extends QueryBuilder {
     required super.target,
     required super.queryNode,
     required super.overrideData,
-    required super.returnData,
+    super.returnData = false,
     super.mustAffectAtLeastOne,
     super.cause,
   }) : super.updateOne();
@@ -120,7 +124,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.delete({
     required super.target,
     required super.queryNode,
-    required super.returnData,
+    super.returnData = false,
     super.sortObj,
     super.mustAffectAtLeastOne,
     super.cause,
@@ -144,7 +148,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.deleteOne({
     required super.target,
     required super.queryNode,
-    required super.returnData,
+    super.returnData = false,
     super.mustAffectAtLeastOne = true,
     super.cause,
   }) : super.deleteOne();
@@ -247,7 +251,7 @@ class RawQueryBuilder extends QueryBuilder {
     required super.target,
     required super.renameBefore,
     required super.renameAfter,
-    required super.returnData,
+    super.returnData = false,
     super.mustAffectAtLeastOne,
     super.cause,
   }) : super.renameField();
@@ -283,6 +287,9 @@ class RawQueryBuilder extends QueryBuilder {
 
   /// * [target] : The collection name in DB.
   /// * [rawAddData] : Data specified when performing an add operation.
+  /// * [returnData] : If true, return the changed objs.
+  /// If serialKey is set, the object will be returned with
+  /// the serial number added.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -303,6 +310,7 @@ class RawQueryBuilder extends QueryBuilder {
   RawQueryBuilder.clearAdd({
     required super.target,
     required List<Map<String, dynamic>> rawAddData,
+    super.returnData = false,
     super.mustAffectAtLeastOne,
     super.serialKey,
     super.resetSerial,

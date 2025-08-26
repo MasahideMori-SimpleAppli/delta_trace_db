@@ -476,6 +476,9 @@ void main() {
           "1",
           ["tester"],
           ["users:write:all"],
+          collectionPermissions: {
+            "users": Permission([EnumQueryType.add]),
+          },
           context: {"otherData": "test"},
         ),
         when: TemporalTrace(

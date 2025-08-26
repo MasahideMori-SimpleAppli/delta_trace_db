@@ -29,6 +29,9 @@ class QueryBuilder {
   /// * [addData] : Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
   /// a subclass of ClonableFile.
+  /// * [returnData] : If true, return the changed objs.
+  /// If serialKey is set, the object will be returned with
+  /// the serial number added.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -47,6 +50,7 @@ class QueryBuilder {
   QueryBuilder.add({
     required this.target,
     required List<CloneableFile> addData,
+    this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.serialKey,
     this.cause,
@@ -82,7 +86,7 @@ class QueryBuilder {
     required this.target,
     required QueryNode queryNode,
     required Map<String, dynamic> overrideData,
-    required this.returnData,
+    this.returnData = false,
     this.sortObj,
     this.mustAffectAtLeastOne = true,
     this.cause,
@@ -115,7 +119,7 @@ class QueryBuilder {
     required this.target,
     required QueryNode queryNode,
     required Map<String, dynamic> overrideData,
-    required this.returnData,
+    this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.cause,
   }) : this.queryNode = queryNode,
@@ -142,7 +146,7 @@ class QueryBuilder {
   QueryBuilder.delete({
     required this.target,
     required QueryNode queryNode,
-    required this.returnData,
+    this.returnData = false,
     this.sortObj,
     this.mustAffectAtLeastOne = true,
     this.cause,
@@ -167,7 +171,7 @@ class QueryBuilder {
   QueryBuilder.deleteOne({
     required this.target,
     required QueryNode queryNode,
-    required this.returnData,
+    this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.cause,
   }) : this.queryNode = queryNode,
@@ -275,7 +279,7 @@ class QueryBuilder {
     required this.target,
     required String renameBefore,
     required String renameAfter,
-    required this.returnData,
+    this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.cause,
   }) : this.renameBefore = renameBefore,
@@ -316,6 +320,9 @@ class QueryBuilder {
   /// * [addData] : Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
   /// a subclass of ClonableFile.
+  /// * [returnData] : If true, return the changed objs.
+  /// If serialKey is set, the object will be returned with
+  /// the serial number added.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -336,6 +343,7 @@ class QueryBuilder {
   QueryBuilder.clearAdd({
     required this.target,
     required List<CloneableFile> addData,
+    this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.serialKey,
     this.resetSerial = false,

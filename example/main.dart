@@ -2,7 +2,7 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 
 class User extends CloneableFile {
-  final String id;
+  final int id;
   final String name;
   final int age;
   final DateTime createdAt;
@@ -53,7 +53,8 @@ void main() async {
     target: 'users',
     addData: [
       User(
-        id: '1',
+        id: -1,
+        // dummy value
         name: 'sampleA',
         age: 25,
         createdAt: now,
@@ -61,7 +62,7 @@ void main() async {
         nestedObj: {"a": "test", "b": 1},
       ),
       User(
-        id: '2',
+        id: -1,
         name: 'sampleB',
         age: 28,
         createdAt: now,
@@ -69,7 +70,7 @@ void main() async {
         nestedObj: {"a": "test", "b": 1},
       ),
       User(
-        id: '3',
+        id: -1,
         name: 'sampleC',
         age: 31,
         createdAt: now,
@@ -77,7 +78,7 @@ void main() async {
         nestedObj: {"a": "text", "b": 2},
       ),
       User(
-        id: '4',
+        id: -1,
         name: 'sampleD',
         age: 17,
         createdAt: now,
@@ -85,6 +86,8 @@ void main() async {
         nestedObj: {"a": "text", "b": 3},
       ),
     ],
+    // auto set User.id to serial number from 0 to int.max.
+    serialKey: "id",
   ).build();
   // If the query is processed on the server, it can be serialized.
   // final jsonMap = q1.toDict();
