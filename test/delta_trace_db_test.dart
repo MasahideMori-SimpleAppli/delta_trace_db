@@ -471,6 +471,7 @@ void main() {
       ],
       cause: Cause(
         serial: "1",
+        chainParentSerial: "1",
         who: Actor(
           EnumActorType.system,
           "1",
@@ -487,6 +488,8 @@ void main() {
         what: "The test of serialize and deserialize.",
         why: "test",
         from: "test",
+        context: {"test": "test"},
+        confidenceScore: 1.0,
       ),
     ).build();
     // json convert test
