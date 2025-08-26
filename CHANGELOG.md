@@ -1,3 +1,7 @@
+## 0.0.29
+
+* Fixed a bug where Actor class comparisons ignored element order.
+
 ## 0.0.28
 
 * Fixed an issue where internal class version number changes were missing.

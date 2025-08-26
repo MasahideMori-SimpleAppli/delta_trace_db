@@ -8,7 +8,7 @@ import '../../../delta_trace_db.dart';
 /// (ja) データベースの操作をリクエストした者の情報を定義するクラスです。
 class Actor extends CloneableFile {
   static const String className = "Actor";
-  static const String version = "2";
+  static const String version = "3";
   final EnumActorType type;
   final String id;
 
@@ -102,8 +102,8 @@ class Actor extends CloneableFile {
     if (other is Actor) {
       return type == other.type &&
           id == other.id &&
-          UnorderedIterableEquality().equals(roles, other.roles) &&
-          UnorderedIterableEquality().equals(permissions, other.permissions) &&
+          const ListEquality<String>().equals(roles, other.roles) &&
+          const ListEquality<String>().equals(permissions, other.permissions) &&
           DeepCollectionEquality().equals(
             collectionPermissions,
             other.collectionPermissions,
