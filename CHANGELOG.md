@@ -1,3 +1,8 @@
+## 0.0.28
+
+* Fixed an issue where internal class version number changes were missing.
+* Automated tests have been added.
+
 ## 0.0.27
 
 * The returnData flag is now available for Add and ClearAdd queries.

@@ -8,7 +8,7 @@ import '../../../delta_trace_db.dart';
 /// (ja) データベースの操作をリクエストした者の情報を定義するクラスです。
 class Actor extends CloneableFile {
   static const String className = "Actor";
-  static const String version = "1";
+  static const String version = "2";
   final EnumActorType type;
   final String id;
 

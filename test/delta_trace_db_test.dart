@@ -696,4 +696,25 @@ void main() {
     expect(db.collection("items").raw[0]["serialKey"] == 0, true);
     expect(db.collection("items").raw[1]["serialKey"] == 1, true);
   });
+
+  test('add test with returnData', () {
+    // データベース作成とデータ追加
+    DeltaTraceDatabase db = DeltaTraceDatabase();
+    // add
+    final Query q1 = QueryBuilder.add(
+      target: 'items',
+      addData: [
+        Item1(name: "itemA"),
+        Item1(name: "itemB"),
+      ],
+      serialKey: "serialKey",
+      returnData: true,
+    ).build();
+    final QueryResult<Item1> r1 = db.executeQuery<Item1>(q1);
+    expect(r1.isSuccess, true);
+    expect(r1.result.isNotEmpty, true);
+    List<Item1> rItems = r1.convert(Item1.fromDict);
+    expect(rItems[0].serialKey == 0, true);
+    expect(rItems[1].serialKey == 1, true);
+  });
 }
