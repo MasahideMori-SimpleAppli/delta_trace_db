@@ -1,3 +1,8 @@
+## 0.0.30
+
+* Added a note to the Readme.
+* Added automated tests.
+
 ## 0.0.29
 
 * Fixed a bug where Actor class comparisons ignored element order.

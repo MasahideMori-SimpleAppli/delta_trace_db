@@ -431,6 +431,11 @@ addedCount:100000
 It is possible to speed up the database, but this is a low priority, so I think that improving
 usability and creating peripheral tools will take priority.
 
+## Notes
+
+This package is intended for single-threaded operation.  
+Please note that additional processing, such as message passing, is required for parallel processing where memory is not shared.  
+
 ## Support
 
 There is essentially no support at this time, but bugs will likely be fixed.  

@@ -27,6 +27,12 @@ void main() {
         "user": Permission([EnumQueryType.clear]),
       },
     );
+    final r6 = db.executeQuery(
+      q,
+      collectionPermissions: {
+        "item": Permission([EnumQueryType.clear]),
+      },
+    );
     final tr1 = db.executeTransactionQuery(tq, collectionPermissions: null);
     final tr2 = db.executeTransactionQuery(tq, collectionPermissions: {});
     final tr3 = db.executeTransactionQuery(
@@ -45,15 +51,23 @@ void main() {
         "user": Permission([EnumQueryType.clear]),
       },
     );
+    final tr6 = db.executeTransactionQuery(
+      tq,
+      collectionPermissions: {
+        "item": Permission([EnumQueryType.clear]),
+      },
+    );
     expect(r1.isSuccess, true);
     expect(r2.isSuccess, false);
     expect(r3.isSuccess, false);
     expect(r4.isSuccess, false);
     expect(r5.isSuccess, true);
+    expect(r6.isSuccess, false);
     expect(tr1.isSuccess, true);
     expect(tr2.isSuccess, false);
     expect(tr3.isSuccess, false);
     expect(tr4.isSuccess, false);
     expect(tr5.isSuccess, true);
+    expect(tr6.isSuccess, false);
   });
 }
