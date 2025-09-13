@@ -1,3 +1,8 @@
+## 0.0.31
+
+* The QueryResult class now has a target parameter, which is set to the target at the time the query was issued, making debugging a bit easier.
+* The documentation for the QueryResult class has been improved.
+
 ## 0.0.30
 
 * Added a note to the Readme.

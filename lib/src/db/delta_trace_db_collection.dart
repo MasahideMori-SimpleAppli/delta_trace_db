@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "10";
+  static const String version = "11";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.
@@ -152,6 +152,7 @@ class Collection extends CloneableFile {
         if (!i.containsKey(q.serialKey!)) {
           return QueryResult<T>(
             isSuccess: false,
+            target: q.target,
             type: q.type,
             result: [],
             dbLength: _data.length,
@@ -180,6 +181,7 @@ class Collection extends CloneableFile {
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: (UtilCopy.jsonableDeepCopy(addedItems) as List)
           .cast<Map<String, dynamic>>(),
@@ -226,6 +228,7 @@ class Collection extends CloneableFile {
       }
       return QueryResult<T>(
         isSuccess: true,
+        target: q.target,
         type: q.type,
         result: (UtilCopy.jsonableDeepCopy(r) as List)
             .cast<Map<String, dynamic>>(),
@@ -249,6 +252,7 @@ class Collection extends CloneableFile {
       }
       return QueryResult<T>(
         isSuccess: true,
+        target: q.target,
         type: q.type,
         result: [],
         dbLength: _data.length,
@@ -281,6 +285,7 @@ class Collection extends CloneableFile {
       }
       return QueryResult<T>(
         isSuccess: true,
+        target: q.target,
         type: q.type,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
             .cast<Map<String, dynamic>>(),
@@ -302,6 +307,7 @@ class Collection extends CloneableFile {
       }
       return QueryResult<T>(
         isSuccess: true,
+        target: q.target,
         type: q.type,
         result: [],
         dbLength: _data.length,
@@ -336,6 +342,7 @@ class Collection extends CloneableFile {
       }
       return QueryResult<T>(
         isSuccess: true,
+        target: q.target,
         type: q.type,
         result: (UtilCopy.jsonableDeepCopy(deletedItems) as List)
             .cast<Map<String, dynamic>>(),
@@ -359,6 +366,7 @@ class Collection extends CloneableFile {
       }
       return QueryResult<T>(
         isSuccess: true,
+        target: q.target,
         type: q.type,
         result: [],
         dbLength: _data.length,
@@ -422,6 +430,7 @@ class Collection extends CloneableFile {
     }
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
@@ -450,6 +459,7 @@ class Collection extends CloneableFile {
     }
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
@@ -489,6 +499,7 @@ class Collection extends CloneableFile {
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: [],
       dbLength: _data.length,
@@ -509,6 +520,7 @@ class Collection extends CloneableFile {
       if (!item.containsKey(q.renameBefore!)) {
         return QueryResult<T>(
           isSuccess: false,
+          target: q.target,
           type: q.type,
           result: [],
           dbLength: _data.length,
@@ -520,6 +532,7 @@ class Collection extends CloneableFile {
       if (item.containsKey(q.renameAfter!)) {
         return QueryResult<T>(
           isSuccess: false,
+          target: q.target,
           type: q.type,
           result: [],
           dbLength: _data.length,
@@ -541,6 +554,7 @@ class Collection extends CloneableFile {
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: (UtilCopy.jsonableDeepCopy(r) as List)
           .cast<Map<String, dynamic>>(),
@@ -557,6 +571,7 @@ class Collection extends CloneableFile {
   QueryResult<T> count<T>(Query q) {
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: [],
       dbLength: _data.length,
@@ -578,6 +593,7 @@ class Collection extends CloneableFile {
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: [],
       dbLength: 0,
@@ -610,6 +626,7 @@ class Collection extends CloneableFile {
         if (!i.containsKey(q.serialKey!)) {
           return QueryResult<T>(
             isSuccess: false,
+            target: q.target,
             type: q.type,
             result: [],
             dbLength: _data.length,
@@ -638,6 +655,7 @@ class Collection extends CloneableFile {
     notifyListeners();
     return QueryResult<T>(
       isSuccess: true,
+      target: q.target,
       type: q.type,
       result: (UtilCopy.jsonableDeepCopy(addedItems) as List)
           .cast<Map<String, dynamic>>(),

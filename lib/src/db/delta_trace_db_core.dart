@@ -10,7 +10,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "9";
+  static const String version = "10";
 
   late final Map<String, Collection> _collections;
 
@@ -262,6 +262,7 @@ class DeltaTraceDatabase extends CloneableFile {
     if (!UtilQuery.checkPermissions(q, collectionPermissions)) {
       return QueryResult<T>(
         isSuccess: false,
+        target: q.target,
         type: q.type,
         result: [],
         dbLength: -1,
@@ -313,6 +314,7 @@ class DeltaTraceDatabase extends CloneableFile {
             if (r.updateCount == 0) {
               return QueryResult<T>(
                 isSuccess: false,
+                target: q.target,
                 type: q.type,
                 result: [],
                 dbLength: col.raw.length,
@@ -335,6 +337,7 @@ class DeltaTraceDatabase extends CloneableFile {
     } on ArgumentError catch (e) {
       return QueryResult<T>(
         isSuccess: false,
+        target: q.target,
         type: q.type,
         result: [],
         dbLength: col.raw.length,
@@ -346,6 +349,7 @@ class DeltaTraceDatabase extends CloneableFile {
       print(className + ",executeQuery: " + e.toString());
       return QueryResult<T>(
         isSuccess: false,
+        target: q.target,
         type: q.type,
         result: [],
         dbLength: col.raw.length,
