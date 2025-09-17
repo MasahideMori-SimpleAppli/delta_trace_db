@@ -1,5 +1,8 @@
 import 'package:file_state_manager/file_state_manager.dart';
+import 'package:logging/logging.dart';
 import '../../delta_trace_db.dart';
+
+final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_core');
 
 /// (en) It is an in-memory database that takes into consideration the
 /// safety of various operations.
@@ -10,7 +13,7 @@ import '../../delta_trace_db.dart';
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "10";
+  static const String version = "11";
 
   late final Map<String, Collection> _collections;
 
@@ -31,20 +34,18 @@ class DeltaTraceDatabase extends CloneableFile {
 
   /// データベースのJSONからの復元処理。
   static Map<String, Collection> _parseCollections(Map<String, dynamic> src) {
-    final raw = src["collections"];
-    if (raw is! Map<String, dynamic>) {
+    final cols = src["collections"];
+    if (cols is! Map<String, dynamic>) {
       throw FormatException(
         "Invalid format: 'collections' should be a Map<String, dynamic>.",
       );
     }
     final Map<String, Collection> r = {};
-    for (final entry in raw.entries) {
+    for (final entry in cols.entries) {
       final key = entry.key;
       final value = entry.value;
       if (value is! Map<String, dynamic>) {
-        throw FormatException(
-          "Invalid format: value of collection '$key' is not a Map.",
-        );
+        throw FormatException("Invalid format: target is not a Map.");
       }
       // ここでもエラーが起きれば、そのままエラーとしてスローされて良い。
       r[key] = Collection.fromDict(value);
@@ -70,16 +71,42 @@ class DeltaTraceDatabase extends CloneableFile {
     return col;
   }
 
+  /// (en) Find the specified collection.
+  /// Returns it if it exists, otherwise returns null.
+  ///
+  /// (ja) 指定のコレクションを検索します。
+  /// 存在すれば返し、存在しなければ null を返します。
+  ///
+  /// * [name] : The collection name.
+  Collection? findCollection(String name) {
+    if (_collections.containsKey(name)) {
+      return _collections[name] as Collection;
+    }
+    return null;
+  }
+
+  /// (en) Deletes the specified collection.
+  /// If a collection with the specified name does not exist, this does nothing.
+  ///
+  /// (ja) 指定のコレクションを削除します。
+  /// 指定の名前のコレクションが存在しなかった場合は何もしません。
+  /// * [name] : The collection name.
+  void removeCollection(String name) {
+    _collections.remove(name);
+  }
+
   /// (en) Saves individual collections as dictionaries.
   /// For example, you can use this if you want to store a specific collection
   /// in an encrypted format.
+  /// If you specify a collection that does not exist, null is returned.
   ///
   /// (ja) 個別のコレクションを辞書として保存します。
   /// 特定のコレクション単位で暗号化して保存したいような場合に利用できます。
+  /// 存在しないコレクションを指定した場合はnullが返されます。
   ///
   /// * [name] : The collection name.
-  Map<String, dynamic> collectionToDict(String name) =>
-      _collections[name]?.toDict() ?? {};
+  Map<String, dynamic>? collectionToDict(String name) =>
+      _collections[name]?.toDict();
 
   /// (en) Restores a specific collection from a dictionary, re-registers it,
   /// and retrieves it.
@@ -119,9 +146,14 @@ class DeltaTraceDatabase extends CloneableFile {
   ) {
     final col = Collection.fromDict(src);
     Set<void Function()>? listenersBuf = _collections[name]?.listeners;
+    Map<String, void Function()>? namedListenersBuf =
+        _collections[name]?.namedListeners;
     _collections[name] = col;
     if (listenersBuf != null) {
       _collections[name]!.listeners = listenersBuf;
+    }
+    if (namedListenersBuf != null) {
+      _collections[name]!.namedListeners = namedListenersBuf;
     }
     return col;
   }
@@ -174,9 +206,13 @@ class DeltaTraceDatabase extends CloneableFile {
   ///
   /// * [target] : The target collection name.
   /// * [cb] : The function to execute when the DB is changed.
-  void addListener(String target, void Function() cb) {
+  /// * [name] : If you set a non-null value, a listener will be registered
+  /// with that name.
+  /// Setting a name is useful if you want to be more precise about
+  /// registration and release.
+  void addListener(String target, void Function() cb, {String? name}) {
     Collection col = collection(target);
-    col.addListener(cb);
+    col.addListener(cb, name: name);
   }
 
   /// (en) This function is used to cancel the set callback.
@@ -187,9 +223,11 @@ class DeltaTraceDatabase extends CloneableFile {
   ///
   /// * [target] : The target collection name.
   /// * [cb] : The function for which you want to cancel the notification.
-  void removeListener(String target, void Function() cb) {
+  /// * [name] : If you registered with a name when you added Listener,
+  /// you must unregister with the same name.
+  void removeListener(String target, void Function() cb, {String? name}) {
     Collection col = collection(target);
-    col.removeListener(cb);
+    col.removeListener(cb, name: name);
   }
 
   /// (en) Executes a query of any type.
@@ -233,10 +271,10 @@ class DeltaTraceDatabase extends CloneableFile {
           collectionPermissions: collectionPermissions,
         );
       } else {
-        throw ArgumentError("Unsupported query class: ${query["className"]}");
+        throw ArgumentError("Unsupported query class");
       }
     } else {
-      throw ArgumentError("Unsupported query type: ${query.runtimeType}");
+      throw ArgumentError("Unsupported query type");
     }
   }
 
@@ -334,7 +372,8 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.count:
           return r;
       }
-    } on ArgumentError catch (e) {
+    } on ArgumentError catch (e, stack) {
+      _logger.severe("executeQuery ArgumentError", e, stack);
       return QueryResult<T>(
         isSuccess: false,
         target: q.target,
@@ -343,10 +382,10 @@ class DeltaTraceDatabase extends CloneableFile {
         dbLength: col.raw.length,
         updateCount: -1,
         hitCount: -1,
-        errorMessage: e.message.toString(),
+        errorMessage: "executeQuery ArgumentError",
       );
-    } catch (e) {
-      print(className + ",executeQuery: " + e.toString());
+    } catch (e, stack) {
+      _logger.severe("executeQuery Unexpected Error", e, stack);
       return QueryResult<T>(
         isSuccess: false,
         target: q.target,
@@ -355,7 +394,7 @@ class DeltaTraceDatabase extends CloneableFile {
         dbLength: col.raw.length,
         updateCount: -1,
         hitCount: -1,
-        errorMessage: "Unexpected Error",
+        errorMessage: "executeQuery Unexpected Error",
       );
     }
   }
@@ -387,13 +426,19 @@ class DeltaTraceDatabase extends CloneableFile {
     try {
       // 一時的に保存が必要なコレクションを計算してバッファします。
       Map<String, Map<String, dynamic>> buff = {};
+      Set<String> nonExistTargets = {};
       for (Query i in q.queries) {
         if (buff.containsKey(i.target)) {
           continue;
         } else {
-          buff[i.target] = collectionToDict(i.target);
-          // コレクションをトランザクションモードに変更する。
-          collection(i.target).changeTransactionMode(true);
+          Map<String, dynamic>? tCollection = collectionToDict(i.target);
+          if (tCollection != null) {
+            buff[i.target] = tCollection;
+            // コレクションをトランザクションモードに変更する。
+            collection(i.target).changeTransactionMode(true);
+          } else {
+            nonExistTargets.add(i.target);
+          }
         }
       }
       // クエリを実行します。
@@ -401,36 +446,15 @@ class DeltaTraceDatabase extends CloneableFile {
         for (Query i in q.queries) {
           rq.add(executeQuery(i, collectionPermissions: collectionPermissions));
         }
-      } catch (e) {
+      } catch (e, stack) {
         // エラーの場合は全ての変更を元に戻し、エラー扱いにします。
-        // DBの変更を元に戻す。
-        for (String key in buff.keys) {
-          collectionFromDictKeepListener(key, buff[key]!);
-          // 念の為確実にfalseにする。
-          collection(key).changeTransactionMode(false);
-        }
-        print(className + ",executeTransactionQuery: Transaction failed");
-        return TransactionQueryResult(
-          isSuccess: false,
-          results: [],
-          errorMessage: "Transaction failed",
-        );
+        _logger.severe("executeTransactionQuery failed", e, stack);
+        return _rollbackCollections<T>(buff, nonExistTargets);
       }
       // 問題がある場合は全ての変更を元に戻し、エラー扱いにします。
       for (QueryResult i in rq) {
         if (i.isSuccess == false) {
-          // DBの変更を元に戻す。
-          for (String key in buff.keys) {
-            collectionFromDictKeepListener(key, buff[key]!);
-            // 念の為確実にfalseにする。
-            collection(key).changeTransactionMode(false);
-          }
-          print(className + ",executeTransactionQuery: Transaction failed");
-          return TransactionQueryResult(
-            isSuccess: false,
-            results: [],
-            errorMessage: "Transaction failed",
-          );
+          return _rollbackCollections<T>(buff, nonExistTargets);
         }
       }
       // コールバックが必要なコレクションのリスト。
@@ -449,13 +473,36 @@ class DeltaTraceDatabase extends CloneableFile {
         collection(key).notifyListeners();
       }
       return TransactionQueryResult(isSuccess: true, results: rq);
-    } catch (e) {
-      print(className + ",executeTransactionQuery: " + e.toString());
+    } catch (e, stack) {
+      _logger.severe("executeTransactionQuery failed", e, stack);
       return TransactionQueryResult(
         isSuccess: false,
         results: [],
         errorMessage: "Unexpected Error",
       );
     }
+  }
+
+  /// rollback db.
+  TransactionQueryResult<T> _rollbackCollections<T>(
+    Map<String, Map<String, dynamic>> buff,
+    Set<String> nonExistTargets,
+  ) {
+    // DBの変更を元に戻す。
+    for (String key in buff.keys) {
+      collectionFromDictKeepListener(key, buff[key]!);
+      // 念の為確実にfalseにする。
+      collection(key).changeTransactionMode(false);
+    }
+    // 操作前に存在しなかったコレクションは削除する。
+    for (String key in nonExistTargets) {
+      removeCollection(key);
+    }
+    _logger.severe("executeTransactionQuery, Transaction failed");
+    return TransactionQueryResult(
+      isSuccess: false,
+      results: [],
+      errorMessage: "Transaction failed",
+    );
   }
 }

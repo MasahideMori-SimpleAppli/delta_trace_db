@@ -1,3 +1,14 @@
+## 0.0.32
+
+* Security fixes. This is important, so please update if you are running an older version.
+* Logging on the app has been changed to be handled using the [logging](https://pub.dev/packages/logging) package, so if you want to get error logs, please refer to the logging package.
+* Added findCollection and removeCollection method to DeltaTraceDataBase class.
+* The name option has been added to the addListener and removeListener methods of the DeltaTraceDataBase and Collection classes.
+* When executing the listeners for the DeltaTraceDataBase class and Collection class, if an error occurs in the callback, the processing will stop there, so I changed it to ignore errors during the callback.
+* Fixed a bug that caused transaction queries to not work correctly under certain conditions.
+* The collectionToDict method of the deltaTraceDatabase class has been modified to return null if a non-existent collection is specified.
+* Added explanatory text for QueryBuilder and RawQueryBuilder.
+
 ## 0.0.31
 
 * The QueryResult class now has a target parameter, which is set to the target at the time the query was issued, making debugging a bit easier.

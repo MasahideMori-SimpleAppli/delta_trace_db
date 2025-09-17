@@ -18,7 +18,7 @@ class UtilQuery {
       } else if (src["className"] == "TransactionQuery") {
         return TransactionQuery.fromDict(src);
       } else {
-        throw ArgumentError("Unsupported query class: ${src["className"]}");
+        throw ArgumentError("Unsupported query class");
       }
     } catch (e) {
       throw ArgumentError("Unsupported object");

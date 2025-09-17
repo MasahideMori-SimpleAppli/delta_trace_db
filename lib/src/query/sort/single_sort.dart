@@ -8,7 +8,7 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// (ja) クエリの戻り値について、単一キーでのソートを指定するためのクラスです。
 class SingleSort extends CloneableFile implements AbstractSort {
   static const String className = "SingleSort";
-  static const String version = "3";
+  static const String version = "4";
   String field;
   bool reversed;
   EnumValueType vType;
@@ -73,21 +73,21 @@ class SingleSort extends CloneableFile implements AbstractSort {
       case EnumValueType.datetime_:
         if (value is DateTime) return value;
         if (value is String) return DateTime.tryParse(value);
-        throw Exception('Cannot convert $value to DateTime');
+        throw Exception('Cannot convert value to DateTime');
       case EnumValueType.int_:
         if (value is int) return value;
         if (value is num) return value.toInt();
         if (value is String) return int.tryParse(value);
-        throw Exception('Cannot convert $value to int');
+        throw Exception('Cannot convert value to int');
       case EnumValueType.floatStrict_:
         if (value is double) return value;
         if (value is num) return value.toDouble();
         if (value is String) return double.tryParse(value);
-        throw Exception('Cannot convert $value to double');
+        throw Exception('Cannot convert value to double');
       case EnumValueType.floatEpsilon12_:
         if (value is num) return value.toDouble();
         if (value is String) return double.tryParse(value);
-        throw Exception('Cannot convert $value to double (epsilon)');
+        throw Exception('Cannot convert value to double (epsilon)');
       case EnumValueType.boolean_:
         if (value is bool) return value;
         if (value is int) return value != 0;
@@ -96,7 +96,7 @@ class SingleSort extends CloneableFile implements AbstractSort {
           if (['true', '1', 'yes', 'y'].contains(lower)) return true;
           if (['false', '0', 'no', 'n'].contains(lower)) return false;
         }
-        throw Exception('Cannot convert $value to bool');
+        throw Exception('Cannot convert value to bool');
       case EnumValueType.string_:
         return value.toString();
       case EnumValueType.auto_:
@@ -118,7 +118,7 @@ class SingleSort extends CloneableFile implements AbstractSort {
       if (aValue == null) return reversed ? -1 : 1;
       if (bValue == null) return reversed ? 1 : -1;
       // 比較用の計算。
-      int result;
+      int result = 0;
       switch (vType) {
         // 型指定での特殊処理
         case EnumValueType.floatEpsilon12_:
@@ -136,15 +136,11 @@ class SingleSort extends CloneableFile implements AbstractSort {
             result = aInt.compareTo(bInt);
           } else if (aValue is Comparable && bValue is Comparable) {
             if (aValue.runtimeType != bValue.runtimeType) {
-              throw Exception(
-                'Incompatible types: $aValue (${aValue.runtimeType}) vs $bValue (${bValue.runtimeType})',
-              );
+              throw Exception('Incompatible types');
             }
             result = aValue.compareTo(bValue);
           } else {
-            throw Exception(
-              'Field "$field" not comparable: $aValue (${aValue.runtimeType}), $bValue (${bValue.runtimeType})',
-            );
+            throw Exception('Field not comparable');
           }
       }
       return reversed ? -result : result;

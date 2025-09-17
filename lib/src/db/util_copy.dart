@@ -17,7 +17,7 @@ class UtilCopy {
   /// Do not set this when using from outside.
   static dynamic jsonableDeepCopy(dynamic value, {int depth = 0}) {
     if (depth > _maxDepth) {
-      throw ArgumentError('Exceeded max allowed nesting depth ($_maxDepth)');
+      throw ArgumentError('Exceeded max allowed nesting depth');
     }
     // 通常の処理
     if (value is Map<String, dynamic>) {
@@ -32,9 +32,7 @@ class UtilCopy {
         value == null) {
       return value;
     } else {
-      throw ArgumentError(
-        'Unsupported type for JSON deep copy: ${value.runtimeType}',
-      );
+      throw ArgumentError('Unsupported type for JSON deep copy');
     }
   }
 }

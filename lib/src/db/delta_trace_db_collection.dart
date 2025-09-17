@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:file_state_manager/file_state_manager.dart';
-
+import 'package:logging/logging.dart';
 import '../../delta_trace_db.dart';
+
+final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 
 /// (en) This class relates to the contents of each class in the DB.
 /// It implements operations on the DB.
@@ -10,7 +12,7 @@ import '../../delta_trace_db.dart';
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "11";
+  static const String version = "12";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.
@@ -19,6 +21,7 @@ class Collection extends CloneableFile {
 
   /// A set of callbacks to notify when linking with the UI, etc.
   Set<void Function()> listeners = {};
+  Map<String, void Function()> namedListeners = {};
 
   /// A flag that is true only during a transaction.
   /// When this is ON, notifications will not be delivered.
@@ -113,7 +116,17 @@ class Collection extends CloneableFile {
   /// なお、通知に関してはDBをデシリアライズしても復元されません。毎回設定する必要があります。
   ///
   /// * [cb] : The function to execute when the DB is changed.
-  void addListener(void Function() cb) => listeners.add(cb);
+  /// * [name] : If you set a non-null value, a listener will be registered
+  /// with that name.
+  /// Setting a name is useful if you want to be more precise about
+  /// registration and release.
+  void addListener(void Function() cb, {String? name}) {
+    if (name == null) {
+      listeners.add(cb);
+    } else {
+      namedListeners[name] = cb;
+    }
+  }
 
   /// (en) This function is used to cancel the set callback.
   /// Call it in the UI using dispose etc.
@@ -122,7 +135,15 @@ class Collection extends CloneableFile {
   /// UIではdisposeなどで呼び出します。
   ///
   /// * [cb] : The function for which you want to cancel the notification.
-  void removeListener(void Function() cb) => listeners.remove(cb);
+  /// * [name] : If you registered with a name when you added Listener,
+  /// you must unregister with the same name.
+  void removeListener(void Function() cb, {String? name}) {
+    if (name == null) {
+      listeners.remove(cb);
+    } else {
+      namedListeners.remove(name);
+    }
+  }
 
   /// (en) Executes a registered callback.
   ///
@@ -130,7 +151,19 @@ class Collection extends CloneableFile {
   void notifyListeners() {
     if (!_isTransactionMode) {
       for (final cb in listeners) {
-        cb();
+        try {
+          cb();
+        } catch (e, stack) {
+          _logger.severe("Callback in listeners failed", e, stack);
+        }
+      }
+
+      for (final namedCb in namedListeners.values) {
+        try {
+          namedCb();
+        } catch (e, stack) {
+          _logger.severe("Callback in namedListeners failed", e, stack);
+        }
       }
     } else {
       runNotifyListenersInTransaction = true;
@@ -158,8 +191,7 @@ class Collection extends CloneableFile {
             dbLength: _data.length,
             updateCount: 0,
             hitCount: 0,
-            errorMessage:
-                'The target serialKey does not exist. serialKey:${q.serialKey!}',
+            errorMessage: 'The target serialKey does not exist.',
           );
         }
       }
@@ -526,7 +558,7 @@ class Collection extends CloneableFile {
           dbLength: _data.length,
           updateCount: 0,
           hitCount: 0,
-          errorMessage: 'The target key does not exist. key:${q.renameBefore!}',
+          errorMessage: 'The renameBefore key does not exist.',
         );
       }
       if (item.containsKey(q.renameAfter!)) {
@@ -538,8 +570,7 @@ class Collection extends CloneableFile {
           dbLength: _data.length,
           updateCount: 0,
           hitCount: 0,
-          errorMessage:
-              'An existing key was specified as the new key. key:${q.renameAfter!}',
+          errorMessage: 'An existing key was specified as the new key',
         );
       }
     }
@@ -632,8 +663,7 @@ class Collection extends CloneableFile {
             dbLength: _data.length,
             updateCount: 0,
             hitCount: 0,
-            errorMessage:
-                'The target serialKey does not exist. serialKey:${q.serialKey!}',
+            errorMessage: 'The target serialKey does not exist',
           );
         }
       }

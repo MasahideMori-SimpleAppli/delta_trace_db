@@ -358,42 +358,42 @@ testフォルダのspeed_test.dartを利用して実際の環境でテストし�
 速度はデータ容量にも依存するので、大きなデータが大量にある場合はより遅くなることに注意してください。
 
 ```text
-speed test for 100000 records                                                                                                                                                                              
+speed test for 100000 records                                                                                                                                                                                                                                                      
 start add
-end add: 209 ms
+end add: 189 ms
 start getAll (with object convert)
-end getAll: 672 ms
+end getAll: 673 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 343 ms
+end save: 349 ms
 start load (with json string convert)
-end load: 263 ms
+end load: 260 ms
 start search (with object convert)
-end search: 805 ms
+end search: 777 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 483 ms
+end search paging: 441 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 586 ms
+end search paging by obj: 537 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 488 ms
+end search paging by offset: 449 ms
 returnsLength:50000
 start update at half index and last index object
-end update: 29 ms
+end update: 33 ms
 start updateOne of half index object
-end updateOne: 11 ms
+end updateOne: 9 ms
 start conformToTemplate
 end conformToTemplate: 63 ms
 start delete half object (with object convert)
-end delete: 441 ms
+end delete: 402 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
 end deleteOne: 8 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 71 ms
+end add with serialKey: 56 ms
 addedCount:100000
 ```
 

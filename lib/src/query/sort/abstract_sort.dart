@@ -32,7 +32,7 @@ abstract class AbstractSort {
       case MultiSort.className:
         return MultiSort.fromDict(src);
       default:
-        throw Exception('Unknown sort class: ${src['className']}');
+        throw Exception('Unknown sort class');
     }
   }
 }

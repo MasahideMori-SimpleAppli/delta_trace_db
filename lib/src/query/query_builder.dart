@@ -25,6 +25,13 @@ class QueryBuilder {
   bool resetSerial = false;
   Cause? cause;
 
+  /// (en) Adds an item to the specified collection.
+  /// If the specified collection does not already exist,
+  /// it will be created automatically.
+  ///
+  /// (ja) 指定されたコレクションに要素を追加します。
+  /// 指定されたコレクションがまだ存在しない場合はコレクションが自動で作成されます。
+  ///
   /// * [target] : The collection name in DB.
   /// * [addData] : Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
@@ -57,6 +64,13 @@ class QueryBuilder {
   }) : this.addData = addData,
        type = EnumQueryType.add;
 
+  /// (en) Overwrites the parameters of all objects in the specified collection
+  /// that match the conditions.
+  /// Parameters not specified for overwriting remain unchanged.
+  ///
+  /// (ja) 指定されたコレクションのうち、条件にマッチする全てのオブジェクトのパラメータを
+  /// 上書きします。上書き対象に指定していないパラメータは変化しません。
+  ///
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
@@ -94,6 +108,13 @@ class QueryBuilder {
        this.overrideData = overrideData,
        type = EnumQueryType.update;
 
+  /// (en) Overwrites the parameters of one object in the specified collection
+  /// that matches the conditions. Parameters not specified for overwriting
+  /// remain unchanged.
+  ///
+  /// (ja) 指定されたコレクションのうち、条件にマッチする１つのオブジェクトのパラメータを
+  /// 上書きします。上書き対象に指定していないパラメータは変化しません。
+  ///
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
@@ -126,6 +147,11 @@ class QueryBuilder {
        this.overrideData = overrideData,
        type = EnumQueryType.updateOne;
 
+  /// (en) Deletes all objects in the specified collection that match
+  /// the specified criteria.
+  ///
+  /// (ja) 指定されたコレクションのうち、条件にマッチするオブジェクトを全て削除します。
+  ///
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
@@ -153,6 +179,11 @@ class QueryBuilder {
   }) : this.queryNode = queryNode,
        type = EnumQueryType.delete;
 
+  /// (en) Deletes only one object that matches the specified criteria from
+  /// the specified collection.
+  ///
+  /// (ja) 指定されたコレクションのうち、条件にマッチするオブジェクトを１件だけ削除します。
+  ///
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
@@ -177,6 +208,11 @@ class QueryBuilder {
   }) : this.queryNode = queryNode,
        type = EnumQueryType.deleteOne;
 
+  /// (en) Gets objects from the specified collection that match
+  /// the specified criteria.
+  ///
+  /// (ja) 指定されたコレクションから、条件にマッチするオブジェクトを取得します。
+  ///
   /// * [target] : The collection name in DB.
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
@@ -224,6 +260,10 @@ class QueryBuilder {
   }) : this.queryNode = queryNode,
        type = EnumQueryType.search;
 
+  /// (en) Gets all items in the specified collection.
+  ///
+  /// (ja) 指定されたコレクションの全てのアイテムを取得します。
+  ///
   /// * [target] : The collection name in DB.
   /// * [sortObj] : An object for sorting the return values.
   /// SingleSort or MultiSort can be used.
@@ -236,6 +276,16 @@ class QueryBuilder {
   QueryBuilder.getAll({required this.target, this.sortObj, this.cause})
     : type = EnumQueryType.getAll;
 
+  /// (en) Formats the contents of the specified collection to match the
+  /// specified template.
+  /// Fields not present in the template will be removed,
+  /// and fields that are only present in the template will be added
+  /// with the template's value as their initial value.
+  ///
+  /// (ja) 指定されたコレクションの内容を、指定したテンプレートに一致するように整形します。
+  /// テンプレートに存在しないフィールドは削除され、テンプレートにのみ存在するフィールドは、
+  /// テンプレートの値を初期値として追加されます。
+  ///
   /// * [target] : The collection name in DB.
   /// * [template] : Specify this when changing the structure of the DB class.
   /// Fields that do not exist in the existing structure but exist in the
@@ -261,6 +311,10 @@ class QueryBuilder {
   }) : this.template = template,
        type = EnumQueryType.conformToTemplate;
 
+  /// (en) Renames a specific field in the specified collection.
+  ///
+  /// (ja) 指定されたコレクションの特定のフィールドの名前を変更します。
+  ///
   /// * [target] : The collection name in DB.
   /// * [renameBefore] : The old variable name when querying for a rename.
   /// * [renameAfter] : The new name of the variable when querying for a rename.
@@ -286,6 +340,10 @@ class QueryBuilder {
        this.renameAfter = renameAfter,
        type = EnumQueryType.renameField;
 
+  /// (en) Gets the number of elements in the specified collection.
+  ///
+  /// (ja) 指定されたコレクションの要素数を取得します。
+  ///
   /// * [target] : The collection name in DB.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
@@ -296,6 +354,10 @@ class QueryBuilder {
   QueryBuilder.count({required this.target, this.cause})
     : type = EnumQueryType.count;
 
+  /// (en) Clears the specified collection.
+  ///
+  /// (ja) 指定されたコレクションをclearします。
+  ///
   /// * [target] : The collection name in DB.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
@@ -316,6 +378,10 @@ class QueryBuilder {
     this.cause,
   }) : type = EnumQueryType.clear;
 
+  /// (en) Clears the specified collection and then add data.
+  ///
+  /// (ja) 指定されたコレクションをclearした後、dataをAddします。
+  ///
   /// * [target] : The collection name in DB.
   /// * [addData] : Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
