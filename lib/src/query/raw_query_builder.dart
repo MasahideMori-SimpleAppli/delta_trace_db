@@ -235,6 +235,31 @@ class RawQueryBuilder extends QueryBuilder {
     super.cause,
   }) : super.search();
 
+  /// (en) Gets objects from the specified collection that match
+  /// the specified criteria.
+  /// It is faster than a "search query" when searching for a single item
+  /// because the search stops once a hit is found.
+  ///
+  /// (ja) 指定されたコレクションから、条件にマッチするオブジェクトを取得します。
+  /// 1件のヒットがあった時点で探索を打ち切るため、
+  /// 単一のアイテムを検索する場合はsearchよりも高速に動作します。
+  ///
+  /// * [target] : The collection name in DB.
+  /// * [queryNode] : This is the node object used for the search.
+  /// You can build queries by combining the various nodes defined in
+  /// comparison_node.dart.
+  /// * [cause] : You can add further parameters such as why this query was
+  /// made and who made it.
+  /// This is useful if you have high security requirements or want to run the
+  /// program autonomously using artificial intelligence.
+  /// By saving the entire query including this as a log,
+  /// the DB history is recorded.
+  RawQueryBuilder.searchOne({
+    required super.target,
+    required super.queryNode,
+    super.cause,
+  }) : super.searchOne();
+
   /// (en) Gets all items in the specified collection.
   ///
   /// (ja) 指定されたコレクションの全てのアイテムを取得します。
@@ -323,9 +348,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// the DB history is recorded.
   RawQueryBuilder.count({required super.target, super.cause}) : super.count();
 
-  /// (en) Clears the specified collection.
+  /// (en) This query empties the contents of the specified collection.
   ///
-  /// (ja) 指定されたコレクションをclearします。
+  /// (ja) このクエリは指定したコレクションの内容を空にします。
   ///
   /// * [target] : The collection name in DB.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
@@ -384,6 +409,40 @@ class RawQueryBuilder extends QueryBuilder {
   }) : this.rawAddData = rawAddData,
        super.clearAdd(addData: []);
 
+  /// (en) Deletes the specified collection.
+  /// This query is special because it deletes the collection itself.
+  /// Therefore, it cannot be included as part of a transaction query.
+  /// Additionally, any callbacks associated with the target collection will
+  /// not be called when executed.
+  /// This is a maintenance function for administrators who need to change
+  /// the database structure.
+  /// Typically, the database should be designed so that it never needs to be
+  /// called.
+  ///
+  /// (ja) 指定されたコレクションを削除します。
+  /// このクエリは特殊で、コレクションそのものが削除されるため
+  /// トランザクションクエリの一部として含めることはできません。
+  /// また、実行時には対象のコレクションに紐付いたコールバックも呼ばれません。
+  /// これはDBの構造変更が必要な管理者のためのメンテナンス機能であり、
+  /// 通常はこれを呼び出さないでも問題ない設計にしてください。
+  ///
+  /// * [target] : The collection name in DB.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
+  /// * [cause] : You can add further parameters such as why this query was
+  /// made and who made it.
+  /// This is useful if you have high security requirements or want to run the
+  /// program autonomously using artificial intelligence.
+  /// By saving the entire query including this as a log,
+  /// the DB history is recorded.
+  RawQueryBuilder.removeCollection({
+    required super.target,
+    super.mustAffectAtLeastOne,
+    super.cause,
+  }) : super.removeCollection();
+
   /// (en) Commit the content and convert it into a query object.
   ///
   /// (ja) 内容を確定してクエリーオブジェクトに変換します。
@@ -405,6 +464,7 @@ class RawQueryBuilder extends QueryBuilder {
       returnData: returnData,
       mustAffectAtLeastOne: mustAffectAtLeastOne,
       serialKey: serialKey,
+      resetSerial: resetSerial,
       cause: cause,
     );
   }

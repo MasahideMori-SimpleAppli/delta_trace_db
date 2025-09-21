@@ -217,7 +217,7 @@ void main() {
       target: 'users',
       queryNode: FieldStartsWith("name", "sample"),
       sortObj: SingleSort(field: 'age'),
-      offset: 50000,
+      offset: recordsCount ~/ 2,
     ).build();
     print("start search paging by offset (with object convert)");
     dt1 = DateTime.now();
@@ -231,11 +231,28 @@ void main() {
     );
     print("returnsLength:${r2PagingOffset.result.length}");
 
+    // search One
+    final Query q2One = QueryBuilder.searchOne(
+      target: 'users',
+      queryNode: FieldEquals('age', recordsCount - 1),
+    ).build();
+    print(
+      "start searchOne, the last index object search (with object convert)",
+    );
+    dt1 = DateTime.now();
+    final QueryResult<User> r2One = db.executeQuery<User>(q2One);
+    List<User> _ = r2One.convert(User.fromDict);
+    dt2 = DateTime.now();
+    print(
+      "end searchOne: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
+    );
+    print("returnsLength:${r2One.result.length}");
+
     // update
     final Query q3 = QueryBuilder.update(
       target: 'users',
       queryNode: OrNode([
-        FieldEquals('name', 'sample${(recordsCount ~/ 2)}'),
+        FieldEquals('name', 'sample${((recordsCount ~/ 2) - 1)}'),
         FieldEquals('name', 'sample${recordsCount - 1}'),
       ]),
       overrideData: {'age': recordsCount + 1},
@@ -253,7 +270,7 @@ void main() {
     // updateOne
     final Query q4 = QueryBuilder.updateOne(
       target: 'users',
-      queryNode: OrNode([FieldEquals('name', 'sample${(recordsCount ~/ 2)}')]),
+      queryNode: FieldEquals('name', 'sample${(recordsCount ~/ 2) - 1}'),
       overrideData: {'age': recordsCount},
       returnData: false,
     ).build();
@@ -288,7 +305,7 @@ void main() {
     // delete
     final Query q6 = QueryBuilder.delete(
       target: 'users',
-      queryNode: FieldGreaterThan('age', (recordsCount ~/ 2) - 1),
+      queryNode: FieldGreaterThan('age', (recordsCount ~/ 2)),
       sortObj: SingleSort(field: 'id'),
       returnData: true,
     ).build();
@@ -305,7 +322,7 @@ void main() {
     // deleteOne
     final Query q7 = QueryBuilder.deleteOne(
       target: 'users',
-      queryNode: FieldEquals('age', (recordsCount ~/ 2) - 1),
+      queryNode: FieldEquals('age', recordsCount ~/ 2),
       returnData: true,
     ).build();
     print("start deleteOne for last object (with object convert)");

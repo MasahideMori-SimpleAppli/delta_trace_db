@@ -371,6 +371,28 @@ so you will need to allocate additional memory for this.
     QueryExecutionResult result2 = db.executeQueryObject(tq2);
 ```
 
+### 🗑️ 10. Deletion Process
+
+After creating the DB structure, if you absolutely need to modify it,  
+there is a command to delete a collection.
+
+However, this command is intended **only for administrative maintenance**:
+- It cannot be included in transactional queries.
+- It does not trigger any UI callbacks at runtime.
+
+Use it with caution if necessary.
+
+```dart
+final db = DeltaTraceDatabase();
+final q1 = RawQueryBuilder
+        .add(
+        target: "user", rawAddData: [{"id": -1, "name": "a"}, {"id": -1, "name": "a"}], serialKey: "id")
+        .build();
+final r1 = db.executeQuery(q1);
+final q2 = RawQueryBuilder.removeCollection(target: "user").build();
+final r2 = db.executeQuery(q2);
+```
+
 ## Speed
 
 This package is an in-memory database, so it is generally fast.  
@@ -387,42 +409,45 @@ any problems in practical use.
 Please note that speeds also depend on the amount of data, so if you have a lot of large data, it will be slower.
 
 ```text
-speed test for 100000 records                                                                                                                                                                                                                                                      
+speed test for 100000 records                                                                                                                                                                                                                                                     
 start add
-end add: 189 ms
+end add: 190 ms
 start getAll (with object convert)
-end getAll: 673 ms
+end getAll: 727 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 349 ms
+end save: 348 ms
 start load (with json string convert)
-end load: 260 ms
+end load: 249 ms
 start search (with object convert)
-end search: 777 ms
+end search: 869 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 441 ms
+end search paging: 502 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 537 ms
+end search paging by obj: 618 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 449 ms
+end search paging by offset: 506 ms
 returnsLength:50000
+start searchOne, the last index object search (with object convert)
+end searchOne: 13 ms
+returnsLength:1
 start update at half index and last index object
-end update: 33 ms
+end update: 27 ms
 start updateOne of half index object
-end updateOne: 9 ms
+end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 63 ms
+end conformToTemplate: 61 ms
 start delete half object (with object convert)
-end delete: 402 ms
+end delete: 491 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 8 ms
+end deleteOne: 7 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 56 ms
+end add with serialKey: 58 ms
 addedCount:100000
 ```
 

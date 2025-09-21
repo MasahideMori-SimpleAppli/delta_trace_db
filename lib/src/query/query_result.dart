@@ -6,7 +6,7 @@ import '../../delta_trace_db.dart';
 /// (ja) DBへのクエリ結果や付加情報を格納したクラスです。
 class QueryResult<T> extends QueryExecutionResult {
   static const String className = "QueryResult";
-  static const String version = "5";
+  static const String version = "6";
   String target;
   EnumQueryType type;
   List<Map<String, dynamic>> result;
@@ -42,6 +42,9 @@ class QueryResult<T> extends QueryExecutionResult {
   /// * [dbLength] : DB side item length.
   /// This is The total number of records in the collection.
   /// * [updateCount] : The total number of records add, updated or deleted.
+  /// When issuing a removeCollection query,
+  /// if the target collection already exists, the result will be 1.
+  /// if a non-existent collection is specified the result will be 0.
   /// * [hitCount] : The total number of records searched.
   /// * [errorMessage] : A message that is added only if an error occurs.
   QueryResult({

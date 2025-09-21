@@ -271,79 +271,102 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
 その分のメモリを追加で確保しておく必要があることに注意してください。  
 
 ```dart
-    final now = DateTime.now();
-    final db = DeltaTraceDatabase();
-    List<User> users = [
-      User(
-        id: 1,
-        name: 'Taro',
-        age: 25,
-        createdAt: now.add(Duration(days: 0)),
-        updatedAt: now.add(Duration(days: 0)),
-        nestedObj: {},
-      ),
-      User(
-        id: 2,
-        name: 'Jiro',
-        age: 28,
-        createdAt: now.add(Duration(days: 1)),
-        updatedAt: now.add(Duration(days: 1)),
-        nestedObj: {},
-      ),
-      User(
-        id: 3,
-        name: 'Saburo',
-        age: 31,
-        createdAt: now.add(Duration(days: 2)),
-        updatedAt: now.add(Duration(days: 2)),
-        nestedObj: {},
-      ),
-      User(
-        id: 4,
-        name: 'Hanako',
-        age: 17,
-        createdAt: now.add(Duration(days: 3)),
-        updatedAt: now.add(Duration(days: 3)),
-        nestedObj: {},
-      ),
-    ];
-    // 追加
-    final Query q1 = QueryBuilder.add(target: 'users1', addData: users).build();
-    final Query q2 = QueryBuilder.add(target: 'users2', addData: users).build();
-    QueryResult<User> _ = db.executeQuery<User>(q1);
-    QueryResult<User> _ = db.executeQuery<User>(q2);
-    // 失敗するトランザクション
-    final TransactionQuery tq1 = TransactionQuery(
-      queries: [
-        QueryBuilder.update(
-          target: 'users1',
-          // 型が違う
-          queryNode: FieldEquals("id", "3"),
-          overrideData: {"id": "5"},
-          returnData: true,
-          mustAffectAtLeastOne: true,
-        ).build(),
-        QueryBuilder.clear(target: 'users2').build(),
-      ],
-    );
-    // result.isSuccess は falseで失敗になります。 DBは変更されません。
-    // 巻き戻しは、DB 内のすべてのコレクション (この場合は、users1 と users2) に適用されます。
-    QueryExecutionResult result = db.executeQueryObject(tq1);
-    // 成功するトランザクション
-    final TransactionQuery tq2 = TransactionQuery(
-      queries: [
-        QueryBuilder.update(
-          target: 'users1',
-          queryNode: FieldEquals("id", 3),
-          // オーバーライドする型にも注意してください。このライブラリでは、他の型によるオーバーライドが可能です。
-          overrideData: {"id": 5},
-          returnData: true,
-          mustAffectAtLeastOne: true,
-        ).build(),
-        QueryBuilder.clear(target: 'users2').build(),
-      ],
-    );
-    QueryExecutionResult result2 = db.executeQueryObject(tq2);
+final now = DateTime.now();
+final db = DeltaTraceDatabase();
+List<User> users = [
+  User(
+    id: 1,
+    name: 'Taro',
+    age: 25,
+    createdAt: now.add(Duration(days: 0)),
+    updatedAt: now.add(Duration(days: 0)),
+    nestedObj: {},
+  ),
+  User(
+    id: 2,
+    name: 'Jiro',
+    age: 28,
+    createdAt: now.add(Duration(days: 1)),
+    updatedAt: now.add(Duration(days: 1)),
+    nestedObj: {},
+  ),
+  User(
+    id: 3,
+    name: 'Saburo',
+    age: 31,
+    createdAt: now.add(Duration(days: 2)),
+    updatedAt: now.add(Duration(days: 2)),
+    nestedObj: {},
+  ),
+  User(
+    id: 4,
+    name: 'Hanako',
+    age: 17,
+    createdAt: now.add(Duration(days: 3)),
+    updatedAt: now.add(Duration(days: 3)),
+    nestedObj: {},
+  ),
+];
+// 追加
+final Query q1 = QueryBuilder.add(target: 'users1', addData: users).build();
+final Query q2 = QueryBuilder.add(target: 'users2', addData: users).build();
+QueryResult<User> _ = db.executeQuery<User>(q1);
+QueryResult<User> _ = db.executeQuery<User>(q2);
+// 失敗するトランザクション
+final TransactionQuery tq1 = TransactionQuery(
+  queries: [
+    QueryBuilder.update(
+      target: 'users1',
+      // 型が違う
+      queryNode: FieldEquals("id", "3"),
+      overrideData: {"id": "5"},
+      returnData: true,
+      mustAffectAtLeastOne: true,
+    ).build(),
+    QueryBuilder.clear(target: 'users2').build(),
+  ],
+);
+// result.isSuccess は falseで失敗になります。 DBは変更されません。
+// 巻き戻しは、DB 内のすべてのコレクション (この場合は、users1 と users2) に適用されます。
+QueryExecutionResult result = db.executeQueryObject(tq1);
+// 成功するトランザクション
+final TransactionQuery tq2 = TransactionQuery(
+  queries: [
+    QueryBuilder.update(
+      target: 'users1',
+      queryNode: FieldEquals("id", 3),
+      // オーバーライドする型にも注意してください。このライブラリでは、他の型によるオーバーライドが可能です。
+      overrideData: {"id": 5},
+      returnData: true,
+      mustAffectAtLeastOne: true,
+    ).build(),
+    QueryBuilder.clear(target: 'users2').build(),
+  ],
+);
+QueryExecutionResult result2 = db.executeQueryObject(tq2);
+```
+
+### 🗑️ 10. 削除処理
+
+一度DBの構造を作った後、どうしてもDBの構造を修正する必要が出てきた場合、  
+コレクションを削除する命令があります。  
+
+ただし、この命令は管理者によるメンテナンス用であり、以下のような注意点があります。  
+- トランザクションクエリに含めることはできません。
+- 実行時に UI コールバックをトリガーしません。
+- 
+もし必要になった場合は注意深く使用してください。  
+
+```dart
+
+final db = DeltaTraceDatabase();
+final q1 = RawQueryBuilder
+    .add(
+    target: "user", rawAddData: [{"id": -1, "name": "a"}, {"id": -1, "name": "a"}], serialKey: "id")
+    .build();
+final r1 = db.executeQuery(q1);
+final q2 = RawQueryBuilder.removeCollection(target: "user").build();
+final r2 = db.executeQuery(q2);
 ```
 
 ## 速度
@@ -358,42 +381,45 @@ testフォルダのspeed_test.dartを利用して実際の環境でテストし�
 速度はデータ容量にも依存するので、大きなデータが大量にある場合はより遅くなることに注意してください。
 
 ```text
-speed test for 100000 records                                                                                                                                                                                                                                                      
+speed test for 100000 records                                                                                                                                                                                                                                                     
 start add
-end add: 189 ms
+end add: 190 ms
 start getAll (with object convert)
-end getAll: 673 ms
+end getAll: 727 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 349 ms
+end save: 348 ms
 start load (with json string convert)
-end load: 260 ms
+end load: 249 ms
 start search (with object convert)
-end search: 777 ms
+end search: 869 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 441 ms
+end search paging: 502 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 537 ms
+end search paging by obj: 618 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 449 ms
+end search paging by offset: 506 ms
 returnsLength:50000
+start searchOne, the last index object search (with object convert)
+end searchOne: 13 ms
+returnsLength:1
 start update at half index and last index object
-end update: 33 ms
+end update: 27 ms
 start updateOne of half index object
-end updateOne: 9 ms
+end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 63 ms
+end conformToTemplate: 61 ms
 start delete half object (with object convert)
-end delete: 402 ms
+end delete: 491 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 8 ms
+end deleteOne: 7 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 56 ms
+end add with serialKey: 58 ms
 addedCount:100000
 ```
 

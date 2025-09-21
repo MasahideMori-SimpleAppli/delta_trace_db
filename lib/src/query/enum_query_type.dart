@@ -8,10 +8,12 @@ enum EnumQueryType {
   delete,
   deleteOne,
   search,
+  searchOne,
   getAll,
   conformToTemplate, // DB shape change.
   renameField, // DB field name change.
   count, // get all items count.
   clear, // delete all items.
-  clearAdd, // clear then add
+  clearAdd, // clear then add.
+  removeCollection, // A special query that is not allowed in a transaction.
 }

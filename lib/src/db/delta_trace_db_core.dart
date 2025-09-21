@@ -13,7 +13,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_core');
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "11";
+  static const String version = "12";
 
   late final Map<String, Collection> _collections;
 
@@ -309,6 +309,7 @@ class DeltaTraceDatabase extends CloneableFile {
         errorMessage: "Operation not permitted.",
       );
     }
+    final bool isExistCol = _collections.containsKey(q.target);
     Collection col = collection(q.target);
     try {
       QueryResult<T>? r;
@@ -325,6 +326,8 @@ class DeltaTraceDatabase extends CloneableFile {
           r = col.deleteOne(q);
         case EnumQueryType.search:
           r = col.search(q);
+        case EnumQueryType.searchOne:
+          r = col.searchOne(q);
         case EnumQueryType.getAll:
           r = col.getAll(q);
         case EnumQueryType.conformToTemplate:
@@ -337,6 +340,31 @@ class DeltaTraceDatabase extends CloneableFile {
           r = col.clear(q);
         case EnumQueryType.clearAdd:
           r = col.clearAdd(q);
+        case EnumQueryType.removeCollection:
+          if (isExistCol) {
+            r = QueryResult<T>(
+              isSuccess: true,
+              target: q.target,
+              type: q.type,
+              result: [],
+              dbLength: 0,
+              updateCount: 1,
+              hitCount: 0,
+              errorMessage: null,
+            );
+          } else {
+            r = QueryResult<T>(
+              isSuccess: true,
+              target: q.target,
+              type: q.type,
+              result: [],
+              dbLength: 0,
+              updateCount: 0,
+              hitCount: 0,
+              errorMessage: null,
+            );
+          }
+          removeCollection(q.target);
       }
       switch (q.type) {
         case EnumQueryType.add:
@@ -348,6 +376,7 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.renameField:
         case EnumQueryType.clear:
         case EnumQueryType.clearAdd:
+        case EnumQueryType.removeCollection:
           if (q.mustAffectAtLeastOne) {
             if (r.updateCount == 0) {
               return QueryResult<T>(
@@ -368,6 +397,7 @@ class DeltaTraceDatabase extends CloneableFile {
             return r;
           }
         case EnumQueryType.search:
+        case EnumQueryType.searchOne:
         case EnumQueryType.getAll:
         case EnumQueryType.count:
           return r;
@@ -422,6 +452,18 @@ class DeltaTraceDatabase extends CloneableFile {
     TransactionQuery q, {
     Map<String, Permission>? collectionPermissions,
   }) {
+    // 許可されていないクエリが混ざっていないか調査し、混ざっていたら失敗にする。
+    for (Query i in q.queries) {
+      if (i.type == EnumQueryType.removeCollection) {
+        return TransactionQueryResult(
+          isSuccess: false,
+          results: [],
+          errorMessage:
+              "The query contains a type that is not permitted to be executed within a transaction.",
+        );
+      }
+    }
+    // トランザクション付き処理を開始。
     List<QueryResult> rq = [];
     try {
       // 一時的に保存が必要なコレクションを計算してバッファします。

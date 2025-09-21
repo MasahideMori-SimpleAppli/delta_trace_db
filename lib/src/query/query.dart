@@ -14,7 +14,7 @@ import '../../delta_trace_db.dart';
 /// そのログは完全なDB操作の履歴になります。
 class Query extends CloneableFile {
   static const String className = "Query";
-  static const String version = "5";
+  static const String version = "6";
 
   String target;
   EnumQueryType type;

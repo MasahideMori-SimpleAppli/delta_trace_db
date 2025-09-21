@@ -1,3 +1,11 @@
+## 0.0.33
+
+* The searchOne query has been added, which works quickly when searching for only one item. 
+* The removeCollection query has been added.
+* Fixed a bug in the clearAdd function where only clearing would be performed if the serial key was invalid. This change may affect past queries, so if any of your failing queries(version less than 6) have this, use a clear query to fix it.
+* Fixed a bug where the resetSerial parameter was disabled in RawQueryBuilder.
+* Updated readme and test.
+
 ## 0.0.32
 
 * Security fixes. This is important, so please update if you are running an older version.

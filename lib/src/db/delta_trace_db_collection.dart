@@ -12,7 +12,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "12";
+  static const String version = "14";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.
@@ -472,6 +472,36 @@ class Collection extends CloneableFile {
     );
   }
 
+  /// (en) Finds and returns objects that match a query.
+  /// It is faster than a "search query" when searching for a single item
+  /// because the search stops once a hit is found.
+  ///
+  /// (ja) クエリーにマッチするオブジェクトを検索し、返します。
+  /// 1件のヒットがあった時点で探索を打ち切るため、
+  /// 単一のアイテムを検索する場合はsearchよりも高速に動作します。
+  ///
+  /// * [q] : The query.
+  QueryResult<T> searchOne<T>(Query q) {
+    List<Map<String, dynamic>> r = [];
+    // 検索
+    for (var i = 0; i < _data.length; i++) {
+      if (_evaluate(_data[i], q.queryNode!)) {
+        r.add(_data[i]);
+        break;
+      }
+    }
+    return QueryResult<T>(
+      isSuccess: true,
+      target: q.target,
+      type: q.type,
+      result: (UtilCopy.jsonableDeepCopy(r) as List)
+          .cast<Map<String, dynamic>>(),
+      dbLength: _data.length,
+      updateCount: 0,
+      hitCount: r.length,
+    );
+  }
+
   /// (en) Gets all the contents of the collection.
   /// This is useful if you just want to sort the contents.
   ///
@@ -643,12 +673,6 @@ class Collection extends CloneableFile {
   ///
   /// * [q] : The query.
   QueryResult<T> clearAdd<T>(Query q) {
-    final int preLen = _data.length;
-    _data.clear();
-    if (q.resetSerial) {
-      _serialNum = 0;
-    }
-    List<Map<String, dynamic>> addedItems = [];
     final addData = (UtilCopy.jsonableDeepCopy(q.addData!) as List)
         .cast<Map<String, dynamic>>();
     if (q.serialKey != null) {
@@ -667,6 +691,14 @@ class Collection extends CloneableFile {
           );
         }
       }
+    }
+    final int preLen = _data.length;
+    _data.clear();
+    if (q.resetSerial) {
+      _serialNum = 0;
+    }
+    List<Map<String, dynamic>> addedItems = [];
+    if (q.serialKey != null) {
       for (Map<String, dynamic> i in addData) {
         final int serialNum = _serialNum;
         i[q.serialKey!] = serialNum;
