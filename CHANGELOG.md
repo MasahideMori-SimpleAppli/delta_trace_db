@@ -1,3 +1,9 @@
+## 0.0.34
+
+* In search queries, sortObj is no longer required when using offset, startAfter, or endBefore. If not specified, the queries will be processed in the order they were added to the database.
+* The getAll query now supports offset, startAfter, endBefore, and limit, making it easier to implement paging within a collection.
+* Improved QueryBuilder and RawQueryBuilder descriptions.
+
 ## 0.0.33
 
 * The searchOne query has been added, which works quickly when searching for only one item. 

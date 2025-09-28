@@ -15,14 +15,18 @@ In addition, queries are also classes, and can have DB operation information con
 who, when, what, why, and from.  
 If serialized and saved, it provides a very rich source of information for security audits and
 usage analysis.  
-This is particularly useful in projects with various constraints, such as medical use.  
+This is extremely useful for projects with various constraints, such as medical applications.  
+(However, please note that when using for medical purposes, each country usually has its own special rules. This database does not take into account the medical circumstances of each country.)  
 In addition, for when, the TemporalTrace class has a complete tracing function for   
 the communication path and each arrival time.  
 I think this would be useful, for example, in space-scale communication networks and relay servers,
 where non-negligible delays occur even at the speed of light.  
 
-This package also has a Python backend implementation.
-[Python ver.](https://pypi.org/project/delta-trace-db/)
+This package also has a Python backend implementation.  
+[Python ver.](https://pypi.org/project/delta-trace-db/)  
+
+I am also developing an open source editor for manually editing the DB contents:  
+[DeltaTraceStudio](https://github.com/MasahideMori-SimpleAppli/delta_trace_studio)  
 
 ## DB structure
 
@@ -409,45 +413,45 @@ any problems in practical use.
 Please note that speeds also depend on the amount of data, so if you have a lot of large data, it will be slower.
 
 ```text
-speed test for 100000 records                                                                                                                                                                                                                                                     
+speed test for 100000 records                                                                                                                                                                                                                                                       
 start add
-end add: 190 ms
+end add: 222 ms
 start getAll (with object convert)
-end getAll: 727 ms
+end getAll: 665 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 348 ms
+end save: 351 ms
 start load (with json string convert)
-end load: 249 ms
+end load: 252 ms
 start search (with object convert)
-end search: 869 ms
+end search: 815 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 502 ms
+end search paging: 467 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 618 ms
+end search paging by obj: 552 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 506 ms
+end search paging by offset: 470 ms
 returnsLength:50000
 start searchOne, the last index object search (with object convert)
-end searchOne: 13 ms
+end searchOne: 14 ms
 returnsLength:1
 start update at half index and last index object
-end update: 27 ms
+end update: 28 ms
 start updateOne of half index object
 end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 61 ms
+end conformToTemplate: 60 ms
 start delete half object (with object convert)
-end delete: 491 ms
+end delete: 410 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 7 ms
+end deleteOne: 8 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 58 ms
+end add with serialKey: 67 ms
 addedCount:100000
 ```
 

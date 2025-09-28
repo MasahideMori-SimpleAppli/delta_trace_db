@@ -12,7 +12,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "14";
+  static const String version = "15";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.
@@ -252,9 +252,7 @@ class Collection extends CloneableFile {
           if (isSingleTarget) break;
         }
       }
-      if (q.sortObj != null) {
-        r.sort(q.sortObj!.getComparator());
-      }
+      r = _applySort(q, r);
       if (r.isNotEmpty) {
         notifyListeners();
       }
@@ -301,7 +299,7 @@ class Collection extends CloneableFile {
   /// * [q] : The query.
   QueryResult<T> delete<T>(Query q) {
     if (q.returnData) {
-      final List<Map<String, dynamic>> deletedItems = [];
+      List<Map<String, dynamic>> deletedItems = [];
       _data.removeWhere((item) {
         final shouldDelete = _evaluate(item, q.queryNode!);
         if (shouldDelete) {
@@ -309,9 +307,7 @@ class Collection extends CloneableFile {
         }
         return shouldDelete;
       });
-      if (q.sortObj != null) {
-        deletedItems.sort(q.sortObj!.getComparator());
-      }
+      deletedItems = _applySort(q, deletedItems);
       if (deletedItems.isNotEmpty) {
         notifyListeners();
       }
@@ -365,9 +361,6 @@ class Collection extends CloneableFile {
           _data.removeAt(i);
           break;
         }
-      }
-      if (q.sortObj != null) {
-        deletedItems.sort(q.sortObj!.getComparator());
       }
       if (deletedItems.isNotEmpty) {
         notifyListeners();
@@ -423,43 +416,7 @@ class Collection extends CloneableFile {
     }
     final int hitCount = r.length;
     // ソートやページングのオプション
-    if (q.sortObj != null) {
-      final sorted = [...r];
-      sorted.sort(q.sortObj!.getComparator());
-      r = sorted;
-      if (q.offset != null) {
-        if (q.offset! > 0) {
-          r = r.skip(q.offset!).toList();
-        }
-      } else {
-        if (q.startAfter != null) {
-          final equality = const DeepCollectionEquality();
-          final index = r.indexWhere(
-            (item) => equality.equals(item, q.startAfter),
-          );
-          if (index != -1 && index + 1 < r.length) {
-            r = r.sublist(index + 1);
-          } else if (index != -1 && index + 1 >= r.length) {
-            r = [];
-          }
-        } else if (q.endBefore != null) {
-          final equality = const DeepCollectionEquality();
-          final index = r.indexWhere(
-            (item) => equality.equals(item, q.endBefore),
-          );
-          if (index != -1) {
-            r = r.sublist(0, index);
-          }
-        }
-      }
-    }
-    if (q.limit != null) {
-      if (q.offset == null && q.startAfter == null && q.endBefore != null) {
-        r = r.length > q.limit! ? r.sublist(r.length - q.limit!) : r;
-      } else {
-        r = r.take(q.limit!).toList();
-      }
-    }
+    r = _sortPagingLimit(q, r);
     return QueryResult<T>(
       isSuccess: true,
       target: q.target,
@@ -470,6 +427,82 @@ class Collection extends CloneableFile {
       updateCount: 0,
       hitCount: hitCount,
     );
+  }
+
+  /// ソートとページング、リミットをそれぞれ適用して返します。
+  List<Map<String, dynamic>> _sortPagingLimit(
+    Query q,
+    List<Map<String, dynamic>> preR,
+  ) {
+    List<Map<String, dynamic>> r = preR;
+    r = _applySort(q, r);
+    r = _applyGetPosition(q, r);
+    r = _applyLimit(q, r);
+    return r;
+  }
+
+  /// ソートを適用する。
+  List<Map<String, dynamic>> _applySort(
+    Query q,
+    List<Map<String, dynamic>> preR,
+  ) {
+    List<Map<String, dynamic>> r = preR;
+    if (q.sortObj != null) {
+      final sorted = [...r];
+      sorted.sort(q.sortObj!.getComparator());
+      r = sorted;
+    }
+    return r;
+  }
+
+  /// offset、startAfter、endBeforeを適用します。
+  /// offset、startAfter、endBeforeの優先度は、offset > startAfter > endBeforeです。
+  List<Map<String, dynamic>> _applyGetPosition(
+    Query q,
+    List<Map<String, dynamic>> preR,
+  ) {
+    List<Map<String, dynamic>> r = preR;
+    if (q.offset != null) {
+      if (q.offset! > 0) {
+        r = r.skip(q.offset!).toList();
+      }
+    } else {
+      if (q.startAfter != null) {
+        final equality = const DeepCollectionEquality();
+        final index = r.indexWhere(
+          (item) => equality.equals(item, q.startAfter),
+        );
+        if (index != -1 && index + 1 < r.length) {
+          r = r.sublist(index + 1);
+        } else if (index != -1 && index + 1 >= r.length) {
+          r = [];
+        }
+      } else if (q.endBefore != null) {
+        final equality = const DeepCollectionEquality();
+        final index = r.indexWhere(
+          (item) => equality.equals(item, q.endBefore),
+        );
+        if (index != -1) {
+          r = r.sublist(0, index);
+        }
+      }
+    }
+    return r;
+  }
+
+  /// リミットを適用します。
+  /// - 通常: 先頭から limit 件を返す
+  /// - endBefore が有効な場合: 対象範囲の末尾から limit 件を返す
+  List<Map<String, dynamic>> _applyLimit(
+    Query q,
+    List<Map<String, dynamic>> preR,
+  ) {
+    List<Map<String, dynamic>> r = preR;
+    if (q.limit == null) return r;
+    if (q.offset == null && q.startAfter == null && q.endBefore != null) {
+      return r.length > q.limit! ? r.sublist(r.length - q.limit!) : r;
+    }
+    return r.take(q.limit!).toList();
   }
 
   /// (en) Finds and returns objects that match a query.
@@ -504,21 +537,21 @@ class Collection extends CloneableFile {
 
   /// (en) Gets all the contents of the collection.
   /// This is useful if you just want to sort the contents.
+  /// By specifying paging-related parameters,
+  /// you can easily create paging through all items.
   ///
   /// (ja) コレクションの内容を全件取得します。
   /// 内容をソートだけしたいような場合に便利です。
+  /// ページング関係のパラメータを指定することで、
+  /// 全アイテムからのページングを簡単に作ることもできます。
   ///
   /// * [q] : The query.
   QueryResult<T> getAll<T>(Query q) {
     List<Map<String, dynamic>> r = [];
     r.addAll(_data);
     final int hitCount = r.length;
-    // ソートのオプション
-    if (q.sortObj != null) {
-      final sorted = [...r];
-      sorted.sort(q.sortObj!.getComparator());
-      r = sorted;
-    }
+    // ソートやページングのオプション
+    r = _sortPagingLimit(q, r);
     return QueryResult<T>(
       isSuccess: true,
       target: q.target,

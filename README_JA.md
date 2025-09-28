@@ -6,12 +6,16 @@
 このデータベースではクラス構造をそのままデータベースに登録でき、登録したクラスの要素を全文検索できます。  
 また、クエリもクラスであり、who, when, what, why, fromで構成されるDBの操作情報を持たせられるため、
 シリアライズして保存すれば、セキュリティ監査や利用状況の分析において非常にリッチな情報源を提供します。
-これは特に医療用などの様々な制約のあるプロジェクトにおいて、威力を発揮します。
-また、whenについては、TemporalTraceクラスによる通信経路、 及び各到達時間の完全なトレース機能を持ちます。
+これは例えば医療用などの様々な制約のあるプロジェクトにおいて、威力を発揮します。  
+（ただし、医療用などで使用する場合、通常は国ごとに特別なルールがあるため注意してください。このDBは各国の医療事情についてはサポート対象外です）  
+また、whenについては、TemporalTraceクラスによる通信経路、 及び各到達時間の完全なトレース機能を持ちます。  
 これは例えば、光の速度でも無視できない遅延が発生する宇宙規模の通信網や中継サーバーなどで便利ではないかと考えています。  
 
 このパッケージには、バックエンド用のPython版もあります。  
-[Python ver.](https://pypi.org/project/delta-trace-db/)
+[Python ver.](https://pypi.org/project/delta-trace-db/)　　
+
+また、DBの内容を手動で編集するためのエディタもオープンソースで開発中です。  
+[DeltaTraceStudio](https://github.com/MasahideMori-SimpleAppli/delta_trace_studio)  
 
 ## DBの構造
 
@@ -381,45 +385,45 @@ testフォルダのspeed_test.dartを利用して実際の環境でテストし�
 速度はデータ容量にも依存するので、大きなデータが大量にある場合はより遅くなることに注意してください。
 
 ```text
-speed test for 100000 records                                                                                                                                                                                                                                                     
+speed test for 100000 records                                                                                                                                                                                                                                                       
 start add
-end add: 190 ms
+end add: 222 ms
 start getAll (with object convert)
-end getAll: 727 ms
+end getAll: 665 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 348 ms
+end save: 351 ms
 start load (with json string convert)
-end load: 249 ms
+end load: 252 ms
 start search (with object convert)
-end search: 869 ms
+end search: 815 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 502 ms
+end search paging: 467 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 618 ms
+end search paging by obj: 552 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 506 ms
+end search paging by offset: 470 ms
 returnsLength:50000
 start searchOne, the last index object search (with object convert)
-end searchOne: 13 ms
+end searchOne: 14 ms
 returnsLength:1
 start update at half index and last index object
-end update: 27 ms
+end update: 28 ms
 start updateOne of half index object
 end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 61 ms
+end conformToTemplate: 60 ms
 start delete half object (with object convert)
-end delete: 491 ms
+end delete: 410 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 7 ms
+end deleteOne: 8 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 58 ms
+end add with serialKey: 67 ms
 addedCount:100000
 ```
 

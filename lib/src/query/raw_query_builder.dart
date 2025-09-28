@@ -30,12 +30,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// This value is unique per collection.
   /// Note that only variables directly under the class can be specified as
   /// keys, not nested fields.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.add({
     required super.target,
     required List<Map<String, dynamic>> rawAddData,
@@ -64,20 +61,17 @@ class RawQueryBuilder extends QueryBuilder {
   /// and you update it by data of {"b": {"d": 2}},
   /// the result will be {"a": 0, "b": {"d": 2}}.
   /// * [returnData] : If true, return the changed objs.
-  /// * [sortObj] : An object for sorting the search return values.
-  /// SingleSort or MultiSort can be used.
-  /// If you set returnData to true, the return values of an update or delete
-  /// query will be sorted by this object.
+  /// * [sortObj] : An object for sorting the return values.
+  ///   - SingleSort or MultiSort can be used.
+  ///   - Optional. If omitted, results will be returned in the order
+  ///   they were added to the database.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.update({
     required super.target,
     required super.queryNode,
@@ -110,12 +104,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.updateOne({
     required super.target,
     required super.queryNode,
@@ -136,17 +127,16 @@ class RawQueryBuilder extends QueryBuilder {
   /// comparison_node.dart.
   /// * [returnData] : If true, return the changed objs.
   /// * [sortObj] : An object for sorting the return values.
-  /// SingleSort or MultiSort can be used.
+  ///   - SingleSort or MultiSort can be used.
+  ///   - Optional. If omitted, results will be returned in the order
+  ///   they were added to the database.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.delete({
     required super.target,
     required super.queryNode,
@@ -170,12 +160,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.deleteOne({
     required super.target,
     required super.queryNode,
@@ -194,12 +181,11 @@ class RawQueryBuilder extends QueryBuilder {
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
   /// * [sortObj] : An object for sorting the return values.
-  /// SingleSort or MultiSort can be used.
-  /// If you set returnData to true, the return values of an update or delete
-  /// query will be sorted by this object.
+  ///   - SingleSort or MultiSort can be used.
+  ///   - Optional. If omitted, results will be returned in the order
+  ///   they were added to the database.
   /// * [offset] : An offset for paging support in the front end.
-  /// This is only valid when sorting is specified, and allows you to specify
-  /// that the results returned will be from a specific index after sorting.
+  /// If specified, data from the offset onwards will be retrieved.
   /// * [startAfter] : If you pass in a serialized version of a search result
   /// object, the search will return results from objects after that object,
   /// and if an offset is specified, it will be ignored.
@@ -218,12 +204,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// limit number of objects after the specified object will be returned.
   /// If specified together with endBefore,
   /// limit number of objects before the specified object will be returned.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.search({
     required super.target,
     required super.queryNode,
@@ -248,12 +231,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// * [queryNode] : This is the node object used for the search.
   /// You can build queries by combining the various nodes defined in
   /// comparison_node.dart.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.searchOne({
     required super.target,
     required super.queryNode,
@@ -261,20 +241,52 @@ class RawQueryBuilder extends QueryBuilder {
   }) : super.searchOne();
 
   /// (en) Gets all items in the specified collection.
+  /// If a limit(limit, offset, startAfter, endBefore, limit) is set,
+  /// items from the specified location and quantity will be retrieved from
+  /// all items.
   ///
   /// (ja) 指定されたコレクションの全てのアイテムを取得します。
+  /// 制限(limit, offset, startAfter, endBefore, limit)をかけた場合は、
+  /// 全てのアイテムから指定の位置と量のアイテムを取得します。
   ///
   /// * [target] : The collection name in DB.
   /// * [sortObj] : An object for sorting the return values.
-  /// SingleSort or MultiSort can be used.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
-  RawQueryBuilder.getAll({required super.target, super.sortObj, super.cause})
-    : super.getAll();
+  ///   - SingleSort or MultiSort can be used.
+  ///   - Optional. If omitted, results will be returned in the order
+  ///   they were added to the database.
+  /// * [offset] : An offset for paging support in the front end.
+  /// If specified, data from the offset onwards will be retrieved.
+  /// * [startAfter] : If you pass in a serialized version of a search result
+  /// object, the search will return results from objects after that object,
+  /// and if an offset is specified, it will be ignored.
+  /// This does not work if there are multiple identical objects because it
+  /// compares the object values, and is slightly slower than specifying an
+  /// offset, but it works fine even if new objects are added during the search.
+  /// * [endBefore] : If you pass in a serialized version of a search result
+  /// object, the search will return results from the object before that one,
+  /// and any offset or startAfter specified will be ignored.
+  /// This does not work if there are multiple identical objects because it
+  /// compares the object values, and is slightly slower than specifying an
+  /// offset, but it works fine even if new objects are added during the search.
+  /// * [limit] : The maximum number of search results.
+  ///   - With offset/startAfter: returns up to [limit] items after the
+  ///   specified position.
+  ///   - With endBefore: returns up to [limit] items before the specified
+  ///   position.
+  ///   - If no offset/startAfter/endBefore is specified, the first [limit]
+  ///   items in addition order are returned.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
+  RawQueryBuilder.getAll({
+    required super.target,
+    super.sortObj,
+    super.offset,
+    super.startAfter,
+    super.endBefore,
+    super.limit,
+    super.cause,
+  }) : super.getAll();
 
   /// (en) Formats the contents of the specified collection to match the
   /// specified template.
@@ -295,12 +307,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.conformToTemplate({
     required super.target,
     required Map<String, dynamic> template,
@@ -320,12 +329,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.renameField({
     required super.target,
     required super.renameBefore,
@@ -340,12 +346,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// (ja) 指定されたコレクションの要素数を取得します。
   ///
   /// * [target] : The collection name in DB.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.count({required super.target, super.cause}) : super.count();
 
   /// (en) This query empties the contents of the specified collection.
@@ -359,12 +362,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// returned QueryResult will be set to false.
   /// * [resetSerial] : If true, resets the managed serial number to 0 on
   /// a clear or clearAdd query.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.clear({
     required super.target,
     super.mustAffectAtLeastOne,
@@ -392,12 +392,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// keys, not nested fields.
   /// * [resetSerial] : If true, resets the managed serial number to 0 on
   /// a clear or clearAdd query.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.clearAdd({
     required super.target,
     required List<Map<String, dynamic>> rawAddData,
@@ -431,12 +428,9 @@ class RawQueryBuilder extends QueryBuilder {
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
-  /// * [cause] : You can add further parameters such as why this query was
-  /// made and who made it.
-  /// This is useful if you have high security requirements or want to run the
-  /// program autonomously using artificial intelligence.
-  /// By saving the entire query including this as a log,
-  /// the DB history is recorded.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
   RawQueryBuilder.removeCollection({
     required super.target,
     super.mustAffectAtLeastOne,
