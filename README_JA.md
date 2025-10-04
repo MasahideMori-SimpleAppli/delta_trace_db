@@ -86,7 +86,7 @@ class User extends CloneableFile {
         'name': name,
         'age': age,
         'createdAt': createdAt.toIso8601String(),
-        'updatedAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toUtc().toIso8601String(),
         'nestedObj': {...nestedObj},
       };
 
@@ -100,7 +100,7 @@ class User extends CloneableFile {
 ```dart
 
 final db = DeltaTraceDatabase();
-final now = DateTime.now();
+final now = DateTime.now().toUtc();
 final users = [
   User(id: -1, // ダミーの値を入力。
       name: 'Taro',
@@ -275,7 +275,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
 その分のメモリを追加で確保しておく必要があることに注意してください。  
 
 ```dart
-final now = DateTime.now();
+final now = DateTime.now().toUtc();
 final db = DeltaTraceDatabase();
 List<User> users = [
   User(
@@ -372,6 +372,14 @@ final r1 = db.executeQuery(q1);
 final q2 = RawQueryBuilder.removeCollection(target: "user").build();
 final r2 = db.executeQuery(q2);
 ```
+
+## ⚠️ 🕒 日時の扱いに注意！
+
+「DeltaTraceDB」は、タイムゾーン無し（ローカルタイム）とタイムゾーン付き（DartではUTC）のそれぞれの日時を取り扱えますが、
+タイムゾーン無しとタイムゾーン付きのdatetimeは、原理上正しく比較計算ができません。
+特にPython版では演算エラーになるため、DBの内容を設計する際には十分注意してください。
+バックエンドやクラウドが関与する場合、タイムゾーンはUTCで統一しておくと便利です。
+または、UNIX Timeの整数値を使う方法も高速で利便性が高いです。
 
 ## 速度
 

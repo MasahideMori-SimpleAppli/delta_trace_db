@@ -99,7 +99,7 @@ class User extends CloneableFile {
         'name': name,
         'age': age,
         'createdAt': createdAt.toIso8601String(),
-        'updatedAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toUtc().toIso8601String(),
         'nestedObj': {...nestedObj},
       };
 
@@ -113,7 +113,7 @@ class User extends CloneableFile {
 ```dart
 
 final db = DeltaTraceDatabase();
-final now = DateTime.now();
+final now = DateTime.now().toUtc();
 final users = [
   User(id: -1, // Dummy Value
       name: 'Taro',
@@ -300,7 +300,7 @@ Please note that internally, the collection to be updated is temporarily buffere
 so you will need to allocate additional memory for this.  
 
 ```dart
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     final db = DeltaTraceDatabase();
     List<User> users = [
       User(
@@ -396,6 +396,14 @@ final r1 = db.executeQuery(q1);
 final q2 = RawQueryBuilder.removeCollection(target: "user").build();
 final r2 = db.executeQuery(q2);
 ```
+
+## ⚠️ 🕒 Be careful when handling date and time!
+
+"DeltaTraceDB" can handle date and time without a time zone (local time) and with a time zone (UTC in Dart),
+but in principle, datetimes without a time zone and those with a time zone cannot be correctly compared.
+This will result in an operation error, particularly in the Python version, so please be careful when designing your database contents.
+If a backend or cloud is involved, it is convenient to standardize the time zone to UTC.
+Alternatively, using UNIX Time integer values is fast and convenient.
 
 ## Speed
 
