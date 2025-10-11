@@ -399,12 +399,12 @@ final r2 = db.executeQuery(q2);
 
 ## ⚠️ 🕒 Be careful when handling date and time!
 
-"DeltaTraceDB" can handle datetimes without a time zone (local time) and with a time zone (UTC in Dart), but
-in principle, datetimes without a time zone and those with a time zone cannot be correctly compared.
-In particular, the Python version will result in an operation error (treat as False in search comparisons), 
-so please be careful when designing the database contents.
-If a backend or cloud is involved, we recommend standardizing the time zone to UTC.
-Alternatively, using UNIX Time integer values is fast and convenient.
+"DeltaTraceDB" can handle datetimes without a time zone (local time) and with a time zone (UTC in Dart), but  
+in principle, datetimes without a time zone and those with a time zone cannot be compared correctly.  
+These will be treated as False in search comparison calculations, so please be careful when designing the DB contents.  
+If a backend or cloud is involved, we recommend standardizing the time zone to UTC.  
+Alternatively, using UNIX Time integer values is fast and convenient.  
+If you want to see in detail how it actually works, check out the [test code](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/test/timezone_search_test.dart).  
 
 ## Speed
 
