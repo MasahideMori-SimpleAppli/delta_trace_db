@@ -1,6 +1,6 @@
 name: delta_trace_db
 description: "The NoSQL in-memory database with class-based functionality and detailed operation history tracking."
-version: 0.0.34
+version: 0.0.35
 repository: https://github.com/MasahideMori-SimpleAppli/delta_trace_db
 
 environment:

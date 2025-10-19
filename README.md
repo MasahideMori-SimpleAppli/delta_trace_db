@@ -98,7 +98,7 @@ class User extends CloneableFile {
         'id': id,
         'name': name,
         'age': age,
-        'createdAt': createdAt.toIso8601String(),
+        'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': DateTime.now().toUtc().toIso8601String(),
         'nestedObj': {...nestedObj},
       };
@@ -113,7 +113,7 @@ class User extends CloneableFile {
 ```dart
 
 final db = DeltaTraceDatabase();
-final now = DateTime.now().toUtc();
+final now = DateTime.now();
 final users = [
   User(id: -1, // Dummy Value
       name: 'Taro',
@@ -300,7 +300,7 @@ Please note that internally, the collection to be updated is temporarily buffere
 so you will need to allocate additional memory for this.  
 
 ```dart
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final db = DeltaTraceDatabase();
     List<User> users = [
       User(

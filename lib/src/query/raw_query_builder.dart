@@ -3,9 +3,19 @@ import '../../delta_trace_db.dart';
 /// (en) A builder class for easily constructing queries.
 /// This version differs from the normal QueryBuilder in that it passes a Map
 /// directly without using a ClonableFile.
+/// In addition to constructors for creating each query,
+/// there are methods for dynamically changing the paging parameters.
 ///
 /// (ja) クエリを簡単に組み立てるためのビルダークラスです。
 /// このバージョンは通常のQueryBuilderと異なり、ClonableFileを使用せずにMapを直接渡します。
+/// 各クエリを作成するためのコンストラクタの他に、
+/// ページング用のパラメータを動的に変更するためのメソッドがあります。
+///
+/// Paging setting methods
+/// - [setOffset]
+/// - [setStartAfter]
+/// - [setEndBefore]
+/// - [setLimit]
 class RawQueryBuilder extends QueryBuilder {
   List<Map<String, dynamic>>? rawAddData;
 
@@ -436,6 +446,63 @@ class RawQueryBuilder extends QueryBuilder {
     super.mustAffectAtLeastOne,
     super.cause,
   }) : super.removeCollection();
+
+  /// (en) This method can be used if you want to change only the search position.
+  ///
+  /// (ja) 検索位置だけを変更したい場合に利用できるメソッドです。
+  ///
+  /// * [newOffset] : An offset for paging support in the front end.
+  /// If specified, data from the offset onwards will be retrieved.
+  QueryBuilder setOffset(int? newOffset) {
+    offset = newOffset;
+    return this;
+  }
+
+  /// (en) This method can be used if you want to change only the search position.
+  ///
+  /// (ja) 検索位置だけを変更したい場合に利用できるメソッドです。
+  ///
+  /// * [newStartAfter] : If you pass in a serialized version of a search result
+  /// object, the search will return results from objects after that object,
+  /// and if an offset is specified, it will be ignored.
+  /// This does not work if there are multiple identical objects because it
+  /// compares the object values, and is slightly slower than specifying an
+  /// offset, but it works fine even if new objects are added during the search.
+  QueryBuilder setStartAfter(Map<String, dynamic>? newStartAfter) {
+    startAfter = newStartAfter;
+    return this;
+  }
+
+  /// (en) This method can be used if you want to change only the search position.
+  ///
+  /// (ja) 検索位置だけを変更したい場合に利用できるメソッドです。
+  ///
+  /// * [newEndBefore] : If you pass in a serialized version of a search result
+  /// object, the search will return results from the object before that one,
+  /// and any offset or startAfter specified will be ignored.
+  /// This does not work if there are multiple identical objects because it
+  /// compares the object values, and is slightly slower than specifying an
+  /// offset, but it works fine even if new objects are added during the search.
+  QueryBuilder setEndBefore(Map<String, dynamic>? newEndBefore) {
+    endBefore = newEndBefore;
+    return this;
+  }
+
+  /// (en) This method can be used if you want to change only the limit.
+  ///
+  /// (ja) limitだけを変更したい場合に利用できるメソッドです。
+  ///
+  /// * [newLimit] : The maximum number of search results.
+  ///   - With offset/startAfter: returns up to [limit] items after the
+  ///   specified position.
+  ///   - With endBefore: returns up to [limit] items before the specified
+  ///   position.
+  ///   - If no offset/startAfter/endBefore is specified, the first [limit]
+  ///   items in addition order are returned.
+  QueryBuilder setLimit(int? newLimit) {
+    limit = newLimit;
+    return this;
+  }
 
   /// (en) Commit the content and convert it into a query object.
   ///

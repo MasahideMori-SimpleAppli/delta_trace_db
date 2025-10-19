@@ -85,7 +85,7 @@ class User extends CloneableFile {
         'id': id,
         'name': name,
         'age': age,
-        'createdAt': createdAt.toIso8601String(),
+        'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': DateTime.now().toUtc().toIso8601String(),
         'nestedObj': {...nestedObj},
       };
@@ -100,7 +100,7 @@ class User extends CloneableFile {
 ```dart
 
 final db = DeltaTraceDatabase();
-final now = DateTime.now().toUtc();
+final now = DateTime.now();
 final users = [
   User(id: -1, // ダミーの値を入力。
       name: 'Taro',
@@ -275,7 +275,7 @@ DBがトランザクションクエリ実行前の状態に巻き戻されます
 その分のメモリを追加で確保しておく必要があることに注意してください。  
 
 ```dart
-final now = DateTime.now().toUtc();
+final now = DateTime.now();
 final db = DeltaTraceDatabase();
 List<User> users = [
   User(
