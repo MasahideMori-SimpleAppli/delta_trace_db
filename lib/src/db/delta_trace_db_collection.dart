@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:logging/logging.dart';
-import '../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 

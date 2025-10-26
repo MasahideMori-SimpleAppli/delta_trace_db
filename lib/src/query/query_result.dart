@@ -1,4 +1,4 @@
-import '../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) This class stores the query results and additional information from
 /// the database.

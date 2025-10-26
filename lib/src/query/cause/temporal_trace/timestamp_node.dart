@@ -1,6 +1,6 @@
 import 'package:file_state_manager/file_state_manager.dart';
 
-import '../../../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) A node representing each checkpoint on the trajectory.
 /// This will contain individual data for each point,

@@ -1,5 +1,5 @@
-import '../../../delta_trace_db.dart';
-import '../util_field.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
+import 'package:delta_trace_db/src/query/util_field.dart';
 
 /// (en) Query node for Equals operation.
 ///

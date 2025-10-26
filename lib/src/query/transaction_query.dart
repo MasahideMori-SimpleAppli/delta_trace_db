@@ -1,5 +1,5 @@
 import 'package:file_state_manager/file_state_manager.dart';
-import '../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) This is a query class that supports transaction processing.
 /// It internally stores normal query classes as an array,

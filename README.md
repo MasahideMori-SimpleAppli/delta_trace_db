@@ -16,11 +16,13 @@ who, when, what, why, and from.
 If serialized and saved, it provides a very rich source of information for security audits and
 usage analysis.  
 This is extremely useful for projects with various constraints, such as medical applications.  
-(However, please note that when using for medical purposes, each country usually has its own special rules. This database does not take into account the medical circumstances of each country.)  
-In addition, for when, the TemporalTrace class has a complete tracing function for   
-the communication path and each arrival time.  
-I think this would be useful, for example, in space-scale communication networks and relay servers,
-where non-negligible delays occur even at the speed of light.  
+(However, please note that when using for medical purposes, each country usually has its own special rules.
+This database does not take into account the medical circumstances of each country.)  
+
+Furthermore, by utilizing features such as the TemporalTrace class in queries, 
+it may also be useful in space-scale communication networks and relay servers, 
+where latency is significant even at the speed of light.  
+The TemporalTrace class provides a complete trace of the communication path and the arrival time of each.  
 
 This package also has a Python backend implementation.  
 [Python ver.](https://pypi.org/project/delta-trace-db/)  

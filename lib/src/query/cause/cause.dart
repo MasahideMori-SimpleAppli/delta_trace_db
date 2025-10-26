@@ -1,5 +1,5 @@
 import 'package:file_state_manager/file_state_manager.dart';
-import '../../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) A class for entering a description of a query.
 /// If you write this class accurately, you can log queries and

@@ -1,4 +1,4 @@
-import '../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) A builder class for easily constructing queries.
 /// This version differs from the normal QueryBuilder in that it passes a Map
@@ -45,13 +45,12 @@ class RawQueryBuilder extends QueryBuilder {
   /// to record the reason or initiator of a query.
   RawQueryBuilder.add({
     required super.target,
-    required List<Map<String, dynamic>> rawAddData,
+    required List<Map<String, dynamic>> this.rawAddData,
     super.returnData = false,
     super.mustAffectAtLeastOne,
     super.serialKey,
     super.cause,
-  }) : this.rawAddData = rawAddData,
-       super.add(addData: []);
+  }) : super.add(addData: []);
 
   /// (en) Overwrites the parameters of all objects in the specified collection
   /// that match the conditions.
@@ -322,10 +321,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// to record the reason or initiator of a query.
   RawQueryBuilder.conformToTemplate({
     required super.target,
-    required Map<String, dynamic> template,
+    required super.template,
     super.mustAffectAtLeastOne,
     super.cause,
-  }) : super.conformToTemplate(template: template);
+  }) : super.conformToTemplate();
 
   /// (en) Renames a specific field in the specified collection.
   ///
@@ -407,14 +406,13 @@ class RawQueryBuilder extends QueryBuilder {
   /// to record the reason or initiator of a query.
   RawQueryBuilder.clearAdd({
     required super.target,
-    required List<Map<String, dynamic>> rawAddData,
+    required List<Map<String, dynamic>> this.rawAddData,
     super.returnData = false,
     super.mustAffectAtLeastOne,
     super.serialKey,
     super.resetSerial,
     super.cause,
-  }) : this.rawAddData = rawAddData,
-       super.clearAdd(addData: []);
+  }) : super.clearAdd(addData: []);
 
   /// (en) Deletes the specified collection.
   /// This query is special because it deletes the collection itself.
@@ -453,6 +451,7 @@ class RawQueryBuilder extends QueryBuilder {
   ///
   /// * [newOffset] : An offset for paging support in the front end.
   /// If specified, data from the offset onwards will be retrieved.
+  @override
   QueryBuilder setOffset(int? newOffset) {
     offset = newOffset;
     return this;
@@ -468,6 +467,7 @@ class RawQueryBuilder extends QueryBuilder {
   /// This does not work if there are multiple identical objects because it
   /// compares the object values, and is slightly slower than specifying an
   /// offset, but it works fine even if new objects are added during the search.
+  @override
   QueryBuilder setStartAfter(Map<String, dynamic>? newStartAfter) {
     startAfter = newStartAfter;
     return this;
@@ -483,6 +483,7 @@ class RawQueryBuilder extends QueryBuilder {
   /// This does not work if there are multiple identical objects because it
   /// compares the object values, and is slightly slower than specifying an
   /// offset, but it works fine even if new objects are added during the search.
+  @override
   QueryBuilder setEndBefore(Map<String, dynamic>? newEndBefore) {
     endBefore = newEndBefore;
     return this;
@@ -499,6 +500,7 @@ class RawQueryBuilder extends QueryBuilder {
   ///   position.
   ///   - If no offset/startAfter/endBefore is specified, the first [limit]
   ///   items in addition order are returned.
+  @override
   QueryBuilder setLimit(int? newLimit) {
     limit = newLimit;
     return this;
@@ -507,6 +509,7 @@ class RawQueryBuilder extends QueryBuilder {
   /// (en) Commit the content and convert it into a query object.
   ///
   /// (ja) 内容を確定してクエリーオブジェクトに変換します。
+  @override
   Query build() {
     return Query(
       target: target,

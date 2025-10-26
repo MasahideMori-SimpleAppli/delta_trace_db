@@ -1,4 +1,4 @@
-import '../../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 abstract class QueryNode {
   /// (en) Returns true if the object matches the calculation.

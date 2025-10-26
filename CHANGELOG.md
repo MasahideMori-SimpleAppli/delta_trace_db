@@ -1,3 +1,7 @@
+## 0.0.36
+
+* Refactoring was performed.
+
 ## 0.0.35
 
 * Added a description about time zone handling to the README.

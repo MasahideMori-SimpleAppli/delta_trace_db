@@ -1,5 +1,5 @@
 import 'package:file_state_manager/file_state_manager.dart';
-import '../util_field.dart';
+import 'package:delta_trace_db/src/query/util_field.dart';
 import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) This class allows you to specify single-key sorting for

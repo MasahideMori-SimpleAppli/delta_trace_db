@@ -1,6 +1,6 @@
 import 'package:file_state_manager/file_state_manager.dart';
 
-import '../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) A builder class for easily constructing queries.
 /// In addition to constructors for creating each query,
@@ -63,13 +63,12 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.add({
     required this.target,
-    required List<CloneableFile> addData,
+    required List<CloneableFile> this.addData,
     this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.serialKey,
     this.cause,
-  }) : this.addData = addData,
-       type = EnumQueryType.add;
+  }) : type = EnumQueryType.add;
 
   /// (en) Overwrites the parameters of all objects in the specified collection
   /// that match the conditions.
@@ -102,15 +101,13 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.update({
     required this.target,
-    required QueryNode queryNode,
-    required Map<String, dynamic> overrideData,
+    required QueryNode this.queryNode,
+    required Map<String, dynamic> this.overrideData,
     this.returnData = false,
     this.sortObj,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : this.queryNode = queryNode,
-       this.overrideData = overrideData,
-       type = EnumQueryType.update;
+  }) : type = EnumQueryType.update;
 
   /// (en) Overwrites the parameters of one object in the specified collection
   /// that matches the conditions. Parameters not specified for overwriting
@@ -139,14 +136,12 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.updateOne({
     required this.target,
-    required QueryNode queryNode,
-    required Map<String, dynamic> overrideData,
+    required QueryNode this.queryNode,
+    required Map<String, dynamic> this.overrideData,
     this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : this.queryNode = queryNode,
-       this.overrideData = overrideData,
-       type = EnumQueryType.updateOne;
+  }) : type = EnumQueryType.updateOne;
 
   /// (en) Deletes all objects in the specified collection that match
   /// the specified criteria.
@@ -171,13 +166,12 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.delete({
     required this.target,
-    required QueryNode queryNode,
+    required QueryNode this.queryNode,
     this.returnData = false,
     this.sortObj,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : this.queryNode = queryNode,
-       type = EnumQueryType.delete;
+  }) : type = EnumQueryType.delete;
 
   /// (en) Deletes only one object that matches the specified criteria from
   /// the specified collection.
@@ -198,12 +192,11 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.deleteOne({
     required this.target,
-    required QueryNode queryNode,
+    required QueryNode this.queryNode,
     this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : this.queryNode = queryNode,
-       type = EnumQueryType.deleteOne;
+  }) : type = EnumQueryType.deleteOne;
 
   /// (en) Gets objects from the specified collection that match
   /// the specified criteria.
@@ -244,15 +237,14 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.search({
     required this.target,
-    required QueryNode queryNode,
+    required QueryNode this.queryNode,
     this.sortObj,
     this.offset,
     this.startAfter,
     this.endBefore,
     this.limit,
     this.cause,
-  }) : this.queryNode = queryNode,
-       type = EnumQueryType.search;
+  }) : type = EnumQueryType.search;
 
   /// (en) Gets objects from the specified collection that match
   /// the specified criteria.
@@ -272,10 +264,9 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.searchOne({
     required this.target,
-    required QueryNode queryNode,
+    required QueryNode this.queryNode,
     this.cause,
-  }) : this.queryNode = queryNode,
-       type = EnumQueryType.searchOne;
+  }) : type = EnumQueryType.searchOne;
 
   /// (en) Gets all items in the specified collection.
   /// If a limit(limit, offset, startAfter, endBefore, limit) is set,
@@ -351,11 +342,10 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.conformToTemplate({
     required this.target,
-    required Map<String, dynamic> template,
+    required Map<String, dynamic> this.template,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : this.template = template,
-       type = EnumQueryType.conformToTemplate;
+  }) : type = EnumQueryType.conformToTemplate;
 
   /// (en) Renames a specific field in the specified collection.
   ///
@@ -374,14 +364,12 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.renameField({
     required this.target,
-    required String renameBefore,
-    required String renameAfter,
+    required String this.renameBefore,
+    required String this.renameAfter,
     this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.cause,
-  }) : this.renameBefore = renameBefore,
-       this.renameAfter = renameAfter,
-       type = EnumQueryType.renameField;
+  }) : type = EnumQueryType.renameField;
 
   /// (en) Gets the number of elements in the specified collection.
   ///
@@ -442,14 +430,13 @@ class QueryBuilder {
   /// to record the reason or initiator of a query.
   QueryBuilder.clearAdd({
     required this.target,
-    required List<CloneableFile> addData,
+    required List<CloneableFile> this.addData,
     this.returnData = false,
     this.mustAffectAtLeastOne = true,
     this.serialKey,
     this.resetSerial = false,
     this.cause,
-  }) : this.addData = addData,
-       type = EnumQueryType.clearAdd;
+  }) : type = EnumQueryType.clearAdd;
 
   /// (en) Deletes the specified collection.
   /// This query is special because it deletes the collection itself.

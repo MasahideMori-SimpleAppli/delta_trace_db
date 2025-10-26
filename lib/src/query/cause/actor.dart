@@ -1,6 +1,6 @@
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:collection/collection.dart';
-import '../../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) This class defines the information of the person who
 /// requested the database operation.

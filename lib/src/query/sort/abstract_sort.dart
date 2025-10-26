@@ -1,4 +1,4 @@
-import '../../../delta_trace_db.dart';
+import 'package:delta_trace_db/delta_trace_db.dart';
 
 abstract class AbstractSort {
   /// (en) Comparison function for sorting.
