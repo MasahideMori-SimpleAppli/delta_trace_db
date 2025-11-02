@@ -1,6 +1,8 @@
 ## 0.0.36
 
 * Refactoring was performed.
+* The Actor class has had roles and permissions removed, replaced by the simpler collectionPermissions.
+* Fixed an issue where hash calculation for collectionPermissions was not done.
 
 ## 0.0.35
 

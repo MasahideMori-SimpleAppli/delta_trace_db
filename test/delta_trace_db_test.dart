@@ -475,8 +475,6 @@ void main() {
         who: Actor(
           EnumActorType.system,
           "1",
-          ["tester"],
-          ["users:write:all"],
           collectionPermissions: {
             "users": Permission([EnumQueryType.add]),
           },
