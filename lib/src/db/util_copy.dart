@@ -5,12 +5,12 @@ class UtilCopy {
   /// Throws ArgumentError on unsupported input types.
   /// Note that the return value requires an explicit type conversion.
   /// Also, if you enter data with a depth of 100 or more levels,
-  /// an ArgumentError will be thrown.
+  /// an [ArgumentError] will be thrown.
   ///
   /// (ja) JSONでシリアライズ可能な型のみをディープコピーします。
   /// 戻り値には明示的な型変換が必要であることに注意してください。
   /// 非対応の型を入力するとArgumentErrorをスローします。
-  /// また、深さ100階層以上のデータを入力した場合もArgumentErrorをスローします。
+  /// また、深さ100階層以上のデータを入力した場合も[ArgumentError]をスローします。
   ///
   /// * [value] : The deep copy target.
   /// * [depth] : This is an internal parameter to limit recursive calls.

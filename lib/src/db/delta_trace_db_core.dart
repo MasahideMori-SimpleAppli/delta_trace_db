@@ -29,10 +29,18 @@ class DeltaTraceDatabase extends CloneableFile {
   /// srcはコピーされずにそのまま利用されることに注意してください。
   ///
   /// * [src] : A dictionary made with toDict of this class.
+  ///
+  /// Throws on [FormatException] if the [src] is invalid format.
   DeltaTraceDatabase.fromDict(Map<String, dynamic> src)
     : _collections = _parseCollections(src);
 
-  /// データベースのJSONからの復元処理。
+  /// (en) Restoring database data from JSON.
+  ///
+  /// (ja) データベースのJSONからの復元処理。
+  ///
+  /// * [src] : A dictionary made with toDict of this class.
+  ///
+  /// Throws on [FormatException] if the [src] is invalid format.
   static Map<String, Collection> _parseCollections(Map<String, dynamic> src) {
     final cols = src["collections"];
     if (cols is! Map<String, dynamic>) {
@@ -90,6 +98,7 @@ class DeltaTraceDatabase extends CloneableFile {
   ///
   /// (ja) 指定のコレクションを削除します。
   /// 指定の名前のコレクションが存在しなかった場合は何もしません。
+  ///
   /// * [name] : The collection name.
   void removeCollection(String name) {
     _collections.remove(name);
@@ -120,6 +129,8 @@ class DeltaTraceDatabase extends CloneableFile {
   ///
   /// * [name] : The collection name.
   /// * [src] : A dictionary made with collectionToDict of this class.
+  ///
+  /// Throws on [FormatException] if the [src] is invalid format.
   Collection collectionFromDict(String name, Map<String, dynamic> src) {
     final col = Collection.fromDict(src);
     _collections[name] = col;
@@ -140,6 +151,8 @@ class DeltaTraceDatabase extends CloneableFile {
   ///
   /// * [name] : The collection name.
   /// * [src] : A dictionary made with collectionToDict of this class.
+  ///
+  /// Throws on [FormatException] if the [src] is invalid format.
   Collection collectionFromDictKeepListener(
     String name,
     Map<String, dynamic> src,
@@ -243,11 +256,13 @@ class DeltaTraceDatabase extends CloneableFile {
   /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
   ///
-  /// * [query] : Query、TransactionQuery、Map\<String, dynamic\>のいずれか。
+  /// * [query] : Query, TransactionQuery or Map\<String, dynamic\>.
   /// * [collectionPermissions] : Collection level operation permissions for
   /// the executing user. This is an optional argument for the server,
   /// the key is the target collection name.
   /// Use null on the frontend, if this is null then everything is allowed.
+  ///
+  /// Throws on [ArgumentError] if the [query] is unsupported type.
   QueryExecutionResult executeQueryObject(
     Object query, {
     Map<String, Permission>? collectionPermissions,
@@ -525,7 +540,12 @@ class DeltaTraceDatabase extends CloneableFile {
     }
   }
 
-  /// rollback db.
+  /// (en) Rollback db.
+  ///
+  /// (ja) DBをロールバックします。
+  ///
+  /// * [buff] : The collection buffer that needs to be undone.
+  /// * [nonExistTargets] : A list of collections that did not exist before the operation.
   TransactionQueryResult<T> _rollbackCollections<T>(
     Map<String, Map<String, dynamic>> buff,
     Set<String> nonExistTargets,
