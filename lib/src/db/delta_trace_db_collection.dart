@@ -39,6 +39,8 @@ class Collection extends CloneableFile {
   /// (ja) トランザクションモードへの変更時、及び解除時に呼び出します。
   /// これはDeltaTraceDBからのみ呼び出されることを想定しています。
   /// 通常は使用しないでください。
+  ///
+  /// * [isTransactionMode] :  If true, change to transaction mode.
   void changeTransactionMode(bool isTransactionMode) {
     if (isTransactionMode) {
       _isTransactionMode = true;
@@ -107,6 +109,9 @@ class Collection extends CloneableFile {
   /// Please note that notifications will not be restored even if the DB is
   /// deserialized. You will need to set them every time.
   ///
+  /// Note: Listeners are not serialized.
+  /// You must re-register them　each time after deserialization.
+  ///
   /// (ja) UIとDBを連携する際に利用できる、コールバックの設定関数です。
   /// ここで設定したコールバックは、このコレクションの内容が変更されると呼び出されます。
   /// つまり、登録しておくとDBの内容変更時に画面更新等ができるようになります。
@@ -114,6 +119,8 @@ class Collection extends CloneableFile {
   /// これをサーバー側で使用する場合は、バックアップをストレージに書き込む関数などを設定
   /// するのも良いかもしれません。
   /// なお、通知に関してはDBをデシリアライズしても復元されません。毎回設定する必要があります。
+  ///
+  /// 注: リスナーはシリアライズされません。デシリアライズ後は毎回再登録する必要があります。
   ///
   /// * [cb] : The function to execute when the DB is changed.
   /// * [name] : If you set a non-null value, a listener will be registered
@@ -170,9 +177,23 @@ class Collection extends CloneableFile {
     }
   }
 
+  /// (en) The evaluation function for the query.
+  ///
+  /// (ja) クエリの評価関数。
+  ///
+  /// * [record] : Records (objects) to compare.
+  /// * [node] : The node of the query to use for the comparison.
+  ///
+  /// Returns: If true, the query matches the object(record).
+  bool _evaluate(Map<String, dynamic> record, QueryNode node) =>
+      node.evaluate(record);
+
   /// (en) Adds the data specified by the query.
+  /// If the key specified by serialKey does not exist
+  /// in the object being added, the operation will fail.
   ///
   /// (ja) クエリで指定されたデータを追加します。
+  /// serialKeyで指定したキーが追加するオブジェクトに存在しない場合、操作は失敗します。
   ///
   /// * [q] : The query.
   QueryResult<T> addAll<T>(Query q) {
@@ -429,7 +450,12 @@ class Collection extends CloneableFile {
     );
   }
 
-  /// ソートとページング、リミットをそれぞれ適用して返します。
+  /// (en) Sorting, paging, and limits are applied before returning the result.
+  ///
+  /// (ja) ソートとページング、リミットをそれぞれ適用して返します。
+  ///
+  /// * [q] : The query.
+  /// * [preR] : Pre result.
   List<Map<String, dynamic>> _sortPagingLimit(
     Query q,
     List<Map<String, dynamic>> preR,
@@ -441,7 +467,12 @@ class Collection extends CloneableFile {
     return r;
   }
 
-  /// ソートを適用する。
+  /// (en) Apply sort.
+  ///
+  /// (ja) ソートを適用します。
+  ///
+  /// * [q] : The query.
+  /// * [preR] : Pre result.
   List<Map<String, dynamic>> _applySort(
     Query q,
     List<Map<String, dynamic>> preR,
@@ -455,8 +486,15 @@ class Collection extends CloneableFile {
     return r;
   }
 
-  /// offset、startAfter、endBeforeを適用します。
+  /// (en) Applies offset, startAfter, and endBefore.
+  /// The priority of offset, startAfter,
+  /// and endBefore is "offset > startAfter > endBefore".
+  ///
+  /// (ja) offset、startAfter、endBeforeを適用します。
   /// offset、startAfter、endBeforeの優先度は、offset > startAfter > endBeforeです。
+  ///
+  /// * [q] : The query.
+  /// * [preR] : Pre result.
   List<Map<String, dynamic>> _applyGetPosition(
     Query q,
     List<Map<String, dynamic>> preR,
@@ -490,9 +528,16 @@ class Collection extends CloneableFile {
     return r;
   }
 
-  /// リミットを適用します。
-  /// - 通常: 先頭から limit 件を返す
-  /// - endBefore が有効な場合: 対象範囲の末尾から limit 件を返す
+  /// (en)Applies a limit. Behavior is as follows:
+  /// - Normal: Return limit items from the beginning.
+  /// - If endBefore is enabled: Return limit items from the end of the range.
+  ///
+  /// (ja) リミットを適用します。動作は以下の通りです。
+  /// - 通常: 先頭から limit 件を返す。
+  /// - endBefore が有効な場合: 対象範囲の末尾から limit 件を返す。
+  ///
+  /// * [q] : The query.
+  /// * [preR] : Pre result.
   List<Map<String, dynamic>> _applyLimit(
     Query q,
     List<Map<String, dynamic>> preR,
@@ -604,8 +649,11 @@ class Collection extends CloneableFile {
   }
 
   /// (en) Renames the specified key in the database.
+  /// The operation will fail if the target key does not exist or
+  /// if you try to change it to an existing key.
   ///
   /// (ja) データベースの、指定したキーの名前を変更します。
+  /// 対象のキーが存在しなかったり、既に存在するキーに変更しようとすると操作は失敗します。
   ///
   /// * [q] : The query.
   QueryResult<T> renameField<T>(Query q) {
@@ -658,9 +706,10 @@ class Collection extends CloneableFile {
     );
   }
 
-  /// (en) Returns the total number of records stored in the database.
+  /// (en) Returns the total number of records stored in the collection.
   ///
-  /// (ja) データベースに保存されているデータの総数を返します。
+  /// (ja) コレクション内のデータの総数を返します。
+  ///
   /// * [q] : The query.
   QueryResult<T> count<T>(Query q) {
     return QueryResult<T>(
@@ -674,9 +723,10 @@ class Collection extends CloneableFile {
     );
   }
 
-  /// (en) Clear the contents of the database.
+  /// (en) Clear the contents of the collection.
   ///
-  /// (ja) データベースの保存内容を破棄します。
+  /// (ja) コレクションの内容を破棄します。
+  ///
   /// * [q] : The query.
   QueryResult<T> clear<T>(Query q) {
     final int preLen = _data.length;
@@ -696,13 +746,16 @@ class Collection extends CloneableFile {
     );
   }
 
-  /// (en) Clear the contents stored in the database and then adds them.
+  /// (en) Clear the contents stored in the collection and then adds data.
   /// This can be used, for example, to update a front-end database with
   /// search results from a back-end.
+  /// If the key specified by serialKey does not exist
+  /// in the object being added, the operation will fail.
   ///
-  /// (ja) データベースの保存内容を破棄してから追加します。
+  /// (ja) コレクションの内容を破棄してからデータを追加します。
   /// これは例えば、バックエンドからの検索内容でフロントエンドのDBを更新したい場合などに
   /// 使用できます。
+  /// serialKeyで指定したキーが追加するオブジェクトに存在しない場合、操作は失敗します。
   ///
   /// * [q] : The query.
   QueryResult<T> clearAdd<T>(Query q) {
@@ -759,8 +812,4 @@ class Collection extends CloneableFile {
       hitCount: preLen,
     );
   }
-
-  /// クエリの評価関数。
-  bool _evaluate(Map<String, dynamic> record, QueryNode node) =>
-      node.evaluate(record);
 }
