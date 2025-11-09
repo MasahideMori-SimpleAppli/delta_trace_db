@@ -8,7 +8,7 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// (ja) クエリの戻り値について、単一キーでのソートを指定するためのクラスです。
 class SingleSort extends CloneableFile implements AbstractSort {
   static const String className = "SingleSort";
-  static const String version = "4";
+  static const String version = "5";
   String field;
   bool reversed;
   EnumValueType vType;
