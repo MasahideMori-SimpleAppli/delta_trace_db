@@ -66,7 +66,13 @@ class SingleSort extends CloneableFile implements AbstractSort {
     return SingleSort.fromDict(toDict());
   }
 
-  /// 強制的に型変換します。
+  /// (en) A method that converts data to a specified type.
+  ///
+  /// (ja) 指定された型にデータを変換するメソッドです。
+  ///
+  /// * [value] : The conversion target.
+  ///
+  /// Throws on [Exception] if the [value] is cannot conversion.
   dynamic _convertValue(dynamic value) {
     if (value == null) return null;
     switch (vType) {
