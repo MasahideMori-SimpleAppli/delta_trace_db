@@ -1,3 +1,9 @@
+## 0.0.37
+
+* Refactoring was performed.
+* Documentation additions and corrections have been made.
+* The argument of FieldNotIn has been changed from Iterable to list.
+
 ## 0.0.36
 
 * Refactoring was performed.

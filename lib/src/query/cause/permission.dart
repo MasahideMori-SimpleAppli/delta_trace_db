@@ -11,8 +11,7 @@ class Permission extends CloneableFile {
 
   List<EnumQueryType> allows;
 
-  /// * [allows] : It is invalid when it is null.
-  /// Only calls of the specified type are allowed.
+  /// * [allows] : Only calls of the specified type are allowed.
   /// If you attempt to process a query of a type not specified here,
   /// the QueryResult will return false.
   Permission(this.allows);

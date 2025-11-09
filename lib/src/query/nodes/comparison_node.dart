@@ -9,7 +9,10 @@ class FieldEquals extends QueryNode {
   final dynamic value;
   EnumValueType vType;
 
-  /// Query node for Equals (filed == value) operation.
+  /// (en) Query node for Equals (filed == value) operation.
+  ///
+  /// (ja) Equals (filed == value) 判定のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
@@ -89,7 +92,10 @@ class FieldNotEquals extends QueryNode {
   final dynamic value;
   EnumValueType vType;
 
-  /// Query node for NotEquals (filed != value) operation.
+  /// (en) Query node for NotEquals (filed != value) operation.
+  ///
+  /// (ja) NotEquals (filed != value) 判定のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
@@ -169,9 +175,13 @@ class FieldGreaterThan extends QueryNode {
   final dynamic value;
   EnumValueType vType;
 
-  /// Query node for "field > value" operation.
+  /// (en) Query node for "field > value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
   /// such as null or bool, the result will always be False.
+  ///
+  /// (ja) "field > value" 判定のためのクエリノード。
+  /// null や bool など、大小比較できないオブジェクトを比較しようとすると、
+  /// 結果は常に False になります。
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
@@ -251,9 +261,13 @@ class FieldLessThan extends QueryNode {
   final dynamic value;
   EnumValueType vType;
 
-  /// Query node for "field < value" operation.
+  /// (en) Query node for "field < value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
   /// such as null or bool, the result will always be False.
+  ///
+  /// (ja) "field < value" 判定のためのクエリノード。
+  /// null や bool など、大小比較できないオブジェクトを比較しようとすると、
+  /// 結果は常に False になります。
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
@@ -333,9 +347,13 @@ class FieldGreaterThanOrEqual extends QueryNode {
   final dynamic value;
   EnumValueType vType;
 
-  /// Query node for "field >= value" operation.
+  /// (en) Query node for "field >= value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
   /// such as null or bool, the result will always be False.
+  ///
+  /// (ja) "field >= value" 判定のためのクエリノード。
+  /// null や bool など、大小比較できないオブジェクトを比較しようとすると、
+  /// 結果は常に False になります。
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
@@ -420,9 +438,13 @@ class FieldLessThanOrEqual extends QueryNode {
   final dynamic value;
   EnumValueType vType;
 
-  /// Query node for "field <= value" operation.
+  /// (en) Query node for "field <= value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
   /// such as null or bool, the result will always be False.
+  ///
+  /// (ja) "field <= value" 判定のためのクエリノード。
+  /// null や bool など、大小比較できないオブジェクトを比較しようとすると、
+  /// 結果は常に False になります。
   ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
@@ -506,7 +528,10 @@ class FieldMatchesRegex extends QueryNode {
   final String field;
   final String pattern;
 
-  /// Query node for "RegExp(pattern).hasMatch(field)" operation.
+  /// (en) Query node for "RegExp(pattern).hasMatch(field)" operation.
+  ///
+  /// (ja) "RegExp(pattern).hasMatch(field)" 演算のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [pattern] : The compare pattern of regex.
   FieldMatchesRegex(this.field, this.pattern);
@@ -543,7 +568,10 @@ class FieldContains extends QueryNode {
   final String field;
   final dynamic value;
 
-  /// Query node for "field.contains(value)" operation.
+  /// (en) Query node for "field.contains(value)" operation.
+  ///
+  /// (ja) "field.contains(value)" 演算のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
   FieldContains(this.field, this.value);
@@ -581,7 +609,10 @@ class FieldIn extends QueryNode {
   final String field;
   final List<dynamic> values;
 
-  /// Query node for "values.contains(field)" operation.
+  /// (en) Query node for "values.contains(field)" operation.
+  ///
+  /// (ja) "values.contains(field)" 演算のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [values] : The compare value.
   FieldIn(this.field, this.values);
@@ -613,9 +644,12 @@ class FieldIn extends QueryNode {
 /// (ja) "Not values.contains(field)" 演算のためのクエリノード。
 class FieldNotIn extends QueryNode {
   final String field;
-  final Iterable<dynamic> values;
+  final List<dynamic> values;
 
-  /// Query node for "Not values.contains(field)" operation.
+  /// (en) Query node for "Not values.contains(field)" operation.
+  ///
+  /// (ja) "Not values.contains(field)" 演算のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
   FieldNotIn(this.field, this.values);
@@ -637,8 +671,8 @@ class FieldNotIn extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.notIn_.name,
     'field': field,
-    'values': values.toList(),
-    'version': '1',
+    'values': values,
+    'version': '2',
   };
 }
 
@@ -649,7 +683,10 @@ class FieldStartsWith extends QueryNode {
   final String field;
   final String value;
 
-  /// Query node for "field.toString().startsWidth(value)" operation.
+  /// (en) Query node for "field.toString().startsWidth(value)" operation.
+  ///
+  /// (ja) "field.toString().startsWidth(value)" 演算のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
   FieldStartsWith(this.field, this.value);
@@ -687,7 +724,10 @@ class FieldEndsWith extends QueryNode {
   final String field;
   final String value;
 
-  /// Query node for "field.toString().endsWidth(value)" operation.
+  /// (en) Query node for "field.toString().endsWidth(value)" operation.
+  ///
+  /// (ja) "field.toString().endsWidth(value)" 演算のためのクエリノード。
+  ///
   /// * [field] : The target variable name.
   /// * [value] : The compare value.
   FieldEndsWith(this.field, this.value);

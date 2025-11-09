@@ -21,7 +21,7 @@ class Actor extends CloneableFile {
   /// * [id] : The serial id (user id) of the actor.
   /// * [collectionPermissions] : Collection-level permissions that relate only
   /// to database operations. The key is the collection name.
-  /// * [context] : other context.
+  /// * [context] : The other context.
   Actor(this.type, this.id, {this.collectionPermissions, this.context});
 
   /// (en) Recover this class from the dictionary.

@@ -12,7 +12,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "15";
+  static const String version = "16";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.

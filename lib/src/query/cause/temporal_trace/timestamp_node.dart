@@ -22,7 +22,7 @@ class TimestampNode extends CloneableFile {
   // データが生成された地点での追加コンテキスト情報。キーはロケーション名。
   final Map<String, dynamic> context;
 
-  /// * [timestamp] : The timestamp recorded when the data was generated
+  /// * [timestamp] : The timestamp recorded when the data was generated.
   /// * [location] : The name or identifier of the location where the data
   /// was generated.
   /// e.g. 'UserBrowserClient', 'ApiGateway', 'MarsRelaySatellite-7'

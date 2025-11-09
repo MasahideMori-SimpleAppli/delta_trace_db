@@ -13,7 +13,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_core');
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "12";
+  static const String version = "14";
 
   late final Map<String, Collection> _collections;
 
