@@ -2,13 +2,13 @@ import 'package:file_state_manager/file_state_manager.dart';
 import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) This is a query class for DB operations. It is usually built using
-/// QueryBuilder.
+/// QueryBuilder or RawQueryBuilder.
 /// This class allows you to set the operation target and operation type,
 /// as well as specify paging and
 /// Track operations by Cause. If you output this class directly to a log on
 /// the server side, the log will be a complete history of DB operations.
 ///
-/// (ja) DB操作用のクエリクラスです。通常はQueryBuilderを使用して構築されます。
+/// (ja) DB操作用のクエリクラスです。通常はQueryBuilderまたはRawQueryBuilderを使用して構築されます。
 /// このクラスは、操作対象の設定、操作の種類の設定の他、ページングの指定や
 /// Causeによる操作追跡機能を持っています。このクラスをサーバー側でそのままログに出力すると、
 /// そのログは完全なDB操作の履歴になります。
@@ -35,8 +35,17 @@ class Query extends CloneableFile {
   bool resetSerial;
   Cause? cause;
 
-  /// Note: I recommend not using this class as is,
-  /// but rather using the more convenient QueryBuilder.
+  /// (en) This is a query class for DB operations. It is usually built using
+  /// QueryBuilder or RawQueryBuilder.
+  /// This class allows you to set the operation target and operation type,
+  /// as well as specify paging and
+  /// Track operations by Cause. If you output this class directly to a log on
+  /// the server side, the log will be a complete history of DB operations.
+  ///
+  /// (ja) DB操作用のクエリクラスです。通常はQueryBuilderまたはRawQueryBuilderを使用して構築されます。
+  /// このクラスは、操作対象の設定、操作の種類の設定の他、ページングの指定や
+  /// Causeによる操作追跡機能を持っています。このクラスをサーバー側でそのままログに出力すると、
+  /// そのログは完全なDB操作の履歴になります。
   ///
   /// * [target] : The collection name in DB.
   /// * [type] : The query type.
@@ -53,24 +62,23 @@ class Query extends CloneableFile {
   /// template will be added with the template value as the initial value.
   /// Fields that do not exist in the template will be deleted.
   /// * [queryNode] : This is the node object used for the search.
-  /// You can build queries by combining the various nodes defined in
-  /// comparison_node.dart.
+  /// You can build queries by combining the various nodes.
   /// * [sortObj] : An object for sorting the return values.
   /// SingleSort or MultiSort can be used.
   /// If you set returnData to true, the return values of an update or delete
   /// query will be sorted by this object.
-  /// * [offset] : Use search type only.
+  /// * [offset] : Used only with search or getAll types.
   /// An offset for paging support in the front end.
   /// This is only valid when sorting is specified, and allows you to specify
   /// that the results returned will be from a specific index after sorting.
-  /// * [startAfter] : Use search type only.
+  /// * [startAfter] : Used only with search or getAll types.
   /// If you pass in a serialized version of a search result
   /// object, the search will return results from objects after that object,
   /// and if an offset is specified, it will be ignored.
   /// This does not work if there are multiple identical objects because it
   /// compares the object values, and is slightly slower than specifying an
   /// offset, but it works fine even if new objects are added during the search.
-  /// * [endBefore] : Use search type only.
+  /// * [endBefore] : Used only with search or getAll types.
   /// If you pass in a serialized version of a search result
   /// object, the search will return results from the object before that one,
   /// and any offset or startAfter specified will be ignored.
@@ -81,14 +89,14 @@ class Query extends CloneableFile {
   /// The old variable name when querying for a rename.
   /// * [renameAfter] : Use rename type only.
   /// The new name of the variable when querying for a rename.
-  /// * [limit] : Use search type only.
+  /// * [limit] : Used only with search or getAll types.
   /// The maximum number of search results will be limited to this value.
   /// If specified together with offset or startAfter,
   /// limit number of objects after the specified object will be returned.
   /// If specified together with endBefore,
   /// limit number of objects before the specified object will be returned.
   /// * [returnData] : If true, return the changed objs.
-  /// Not valid for clear and clearAdd.
+  /// Not valid for clear, clearAdd and conformToTemplate.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
