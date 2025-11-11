@@ -3,6 +3,7 @@
 * Refactoring was performed.
 * Documentation additions and corrections have been made.
 * The argument of FieldNotIn has been changed from Iterable to list.
+* The return type of RawQueryBuilder's setOffset, setStartAfter, setEndBefore, and setLimit has been corrected to RawQueryBuilder.
 
 ## 0.0.36
 

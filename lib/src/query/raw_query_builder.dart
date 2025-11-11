@@ -452,7 +452,7 @@ class RawQueryBuilder extends QueryBuilder {
   /// * [newOffset] : An offset for paging support in the front end.
   /// If specified, data from the offset onwards will be retrieved.
   @override
-  QueryBuilder setOffset(int? newOffset) {
+  RawQueryBuilder setOffset(int? newOffset) {
     offset = newOffset;
     return this;
   }
@@ -468,7 +468,7 @@ class RawQueryBuilder extends QueryBuilder {
   /// compares the object values, and is slightly slower than specifying an
   /// offset, but it works fine even if new objects are added during the search.
   @override
-  QueryBuilder setStartAfter(Map<String, dynamic>? newStartAfter) {
+  RawQueryBuilder setStartAfter(Map<String, dynamic>? newStartAfter) {
     startAfter = newStartAfter;
     return this;
   }
@@ -484,7 +484,7 @@ class RawQueryBuilder extends QueryBuilder {
   /// compares the object values, and is slightly slower than specifying an
   /// offset, but it works fine even if new objects are added during the search.
   @override
-  QueryBuilder setEndBefore(Map<String, dynamic>? newEndBefore) {
+  RawQueryBuilder setEndBefore(Map<String, dynamic>? newEndBefore) {
     endBefore = newEndBefore;
     return this;
   }
@@ -501,7 +501,7 @@ class RawQueryBuilder extends QueryBuilder {
   ///   - If no offset/startAfter/endBefore is specified, the first [limit]
   ///   items in addition order are returned.
   @override
-  QueryBuilder setLimit(int? newLimit) {
+  RawQueryBuilder setLimit(int? newLimit) {
     limit = newLimit;
     return this;
   }
