@@ -81,9 +81,9 @@ class QueryResult<T> extends QueryExecutionResult {
   ///
   /// (ja) 検索結果を指定クラスの配列で取得します。
   ///
-  /// * [fromDict] : If class T is CloneableFile,
-  /// Pass a function equivalent to fromDict to restore the object from
-  /// a dictionary.
+  /// * [fromDict] : Passes a function to restore an object from a dictionary.
+  /// If the target is a CloneableFile,
+  /// this is equivalent to the fromDict method.
   List<T> convert(T Function(Map<String, dynamic>) fromDict) {
     List<T> r = [];
     for (Map<String, dynamic> i in result) {
