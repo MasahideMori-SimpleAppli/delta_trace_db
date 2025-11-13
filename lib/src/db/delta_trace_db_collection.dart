@@ -184,7 +184,7 @@ class Collection extends CloneableFile {
   /// * [record] : Records (objects) to compare.
   /// * [node] : The node of the query to use for the comparison.
   ///
-  /// Returns: If true, the query matches the object(record).
+  /// Returns: If true, the query matches the item.
   bool _evaluate(Map<String, dynamic> record, QueryNode node) =>
       node.evaluate(record);
 
@@ -706,7 +706,7 @@ class Collection extends CloneableFile {
     );
   }
 
-  /// (en) Returns the total number of records stored in the collection.
+  /// (en) Returns the total number of items stored in the collection.
   ///
   /// (ja) コレクション内のデータの総数を返します。
   ///

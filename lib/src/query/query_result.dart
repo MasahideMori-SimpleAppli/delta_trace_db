@@ -40,12 +40,12 @@ class QueryResult<T> extends QueryExecutionResult {
   ///   Note: For add/update/delete, the list is only populated if the
   ///   query option [returnData] is set to true.
   /// * [dbLength] : DB side item length.
-  /// This is The total number of records in the collection.
-  /// * [updateCount] : The total number of records add, updated or deleted.
+  /// This is The total number of items in the collection.
+  /// * [updateCount] : The total number of items add, updated or deleted.
   /// When issuing a removeCollection query,
   /// if the target collection already exists, the result will be 1.
   /// if a non-existent collection is specified the result will be 0.
-  /// * [hitCount] : The total number of records searched.
+  /// * [hitCount] : The total number of items searched.
   /// * [errorMessage] : A message that is added only if an error occurs.
   QueryResult({
     required super.isSuccess,
