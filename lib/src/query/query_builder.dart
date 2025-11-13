@@ -211,8 +211,8 @@ class QueryBuilder {
   ///   - SingleSort or MultiSort can be used.
   ///   - Optional. If omitted, results will be returned in the order
   ///   they were added to the database.
-  /// * [offset] : An offset for front-end paging support.
-  /// If specified, data after the specified offset will be retrieved.
+  /// * [offset] : Offset for front-end paging support.
+  /// If specified, data from the specified offset onwards will be retrieved.
   /// * [startAfter] : If you pass in a serialized version of a search result
   /// object, the search will return results from objects after that object,
   /// and if an offset is specified, it will be ignored.
@@ -282,8 +282,8 @@ class QueryBuilder {
   ///   - SingleSort or MultiSort can be used.
   ///   - Optional. If omitted, results will be returned in the order
   ///   they were added to the database.
-  /// * [offset] : An offset for front-end paging support.
-  /// If specified, data after the specified offset will be retrieved.
+  /// * [offset] : Offset for front-end paging support.
+  /// If specified, data from the specified offset onwards will be retrieved.
   /// * [startAfter] : If you pass in a serialized version of a search result
   /// object, the search will return results from objects after that object,
   /// and if an offset is specified, it will be ignored.
@@ -473,8 +473,8 @@ class QueryBuilder {
   ///
   /// (ja) 検索位置だけを変更したい場合に利用できるメソッドです。
   ///
-  /// * [newOffset] : An offset for paging support in the front end.
-  /// If specified, data from the offset onwards will be retrieved.
+  /// * [newOffset] : Offset for front-end paging support.
+  /// If specified, data from the specified offset onwards will be retrieved.
   QueryBuilder setOffset(int? newOffset) {
     offset = newOffset;
     return this;
