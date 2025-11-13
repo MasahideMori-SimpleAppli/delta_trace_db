@@ -181,12 +181,12 @@ class Collection extends CloneableFile {
   ///
   /// (ja) クエリの評価関数。
   ///
-  /// * [record] : Records (objects) to compare.
+  /// * [item] : Items (objects) to compare.
   /// * [node] : The node of the query to use for the comparison.
   ///
   /// Returns: If true, the query matches the item.
-  bool _evaluate(Map<String, dynamic> record, QueryNode node) =>
-      node.evaluate(record);
+  bool _evaluate(Map<String, dynamic> item, QueryNode node) =>
+      node.evaluate(item);
 
   /// (en) Adds the data specified by the query.
   /// If the key specified by serialKey does not exist
