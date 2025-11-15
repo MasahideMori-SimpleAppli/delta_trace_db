@@ -8,65 +8,36 @@ is [here](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/R
 
 ## Overview
 
-"DeltaTraceDB" is an in-memory database (NoSQL) that stores data in units of lists of classes.
-This database allows you to register class structures as they are in the database,  
-and allows full-text searches of the elements of the registered classes.  
-In addition, queries are also classes, and can have DB operation information consisting of   
-who, when, what, why, and from.  
-If serialized and saved, it provides a very rich source of information for security audits and
-usage analysis.  
-This is extremely useful for projects with various constraints, such as medical applications.  
-(However, please note that when using for medical purposes, each country usually has its own special rules.
-This database does not take into account the medical circumstances of each country.)  
+**DeltaTraceDB is a lightweight and high-performance in-memory NoSQL database 
+that stores and searches class structures as-is.**  
+Although it is NoSQL, it also supports full-text search across nested child objects.
 
-Furthermore, by utilizing features such as the TemporalTrace class in queries, 
-it may also be useful in space-scale communication networks and relay servers, 
-where latency is significant even at the speed of light.  
-The TemporalTrace class provides a complete trace of the communication path and the arrival time of each.  
+Queries in DeltaTraceDB are also represented as classes.  
+By serializing and storing these query objects, you can not only restore the database to any past state,  
+but also keep operation metadata such as **who / when / what / why / from**.  
+This allows you to build rich and highly detailed operation logs suitable for security audits and usage analysis.
 
-This package also has a Python backend implementation.  
-[Python ver.](https://pypi.org/project/delta-trace-db/)  
+---
 
-I am also developing an open source editor for manually editing the DB contents:  
-[DeltaTraceStudio](https://github.com/MasahideMori-SimpleAppli/delta_trace_studio)  
+## Features
 
-## DB structure
+- **Store and search classes directly** (your model classes define the DB structure)
+- Lightweight in-memory DB for Dart / Flutter
+- High-speed search performance even with ~100,000 records
+- Queries are classes, making it easy to preserve operation logs
+- Python version available  
+  → https://pypi.org/project/delta-trace-db/
+- GUI editor for DB content is under development  
+  → https://github.com/MasahideMori-SimpleAppli/delta_trace_studio
 
-The structure of this DB is as follows.  
-In other words, each collection corresponds to a list of each class.  
-For this reason, the user is barely aware of the difference between the front end and the back
-end,  
-and can concentrate on the operation of "obtaining the required class object."
+---
 
-```
-📦 Database (DeltaTraceDB)
-├── 🗂️ CollectionA (key: "collection_a")
-│   ├── 📄 Item (ClassA)
-│   │   ├── id: int
-│   │   ├── name: String
-│   │   └── timestamp: String
-│   └── ...
-├── 🗂️ CollectionB (key: "collection_b")
-│   ├── 📄 Item (ClassB)
-│   │   ├── uid: String
-│   │   └── data: Map<String, dynamic>
-└── ...
-```
-
-## Basic DB operations
-
-All operations in this DB are class-based.  
-There is no need to learn a new query language.
-
-### 📦 1. Define the model class
-
-First, prepare the model class.  
-It is convenient to have the model class inherit ClonableFile from the file_state_manager package.  
-If you do not want to inherit ClonableFile, you can also handle Map<String,dynamic> directly with
-RawQueryBuilder.  
-Here is an example of how to inherit ClonableFile.
+## Quick Start
 
 ```dart
+import 'package:delta_trace_db/delta_trace_db.dart';
+import 'package:file_state_manager/file_state_manager.dart';
+
 class User extends CloneableFile {
   final int id;
   final String name;
@@ -84,402 +55,168 @@ class User extends CloneableFile {
     required this.nestedObj,
   });
 
-  static User fromDict(Map<String, dynamic> src) =>
-      User(
-        id: src['id'],
-        name: src['name'],
-        age: src['age'],
-        createdAt: DateTime.parse(src['createdAt']),
-        updatedAt: DateTime.parse(src['updatedAt']),
-        nestedObj: src['nestedObj'],
-      );
+  static User fromDict(Map<String, dynamic> src) => User(
+    id: src['id'],
+    name: src['name'],
+    age: src['age'],
+    createdAt: DateTime.parse(src['createdAt']),
+    updatedAt: DateTime.parse(src['updatedAt']),
+    nestedObj: src['nestedObj'],
+  );
 
   @override
-  Map<String, dynamic> toDict() =>
-      {
-        'id': id,
-        'name': name,
-        'age': age,
-        'createdAt': createdAt.toUtc().toIso8601String(),
-        'updatedAt': DateTime.now().toUtc().toIso8601String(),
-        'nestedObj': {...nestedObj},
-      };
+  Map<String, dynamic> toDict() => {
+    'id': id,
+    'name': name,
+    'age': age,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
+    'nestedObj': {...nestedObj},
+  };
 
   @override
-  User clone() => User.fromDict(toDict());
+  User clone() {
+    return User.fromDict(toDict());
+  }
 }
-```
 
-### 🏗️ 2. Initialize the DB and add data
-
-```dart
-
-final db = DeltaTraceDatabase();
-final now = DateTime.now();
-final users = [
-  User(id: -1, // Dummy Value
+void main() {
+  final db = DeltaTraceDatabase();
+  final now = DateTime.now();
+  List<User> users = [
+    User(
+      id: -1,
       name: 'Taro',
-      age: 25,
-      createdAt: now,
-      updatedAt: now,
-      nestedObj: {"a": "a"}),
-  User(id: -1,
-      name: 'Jiro',
       age: 30,
       createdAt: now,
       updatedAt: now,
-      nestedObj: {"a": "b"}),
-];
-
-// Here, you can specify a serial key to automatically assign an ID.
-final query = QueryBuilder.add(target: 'users', addData: users, serialKey: "id").build();
-// <User> here is not needed on the server.
-// This is a type specification for conversion processing when retrieving data.
-final result = db.executeQuery<User>(query);
-```
-
-💡 Key Points
-
-- You can add, update, and delete data by simply passing the query generated by QueryBuilder to
-  executeQuery.
-- This query can be serialized as a Map<String, dynamic> using the toDict method, so it can be sent
-  to the server as is and reflected in a remote database if necessary.
-- If you prepare a process equivalent to executeQuery on the server side, you can process it with
-  the same query structure.
-- Most of what is required on the server side is user permission confirmation and logging, and
-  logging is also very easy since you can just save the query as is.
-- To return results from the server to the frontend, simply toDict the QueryResult of executeQuery and return it.
-
-### 🔍 3. Data search (filter + sort + paging)
-
-```dart
-
-final searchQuery = QueryBuilder.search(
-  target: 'users',
-  queryNode: FieldContains("name", "ro"), // Name contains "ro" (so Taro and Jiro are the targets)
-  sortObj: SingleSort(field: 'age', reversed: true), // Descending order by age
-  limit: 1, // Only get one result
-).build();
-final searchResult = db.executeQuery<User>(searchQuery);
-// Jiro is obtained.
-final matchedUsers = searchResult.convert(User.fromDict);
-// Query to paging to the next page.
-final pagingQuery = QueryBuilder.search(
+      nestedObj: {"a": "a"},
+    ),
+    User(
+      id: -1,
+      name: 'Jiro',
+      age: 25,
+      createdAt: now,
+      updatedAt: now,
+      nestedObj: {"a": "b"},
+    ),
+  ];
+  // If you want the return value to be reflected immediately on the front end,
+  // set returnData = true to get data that properly reflects the serial key.
+  final query = QueryBuilder.add(
     target: 'users',
-    queryNode: FieldContains("name", "ro"),
-    // When paging, the parameters must be the same as before.
-    sortObj: SingleSort(field: 'age', reversed: true),
-    limit: 1,
-    // Get only one result
-    startAfter: searchResult.result
-        .last // Specify paging. Note that you can also specify an offset instead of an object.
-).build();
-final nextPageSearchResult = db.executeQuery<User>(pagingQuery);
-// Get Taro.
-final nextPageUsers = nextPageSearchResult.convert(User.fromDict);
-```
-
-### ✏️ 4. Data update (multiple conditions/partial update)
-
-```dart
-
-final updateQuery = QueryBuilder.update(
-  target: 'users',
-  queryNode: OrNode([
-    FieldEquals('name', 'Taro'),
-    FieldEquals('name', 'Jiro'),
-  ]),
-  overrideData: {'age': 99},
-  returnData: true,
-).build();
-
-final updateResult = db.executeQuery<User>(updateQuery);
-final updated = updateResult.convert(User.fromDict);
-```
-
-### ❌ 5. Data Deletion
-
-```dart
-
-final deleteQuery = QueryBuilder.delete(
-  target: 'users',
-  queryNode: FieldEquals("name", "Jiro"),
-).build();
-
-final deleteResult = db.executeQuery<User>(deleteQuery);
-```
-
-### 💾 6. Saving and restoring (serialization supported)
-
-```dart
-// Save (obtained in Map format). After this, you can encrypt it as you like or save it using your favorite package.
-final saved = db.toDict();
-// Restore
-final loaded = DeltaTraceDatabase.fromDict(saved);
-```
-
-🕰️ Full restoration (Query log) is also possible using change logs.  
-In delta_trace_db, all change operations (add, update, delete, etc.) are expressed in the Query
-class.  
-So, by saving this Query as a log in chronological order, you can completely reproduce the DB state
-at any point in time.
-
-💡 Why can it be restored?
-
-- All data operations are recorded by Query.
-- The same state can be obtained by re-executing the saved query logs in order on an empty DB in the
-  initial state.
-
-I recommend a configuration where normal saving is done as a date and time snapshot, and the query
-itself is logged.  
-This way, you can restore to just before the problem occurred just by applying the query log from
-the snapshot saving point onwards,  
-and since all other operations are also left in the log, it becomes easy to rebuild the DB.  
-The query can have DB operation information consisting of "who, when, what, why, from" as a Cause
-class,  
-so if you set this appropriately, it will be even easier to identify the problem.
-
-### 🧠 7. Searching in nested fields and searching using other nodes
-
-For nested fields, you can specify the key separated by a ".", such as "nestedObj.a".  
-The nodes that can be used in searches are "LogicalNode (And and Or)" and "ComparisonNode (Equals,
-etc.)".
-Please check the following for available types.  
-[logicalNode](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/lib/src/query/nodes/logical_node.dart)  
-[comparisonNode](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/lib/src/query/nodes/comparison_node.dart)  
-
-### 🧬 8. Type conversion/template conversion (conformToTemplate)
-
-The conformToTemplate function is useful when you want to convert saved data into a new structure.  
-This function can complement and convert saved data according to a template even if the data is
-missing.
-
-```dart
-// Original class
-class ClassA extends ClonableFile {
-  String id;
-  String name;
-
-  ClassB(this.id, this.name)
-// Omitted
+    addData: users,
+    serialKey: "id",
+    returnData: true,
+  ).build();
+  // Specifying the "User class" is only necessary if you want to easily revert to the original class.
+  final r = db.executeQuery<User>(query);
+  // If you want to check the return value, you can easily do so by using toDict, which serializes it.
+  print(r.toDict());
+  // You can easily convert from the Result object back to the original class.
+  // The value of r.result is deserialized using the function specified by convert.
+  List<User> results = r.convert(User.fromDict);
 }
-
-final db = DeltaTraceDatabase();
-final users = [
-  ClassA(id: 'u003', name: 'Hanako')
-];
-final query = QueryBuilder.add(target: 'users', addData: users).build();
-final result = db.executeQuery<User>(query);
-// New class to be changed from ClassA
-class ClassB extends ClonableFile {
-  String id;
-  String name;
-  int age;
-
-  ClassB(this.id, this.name, this.age)
-// Omitted
-}
-
-final Query conformQuery = QueryBuilder.conformToTemplate(
-  target: 'users',
-  template: ClassB(
-      id: '', name: '', age: -1), // Undefined age is filled with the initial value of -1
-).build();
-final QueryResult<ClassB> _ = db.executeQuery<ClassB>(conformQuery);
-
-// => { 'id': 'u003', 'name': 'Hanako', 'age': -1 }
-final conformedUser = ClassB.fromDict(db
-    .collection("users")
-    .raw[0]);
 ```
 
-### 🔁 9. Transaction Processing
+## DB structure
 
-You can use a transaction query if you want to treat multiple queries as a single process.  
-When processing with this query, if the return value isSuccess is false,  
-the DB will be reverted to the state before the transaction query was executed.  
-Please note that internally, the collection to be updated is temporarily buffered in memory,  
-so you will need to allocate additional memory for this.  
+In DeltaTraceDB, each collection corresponds to a **list of class instances**.  
+Since the data structure directly mirrors your class definitions,  
+it becomes easy to keep consistency between the frontend and backend while  
+focusing solely on retrieving the class objects you need.
 
-```dart
-    final now = DateTime.now();
-    final db = DeltaTraceDatabase();
-    List<User> users = [
-      User(
-        id: 1,
-        name: 'Taro',
-        age: 25,
-        createdAt: now.add(Duration(days: 0)),
-        updatedAt: now.add(Duration(days: 0)),
-        nestedObj: {},
-      ),
-      User(
-        id: 2,
-        name: 'Jiro',
-        age: 28,
-        createdAt: now.add(Duration(days: 1)),
-        updatedAt: now.add(Duration(days: 1)),
-        nestedObj: {},
-      ),
-      User(
-        id: 3,
-        name: 'Saburo',
-        age: 31,
-        createdAt: now.add(Duration(days: 2)),
-        updatedAt: now.add(Duration(days: 2)),
-        nestedObj: {},
-      ),
-      User(
-        id: 4,
-        name: 'Hanako',
-        age: 17,
-        createdAt: now.add(Duration(days: 3)),
-        updatedAt: now.add(Duration(days: 3)),
-        nestedObj: {},
-      ),
-    ];
-    // add
-    final Query q1 = QueryBuilder.add(target: 'users1', addData: users).build();
-    final Query q2 = QueryBuilder.add(target: 'users2', addData: users).build();
-    QueryResult<User> _ = db.executeQuery<User>(q1);
-    QueryResult<User> _ = db.executeQuery<User>(q2);
-    // Failed transactions
-    final TransactionQuery tq1 = TransactionQuery(
-      queries: [
-        QueryBuilder.update(
-          target: 'users1',
-          // type error
-          queryNode: FieldEquals("id", "3"),
-          overrideData: {"id": "5"},
-          returnData: true,
-          mustAffectAtLeastOne: true,
-        ).build(),
-        QueryBuilder.clear(target: 'users2').build(),
-      ],
-    );
-    // result.isSuccess is false. The DB hasn't changed.
-    // The rewind applies to all collections in the DB (in this case, users1 and users2).
-    QueryExecutionResult result = db.executeQueryObject(tq1);
-    // Success　transactions
-    final TransactionQuery tq2 = TransactionQuery(
-      queries: [
-        QueryBuilder.update(
-          target: 'users1',
-          queryNode: FieldEquals("id", 3),
-          // Be careful with the overriding type: This library allows overriding with other types.
-          overrideData: {"id": 5},
-          returnData: true,
-          mustAffectAtLeastOne: true,
-        ).build(),
-        QueryBuilder.clear(target: 'users2').build(),
-      ],
-    );
-    QueryExecutionResult result2 = db.executeQueryObject(tq2);
+```
+📦 Database (DeltaTraceDB)
+├── 🗂️ CollectionA (key: "collection_a")
+│   ├── 📄 Item (ClassA)
+│   │   ├── id: int
+│   │   ├── name: String
+│   │   └── timestamp: String
+│   └── ...
+├── 🗂️ CollectionB (key: "collection_b")
+│   ├── 📄 Item (ClassB)
+│   │   ├── uid: String
+│   │   └── data: Map<String, dynamic>
+└── ...
 ```
 
-### 🗑️ 10. Deletion Process
+## Basic Operations
 
-After creating the DB structure, if you absolutely need to modify it,  
-there is a command to delete a collection.
+For detailed usage, including how to write queries, see the documentation:
 
-However, this command is intended **only for administrative maintenance**:
-- It cannot be included in transactional queries.
-- It does not trigger any UI callbacks at runtime.
+📘 [Online Documentation](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
 
-Use it with caution if necessary.
+## Performance
 
-```dart
-final db = DeltaTraceDatabase();
-final q1 = RawQueryBuilder
-        .add(
-        target: "user", rawAddData: [{"id": -1, "name": "a"}, {"id": -1, "name": "a"}], serialKey: "id")
-        .build();
-final r1 = db.executeQuery(q1);
-final q2 = RawQueryBuilder.removeCollection(target: "user").build();
-final r2 = db.executeQuery(q2);
+DeltaTraceDB is fast due to its in-memory design.
+Although it has no dedicated optimization mechanisms at the moment,
+its performance is roughly equivalent to a simple for loop over the data.
+Around 100,000 records can typically be handled without issues.
+
+You can run performance tests using:
+```text
+test/speed_test.dart
 ```
 
-## ⚠️ 🕒 Be careful when handling date and time!
-
-"DeltaTraceDB" can handle datetimes without a time zone (local time) and with a time zone (UTC in Dart), but  
-in principle, datetimes without a time zone and those with a time zone cannot be compared correctly.  
-These will be treated as False in search comparison calculations, so please be careful when designing the DB contents.  
-If a backend or cloud is involved, we recommend standardizing the time zone to UTC.  
-Alternatively, using UNIX Time integer values is fast and convenient.  
-If you want to see in detail how it actually works, check out the [test code](https://github.com/MasahideMori-SimpleAppli/delta_trace_db/blob/main/test/timezone_search_test.dart).  
-
-## Speed
-
-This package is an in-memory database, so it is generally fast.  
-Currently, there is no mechanism to speed it up, but it works almost the same as a for loop in a program,  
-so there is usually no problem with around 100,000 records.  
-I recommend that you test it in an actual environment using speed_test.dart in the test folder.  
-However, since it consumes RAM capacity according to the amount of data,  
-if you need an extremely large database, consider using a general database.  
-For reference, below are the results of a speed test (test/speed_test.dart) run on a slightly  
-older PC equipped with a Ryzen 3600 CPU.  
-The test conditions were chosen to take a sufficiently long time, but I think it will rarely
-cause   
-any problems in practical use.
-Please note that speeds also depend on the amount of data, so if you have a lot of large data, it will be slower.
-
+Below is an example result from a Ryzen 3600 machine:
 ```text
 speed test for 100000 records                                                                                                                                                                                                                                                       
 start add
-end add: 222 ms
+end add: 178 ms
 start getAll (with object convert)
-end getAll: 665 ms
+end getAll: 638 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 351 ms
+end save: 354 ms
 start load (with json string convert)
-end load: 252 ms
+end load: 259 ms
 start search (with object convert)
-end search: 815 ms
+end search: 780 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
-end search paging: 467 ms
+end search paging: 440 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 552 ms
+end search paging by obj: 543 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 470 ms
+end search paging by offset: 438 ms
 returnsLength:50000
 start searchOne, the last index object search (with object convert)
-end searchOne: 14 ms
+end searchOne: 19 ms
 returnsLength:1
 start update at half index and last index object
-end update: 28 ms
+end update: 22 ms
 start updateOne of half index object
-end updateOne: 8 ms
+end updateOne: 6 ms
 start conformToTemplate
-end conformToTemplate: 60 ms
+end conformToTemplate: 65 ms
 start delete half object (with object convert)
-end delete: 410 ms
+end delete: 450 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 8 ms
+end deleteOne: 6 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 67 ms
+end add with serialKey: 54 ms
 addedCount:100000
 ```
 
 ## Future plans
 
-It is possible to speed up the database, but this is a low priority, so I think that improving
-usability and creating peripheral tools will take priority.
+Although further optimization is possible, performance improvements have lower priority.  
+The focus will instead be on improving usability and developing surrounding tools.
 
 ## Notes
 
-This package is intended for single-threaded operation.  
-Please note that additional processing, such as message passing, is required for parallel processing where memory is not shared.  
+This package is designed for single-threaded environments.  
+When using parallel processing without shared memory, additional mechanisms such as message passing are required.
 
 ## Support
 
-There is essentially no support at this time, but bugs will likely be fixed.  
-If you find any issues, please open an issue on GitHub.
+There is no official support, but bugs are likely to be fixed actively.  
+Please open an issue on GitHub if you find any problems.
 
 ## About version control
 

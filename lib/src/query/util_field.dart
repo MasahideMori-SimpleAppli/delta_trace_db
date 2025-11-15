@@ -2,7 +2,6 @@
 ///
 /// (ja) DBの内部処理で利用する、フィールドアクセスに関するユーティリティです。
 class UtilField {
-
   /// (en) Functions for accessing nested fields of a dictionary.
   /// Returns the found value, or None if it doesn't exist.
   ///
