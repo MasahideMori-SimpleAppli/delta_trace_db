@@ -22,8 +22,8 @@ class User extends CloneableFile {
     id: src['id'],
     name: src['name'],
     age: src['age'],
-    createdAt: DateTime.fromMillisecondsSinceEpoch(src['createdAt']),
-    updatedAt: DateTime.fromMillisecondsSinceEpoch(src['updatedAt']),
+    createdAt: DateTime.parse(src['createdAt']),
+    updatedAt: DateTime.parse(src['updatedAt']),
     nestedObj: src['nestedObj'],
   );
 
@@ -32,9 +32,8 @@ class User extends CloneableFile {
     'id': id,
     'name': name,
     'age': age,
-    'createdAt': createdAt.millisecondsSinceEpoch,
-    // This will automatically update the update date.
-    'updatedAt': DateTime.now().millisecondsSinceEpoch,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
     'nestedObj': {...nestedObj},
   };
 
@@ -44,147 +43,40 @@ class User extends CloneableFile {
   }
 }
 
-void main() async {
-  final now = DateTime.now();
+void main() {
   final db = DeltaTraceDatabase();
-
-  // add
-  final Query q1 = QueryBuilder.add(
+  final now = DateTime.now();
+  List<User> users = [
+    User(
+      id: -1,
+      name: 'Taro',
+      age: 30,
+      createdAt: now,
+      updatedAt: now,
+      nestedObj: {"a": "a"},
+    ),
+    User(
+      id: -1,
+      name: 'Jiro',
+      age: 25,
+      createdAt: now,
+      updatedAt: now,
+      nestedObj: {"a": "b"},
+    ),
+  ];
+  // If you want the return value to be reflected immediately on the front end,
+  // set returnData = true to get data that properly reflects the serial key.
+  final query = QueryBuilder.add(
     target: 'users',
-    addData: [
-      User(
-        id: -1,
-        // dummy value
-        name: 'sampleA',
-        age: 25,
-        createdAt: now,
-        updatedAt: now,
-        nestedObj: {"a": "test", "b": 1},
-      ),
-      User(
-        id: -1,
-        name: 'sampleB',
-        age: 28,
-        createdAt: now,
-        updatedAt: now,
-        nestedObj: {"a": "test", "b": 1},
-      ),
-      User(
-        id: -1,
-        name: 'sampleC',
-        age: 31,
-        createdAt: now,
-        updatedAt: now,
-        nestedObj: {"a": "text", "b": 2},
-      ),
-      User(
-        id: -1,
-        name: 'sampleD',
-        age: 17,
-        createdAt: now,
-        updatedAt: now,
-        nestedObj: {"a": "text", "b": 3},
-      ),
-    ],
-    // auto set User.id to serial number from 0 to int.max.
+    addData: users,
     serialKey: "id",
-  ).build();
-  // If the query is processed on the server, it can be serialized.
-  // final jsonMap = q1.toDict();
-  print("// add");
-  final QueryResult<User> addResult = db.executeQuery<User>(q1);
-  print("dbLength:${addResult.dbLength}");
-
-  // search
-  final Query q2 = QueryBuilder.search(
-    target: 'users',
-    queryNode: FieldStartsWith("name", "sample"),
-    sortObj: SingleSort(field: 'age'),
-    limit: 2,
-  ).build();
-  final QueryResult<User> r2 = db.executeQuery<User>(q2);
-  // convert to class
-  final List<User> searchResult = r2.convert(User.fromDict);
-  print("// search");
-  print("return:${searchResult.length}");
-  print("hitCount:${r2.hitCount}");
-  for (User i in searchResult) {
-    print(i.name);
-  }
-  // paging option
-  final Query q2Paging = QueryBuilder.search(
-    target: 'users',
-    queryNode: FieldStartsWith("name", "sample"),
-    sortObj: SingleSort(field: 'age'),
-    limit: 2,
-    startAfter: r2.result.last,
-  ).build();
-  final QueryResult<User> r2Paging = db.executeQuery<User>(q2Paging);
-  final List<User> searchResultPaging = r2Paging.convert(User.fromDict);
-  print("// search (paging)");
-  print("return:${searchResultPaging.length}");
-  print("hitCount:${r2Paging.hitCount}");
-  for (User i in searchResultPaging) {
-    print(i.name);
-  }
-
-  // nested param search
-  // You can access nested parameters by specifying variables separated by ".".
-  final Query q2Nested = QueryBuilder.search(
-    target: 'users',
-    queryNode: FieldEquals("nestedObj.b", 1),
-    sortObj: SingleSort(field: 'age'),
-  ).build();
-  final QueryResult<User> r2Nested = db.executeQuery<User>(q2Nested);
-  // convert to class
-  final List<User> searchNestedResult = r2Nested.convert(User.fromDict);
-  print("// nested param search");
-  print("return:${searchNestedResult.length}");
-  print("hitCount:${r2Nested.hitCount}");
-  for (User i in searchNestedResult) {
-    print(i.name);
-  }
-
-  // update
-  final Query q3 = QueryBuilder.update(
-    target: 'users',
-    queryNode: OrNode([
-      FieldEquals('name', 'sampleA'),
-      FieldEquals('name', 'sampleD'),
-    ]),
-    overrideData: {'age': 26},
     returnData: true,
-    sortObj: SingleSort(field: 'id'),
   ).build();
-  final QueryResult<User> r3 = db.executeQuery<User>(q3);
-  // convert to class
-  final List<User> updateResult = r3.convert(User.fromDict);
-  print("// update");
-  print("updateCount:${r3.updateCount}");
-  for (User i in updateResult) {
-    print(i.toDict().toString());
-  }
-
-  // delete
-  final Query q4 = QueryBuilder.delete(
-    target: 'users',
-    queryNode: FieldEquals("name", "sampleD"),
-    sortObj: SingleSort(field: 'id'),
-    returnData: false,
-  ).build();
-  final QueryResult<User> deleteResult = db.executeQuery<User>(q4);
-  print("// delete");
-  print("dbLength:${deleteResult.dbLength}");
-
-  // save and load
-  // You can save it using your favorite package or using standard input and
-  // output.
-  // This package simply converts the contents of the DB into a Map,
-  // so it can be extended in various ways, for example to perform encryption.
-  final Map<String, dynamic> jsonMap = db.toDict();
-
-  // Restoring the database can be completed simply by loading the map.
-  final DeltaTraceDatabase resumedDB = DeltaTraceDatabase.fromDict(jsonMap);
-  print("// save and load");
-  print("resumedDB users length:${resumedDB.collection('users').length}");
+  // Specifying the "User class" is only necessary if you want to easily revert to the original class.
+  final r = db.executeQuery<User>(query);
+  // If you want to check the return value, you can easily do so by using toDict, which serializes it.
+  print(r.toDict());
+  // You can easily convert from the Result object back to the original class.
+  // The value of r.result is deserialized using the function specified by convert.
+  // List<User> results = r.convert(User.fromDict);
 }

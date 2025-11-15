@@ -1,6 +1,7 @@
 ## 0.0.38
 
 * Updated readme.
+* Updated example.
 
 ## 0.0.37
 
