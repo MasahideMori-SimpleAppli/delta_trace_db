@@ -10,8 +10,6 @@ NoSQLですが、ネストされた子クラスの値についても全文検索
 **who / when / what / why / from** 等の操作情報を保持可能です。  
 これにより、セキュリティ監査や利用状況分析に利用できる「リッチな操作ログ」を作ることができます。
 
----
-
 ## 特徴
 - **クラスをそのまま保存・検索**（モデルクラス＝DB構造）
 - Dart / Flutter で動作する軽量インメモリ DB
@@ -21,8 +19,6 @@ NoSQLですが、ネストされた子クラスの値についても全文検索
   → https://pypi.org/project/delta-trace-db/
 - DB の内容を編集できる GUI ツールも開発中  
   → https://github.com/MasahideMori-SimpleAppli/delta_trace_studio
-
----
 
 ## クイックスタート
 
@@ -111,8 +107,6 @@ void main() {
 }
 ```
 
----
-
 # DB の構造
 
 DeltaTraceDB では、各コレクションが「クラスのリスト」に相当します。  
@@ -134,15 +128,11 @@ DeltaTraceDB では、各コレクションが「クラスのリスト」に相�
 └── ...
 ```
 
----
-
 ## 基本操作
 
 詳細な使用方法やクエリの記述などは、オンラインドキュメントをご覧ください。
 
 📘 [オンラインドキュメント](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
-
----
 
 ## パフォーマンス
 
@@ -198,28 +188,20 @@ end add with serialKey: 54 ms
 addedCount:100000
 ```
 
----
-
 ## 今後の予定について
 
 高速化は可能なものの優先度は低めで、  
 使い勝手の向上や周辺ツールの開発 が主な改良対象になる予定です。
-
----
 
 ## 注意事項
 
 本パッケージは **シングルスレッド前提** で設計されています。  
 メモリを共有しない並列処理では、メッセージパッシングなどの追加処理が必要なことに注意してください。
 
----
-
 ## サポート
 
 公式サポートはありませんが、バグは積極的に修正される可能性があります。  
 問題を見つけた場合は GitHub Issue へお願いします。
-
----
 
 ## バージョン管理について
 
@@ -232,8 +214,6 @@ addedCount:100000
     - X.C.X
 - 軽微な変更やバグ修正
     - X.X.C
-
----
 
 ## ライセンス
 
@@ -252,8 +232,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
----
 
 ## Trademarks
 

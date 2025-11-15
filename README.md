@@ -17,8 +17,6 @@ By serializing and storing these query objects, you can not only restore the dat
 but also keep operation metadata such as **who / when / what / why / from**.  
 This allows you to build rich and highly detailed operation logs suitable for security audits and usage analysis.
 
----
-
 ## Features
 
 - **Store and search classes directly** (your model classes define the DB structure)
@@ -29,8 +27,6 @@ This allows you to build rich and highly detailed operation logs suitable for se
   → https://pypi.org/project/delta-trace-db/
 - GUI editor for DB content is under development  
   → https://github.com/MasahideMori-SimpleAppli/delta_trace_studio
-
----
 
 ## Quick Start
 
@@ -119,8 +115,6 @@ void main() {
 }
 ```
 
----
-
 ## DB structure
 
 In DeltaTraceDB, each collection corresponds to a **list of class instances**.  
@@ -143,15 +137,11 @@ focusing solely on retrieving the class objects you need.
 └── ...
 ```
 
----
-
 ## Basic Operations
 
 For detailed usage, including how to write queries, see the documentation:
 
 📘 [Online Documentation](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
-
----
 
 ## Performance
 
@@ -209,28 +199,20 @@ end add with serialKey: 54 ms
 addedCount:100000
 ```
 
----
-
 ## Future plans
 
 Although further optimization is possible, performance improvements have lower priority.  
 The focus will instead be on improving usability and developing surrounding tools.
-
----
 
 ## Notes
 
 This package is designed for single-threaded environments.  
 When using parallel processing without shared memory, additional mechanisms such as message passing are required.
 
----
-
 ## Support
 
 There is no official support, but bugs are likely to be fixed actively.  
 Please open an issue on GitHub if you find any problems.
-
----
 
 ## About version control
 
@@ -244,8 +226,6 @@ However, versions less than 1.0.0 may change the file structure regardless of th
     - X.C.X
 - Minor changes and bug fixes.
     - X.X.C
-
----
 
 ## License
 
@@ -264,8 +244,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
----
 
 ## Trademarks
 
