@@ -1,3 +1,7 @@
+## 0.0.39
+
+* The following optional parameters have been added to the Actor class: name, email, createdAt, updatedAt, lastAccess, lastAccessDay, operationInDay, and deviceIds.
+
 ## 0.0.38
 
 * Updated readme.
