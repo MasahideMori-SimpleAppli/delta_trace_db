@@ -80,7 +80,6 @@ void main() {
       final actor1 = Actor(EnumActorType.human, 'user1', name: 'User');
       final actor2 = Actor(EnumActorType.human, 'user1', name: 'User');
 
-      // これで == を使った比較
       expect(actor1 == actor2, isTrue);
       expect(actor1.hashCode == actor2.hashCode, isTrue);
 
@@ -103,7 +102,7 @@ void main() {
         EnumActorType.human,
         'user1',
         deviceIds: ['d2', 'd1'],
-      ); // order matters
+      );
 
       expect(actor1 == actor2, isTrue);
       expect(actor1 != actor3, isTrue);
