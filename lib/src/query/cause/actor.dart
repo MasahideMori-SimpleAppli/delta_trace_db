@@ -36,30 +36,28 @@ class Actor extends CloneableFile {
 
   Map<String, dynamic>? context;
 
-  /// * [type] : The actor type. Choose from HUMAN, AI, or SYSTEM.
+  /// * [type] : The actor type. Choose from human, ai, or system.
   /// * [id] : The serial id (user id) of the actor.
   /// * [collectionPermissions] : Collection-level permissions that relate only
   /// to database operations. The key is the collection name.
-  /// * [context] : The other context.
-  /// * [name] : The actor's display name (optional).
-  /// * [email] : The actor's email address (optional).
-  /// * [createdAt] : The creation timestamp of this actor. If null,
+  /// * [context] : Additional metadata related to this actor.
+  /// * [name] : The actor's display name.
+  /// * [email] : The actor's email address.
+  /// * [createdAt] : The creation timestamp (UTC) of this actor. If null,
   /// set to now (UTC).
-  /// * [updatedAt] : The last update timestamp of this actor.
+  /// * [updatedAt] : The last update timestamp (UTC) of this actor.
   /// If null, set to [createdAt].
-  /// This parameter should only be overridden if the values of name, email,
-  /// context, or deviceIds have changed.
-  /// * [lastAccess] : The timestamp of the last database access by this actor.
-  /// It will be updated when you call [updateAccess].
-  /// * [lastAccessDay] : The start-of-day timestamp for counting
-  /// daily operations.
-  /// It will be updated when you call [updateAccess].
-  /// * [operationInDay] : Number of operations performed by this actor
-  /// since [lastAccessDay].
-  /// If this parameter using, After creating an Actor instance,
-  /// call [updateAccess] to record the first access and initialize
-  /// daily operation count.
-  /// * [deviceIds] : This is a list of device IDs that the user is using.
+  /// This parameter should only be manually overridden when the values
+  /// of `name`, `email`, `context`, or `device_ids` have been changed.
+  /// * [lastAccess] : The timestamp (UTC) of the last database access by this actor.
+  /// It will be automatically updated when calling `updateAccess()`.
+  /// * [lastAccessDay] : Day-based timestamp (UTC) used to track daily operation
+  /// counts. Automatically updated when calling `updateAccess()`.
+  /// * [operationInDay] : The number of operations performed since
+  /// `lastAccessDay`. After creating an Actor instance manually,
+  /// call `updateAccess()` to initialize the daily operation state.
+  /// * [deviceIds] : A list of device IDs associated with this actor.
+  /// Used to identify devices used by the same user.
   Actor(
     this.type,
     this.id, {
@@ -77,6 +75,11 @@ class Actor extends CloneableFile {
   }) {
     createdAt ??= DateTime.now().toUtc();
     updatedAt ??= createdAt!.copyWith();
+    // UTC convert
+    createdAt = _toUTC(createdAt);
+    updatedAt = _toUTC(updatedAt);
+    lastAccess = _toUTC(lastAccess);
+    lastAccessDay = _toUTC(lastAccessDay);
   }
 
   static DateTime? _parseDateTime(Map<String, dynamic> src, String key) {
@@ -84,7 +87,7 @@ class Actor extends CloneableFile {
     final v = src[key];
     if (v == null) return null;
     try {
-      return DateTime.parse(v);
+      return DateTime.parse(v).toUtc();
     } catch (e) {
       return null;
     }
@@ -106,6 +109,11 @@ class Actor extends CloneableFile {
     } catch (e) {
       return null;
     }
+  }
+
+  static DateTime? _toUTC(DateTime? d) {
+    if (d == null) return null;
+    return d.isUtc ? d : d.toUtc();
   }
 
   static String? _toIsoUtcString(DateTime? dt) => dt?.toUtc().toIso8601String();
