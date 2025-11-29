@@ -3,9 +3,9 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// (en) The result class for a transactional query.
 ///
 /// (ja) トランザクションクエリの結果クラスです。
-class TransactionQueryResult<T> extends QueryExecutionResult {
+class TransactionQueryResult extends QueryExecutionResult {
   static const String className = "TransactionQueryResult";
-  static const String version = "2";
+  static const String version = "3";
   List<QueryResult> results;
   String? errorMessage;
 
@@ -29,7 +29,7 @@ class TransactionQueryResult<T> extends QueryExecutionResult {
     for (Map<String, dynamic> i in src["results"]) {
       qR.add(QueryResult.fromDict(i));
     }
-    return TransactionQueryResult<T>(
+    return TransactionQueryResult(
       isSuccess: src["isSuccess"],
       results: qR,
       errorMessage: src["errorMessage"],
@@ -37,8 +37,8 @@ class TransactionQueryResult<T> extends QueryExecutionResult {
   }
 
   @override
-  TransactionQueryResult<T> clone() {
-    return TransactionQueryResult<T>.fromDict(toDict());
+  TransactionQueryResult clone() {
+    return TransactionQueryResult.fromDict(toDict());
   }
 
   @override

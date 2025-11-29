@@ -13,7 +13,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_core');
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "14";
+  static const String version = "15";
 
   late final Map<String, Collection> _collections;
 
@@ -463,7 +463,7 @@ class DeltaTraceDatabase extends CloneableFile {
   /// the executing user. This is an optional argument for the server,
   /// the key is the target collection name.
   /// Use null on the frontend, if this is null then everything is allowed.
-  TransactionQueryResult<T> executeTransactionQuery<T>(
+  TransactionQueryResult executeTransactionQuery(
     TransactionQuery q, {
     Map<String, Permission>? collectionPermissions,
   }) {
@@ -506,12 +506,12 @@ class DeltaTraceDatabase extends CloneableFile {
       } catch (e, stack) {
         // エラーの場合は全ての変更を元に戻し、エラー扱いにします。
         _logger.severe("executeTransactionQuery failed", e, stack);
-        return _rollbackCollections<T>(buff, nonExistTargets);
+        return _rollbackCollections(buff, nonExistTargets);
       }
       // 問題がある場合は全ての変更を元に戻し、エラー扱いにします。
       for (QueryResult i in rq) {
         if (i.isSuccess == false) {
-          return _rollbackCollections<T>(buff, nonExistTargets);
+          return _rollbackCollections(buff, nonExistTargets);
         }
       }
       // コールバックが必要なコレクションのリスト。
@@ -546,7 +546,7 @@ class DeltaTraceDatabase extends CloneableFile {
   ///
   /// * [buff] : The collection buffer that needs to be undone.
   /// * [nonExistTargets] : A list of collections that did not exist before the operation.
-  TransactionQueryResult<T> _rollbackCollections<T>(
+  TransactionQueryResult _rollbackCollections(
     Map<String, Map<String, dynamic>> buff,
     Set<String> nonExistTargets,
   ) {
