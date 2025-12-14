@@ -2,6 +2,8 @@ export 'src/db/delta_trace_db_collection.dart';
 export 'src/db/delta_trace_db_core.dart';
 export 'src/db/util_copy.dart';
 
+export 'src/dsl/util_dsl_evaluator.dart';
+
 export 'src/query/cause/temporal_trace/temporal_trace.dart';
 export 'src/query/cause/temporal_trace/timestamp_node.dart';
 export 'src/query/cause/actor.dart';
@@ -20,6 +22,7 @@ export 'src/query/sort/multi_sort.dart';
 export 'src/query/sort/single_sort.dart';
 
 export 'src/query/enum_query_type.dart';
+export 'src/query/merge_query_params.dart';
 export 'src/query/query.dart';
 export 'src/query/query_builder.dart';
 export 'src/query/query_execution_result.dart';

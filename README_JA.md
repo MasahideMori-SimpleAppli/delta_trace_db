@@ -15,10 +15,16 @@ NoSQLですが、ネストされた子クラスの値についても全文検索
 - Dart / Flutter で動作する軽量インメモリ DB
 - 約 10 万件レベルでも高速な検索性能
 - クエリ自体がクラスなので操作ログとして保存可能
-- Python 版あり  
+- Python版もあります。  
   → https://pypi.org/project/delta-trace-db/
-- DB の内容を編集できる GUI ツールも開発中  
+- DB の内容を編集できる GUI ツールもあります。  
   → https://github.com/MasahideMori-SimpleAppli/delta_trace_studio
+
+## 基本操作
+
+詳細な使用方法やクエリの記述などは、オンラインドキュメントをご覧ください。
+
+📘 [オンラインドキュメント](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
 
 ## クイックスタート
 
@@ -127,12 +133,6 @@ DeltaTraceDB では、各コレクションが「クラスのリスト」に相�
 │   │   └── data: Map<String, dynamic>
 └── ...
 ```
-
-## 基本操作
-
-詳細な使用方法やクエリの記述などは、オンラインドキュメントをご覧ください。
-
-📘 [オンラインドキュメント](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
 
 ## パフォーマンス
 

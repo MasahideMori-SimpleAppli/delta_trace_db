@@ -14,7 +14,7 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// そのログは完全なDB操作の履歴になります。
 class Query extends CloneableFile {
   static const String className = "Query";
-  static const String version = "6";
+  static const String version = "7";
 
   String target;
   EnumQueryType type;
@@ -33,6 +33,7 @@ class Query extends CloneableFile {
   bool mustAffectAtLeastOne;
   String? serialKey;
   bool resetSerial;
+  MergeQueryParams? mergeQueryParams;
   Cause? cause;
 
   /// (en) This is a query class for DB operations. It is usually built using
@@ -96,7 +97,7 @@ class Query extends CloneableFile {
   /// If specified together with endBefore,
   /// limit number of objects before the specified object will be returned.
   /// * [returnData] : If true, return the changed objs.
-  /// Not valid for clear, clearAdd and conformToTemplate.
+  /// Not valid for clear, clearAdd, conformToTemplate and merge.
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
@@ -108,6 +109,7 @@ class Query extends CloneableFile {
   /// keys, not nested fields.
   /// * [resetSerial] : If true, resets the managed serial number to 0 on
   /// a clear or clearAdd query.
+  /// * [mergeQueryParams] : Dedicated parameters when issuing a merge query.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -132,6 +134,7 @@ class Query extends CloneableFile {
     this.mustAffectAtLeastOne = true,
     this.serialKey,
     this.resetSerial = false,
+    this.mergeQueryParams,
     this.cause,
   });
 
@@ -141,6 +144,11 @@ class Query extends CloneableFile {
   ///
   /// * [src] : A dictionary made with toDict of this class.
   factory Query.fromDict(Map<String, dynamic> src) {
+    MergeQueryParams? mqp;
+    if (src.containsKey("mergeQueryParams") &&
+        src["mergeQueryParams"] != null) {
+      mqp = MergeQueryParams.fromDict(src["mergeQueryParams"]);
+    }
     return Query(
       target: src["target"],
       type: EnumQueryType.values.byName(src["type"]),
@@ -165,6 +173,7 @@ class Query extends CloneableFile {
       mustAffectAtLeastOne: src["mustAffectAtLeastOne"],
       serialKey: src.containsKey("serialKey") ? src["serialKey"] : null,
       resetSerial: src.containsKey("resetSerial") ? src["resetSerial"] : false,
+      mergeQueryParams: mqp,
       cause: src["cause"] != null ? Cause.fromDict(src["cause"]) : null,
     );
   }
@@ -194,6 +203,7 @@ class Query extends CloneableFile {
       "mustAffectAtLeastOne": mustAffectAtLeastOne,
       "serialKey": serialKey,
       "resetSerial": resetSerial,
+      "mergeQueryParams": mergeQueryParams?.toDict(),
       "cause": cause?.toDict(),
     };
   }

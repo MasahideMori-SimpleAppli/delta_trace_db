@@ -12,7 +12,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 /// DBに対する操作などが実装されています。
 class Collection extends CloneableFile {
   static const String className = "Collection";
-  static const String version = "16";
+  static const String version = "17";
   List<Map<String, dynamic>> _data = [];
 
   /// A serial number is automatically assigned when a serial key is specified.
@@ -55,6 +55,24 @@ class Collection extends CloneableFile {
   ///
   /// (ja) コンストラクタ。
   Collection();
+
+  /// (en) Constructor for creating an object by adding data directly.
+  ///
+  /// (ja) 直接データを追加してオブジェクトを生成するためのコンストラクタ。
+  ///
+  /// * [data] : The Collection items.
+  /// * [serialNum] : The serial number to be managed, starting with 0.
+  Collection.fromData(List<Map<String, dynamic>> data, int serialNum) {
+    _data = data;
+    _serialNum = serialNum;
+  }
+
+  /// (en) Gets the value of the currently managed serial number.
+  ///
+  /// (ja) 現在管理中のシリアルナンバーの値を取得します。
+  int getSerialNum() {
+    return _serialNum;
+  }
 
   /// (en) Restore this object from the dictionary.
   /// Note that src is used as is, not copied.

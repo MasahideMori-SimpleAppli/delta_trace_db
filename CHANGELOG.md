@@ -1,3 +1,9 @@
+## 0.1.0
+
+* A new query type, Merge, has been added.
+* The priority of the mustAffectAtLeastOne error and other errors has been changed so that other errors take priority.
+* Added getSerialNum method to Collection class.
+
 ## 0.0.40
 
 * Removed unnecessary generics from TransactionQueryResult.

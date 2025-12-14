@@ -16,4 +16,5 @@ enum EnumQueryType {
   clear, // delete all items.
   clearAdd, // clear then add.
   removeCollection, // A special query that is not allowed in a transaction.
+  merge,
 }

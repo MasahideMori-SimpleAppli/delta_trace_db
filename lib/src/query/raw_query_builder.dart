@@ -445,6 +445,38 @@ class RawQueryBuilder extends QueryBuilder {
     super.cause,
   }) : super.removeCollection();
 
+  /// (en) Merges collections according to the specified template and
+  /// creates a new collection.
+  /// This query is special and cannot be included as part of a
+  /// transaction query.
+  /// Also, any callbacks associated with the target collection will not be
+  /// called when it is executed.
+  /// This is a maintenance function for administrators who need to change
+  /// the database structure.
+  /// Normally, you should design your database so that it does not need to
+  /// be called.
+  ///
+  /// (ja) 指定されたテンプレートに沿ってコレクションをマージし、
+  /// 新しいコレクションを作成します。
+  /// このクエリは特殊で、トランザクションクエリの一部として含めることはできません。
+  /// また、実行時には対象のコレクションに紐付いたコールバックも呼ばれません。
+  /// これはDBの構造変更が必要な管理者のためのメンテナンス機能であり、
+  /// 通常はこれを呼び出さないでも問題ない設計にしてください。
+  ///
+  /// * [mergeQueryParams] : Parameter object specifically for merge queries.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
+  RawQueryBuilder.merge({
+    required super.mergeQueryParams,
+    super.mustAffectAtLeastOne = true,
+    super.cause,
+  }) : super.merge();
+
   /// (en) This method can be used if you want to change only the search position.
   ///
   /// (ja) 検索位置だけを変更したい場合に利用できるメソッドです。
@@ -529,6 +561,7 @@ class RawQueryBuilder extends QueryBuilder {
       mustAffectAtLeastOne: mustAffectAtLeastOne,
       serialKey: serialKey,
       resetSerial: resetSerial,
+      mergeQueryParams: mergeQueryParams,
       cause: cause,
     );
   }

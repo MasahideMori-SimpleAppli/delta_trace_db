@@ -13,7 +13,7 @@ final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_core');
 /// 人間以外で、AIも主な利用者であると想定して作成しています。
 class DeltaTraceDatabase extends CloneableFile {
   static const String className = "DeltaTraceDatabase";
-  static const String version = "15";
+  static const String version = "16";
 
   late final Map<String, Collection> _collections;
 
@@ -380,6 +380,8 @@ class DeltaTraceDatabase extends CloneableFile {
             );
           }
           removeCollection(q.target);
+        case EnumQueryType.merge:
+          r = _executeMergeQuery(q);
       }
       switch (q.type) {
         case EnumQueryType.add:
@@ -392,19 +394,25 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.clear:
         case EnumQueryType.clearAdd:
         case EnumQueryType.removeCollection:
+        case EnumQueryType.merge:
           if (q.mustAffectAtLeastOne) {
             if (r.updateCount == 0) {
-              return QueryResult<T>(
-                isSuccess: false,
-                target: q.target,
-                type: q.type,
-                result: [],
-                dbLength: col.raw.length,
-                updateCount: 0,
-                hitCount: r.hitCount,
-                errorMessage:
-                    "No data matched the condition (mustAffectAtLeastOne=true).",
-              );
+              if (r.isSuccess == false) {
+                //　既に別のエラーが返されている場合。
+                return r;
+              } else {
+                return QueryResult<T>(
+                  isSuccess: false,
+                  target: q.target,
+                  type: q.type,
+                  result: [],
+                  dbLength: col.raw.length,
+                  updateCount: 0,
+                  hitCount: r.hitCount,
+                  errorMessage:
+                      "No data matched the condition (mustAffectAtLeastOne=true).",
+                );
+              }
             } else {
               return r;
             }
@@ -451,12 +459,16 @@ class DeltaTraceDatabase extends CloneableFile {
   /// During a transaction, after all operations are completed successfully,
   /// if there is a listener callback for each collection, it will be invoked.
   /// If there is a failure, nothing will be done.
+  /// removeCollection and merge queries cannot be executed and will return an
+  /// error message if they are included in a transaction.
   ///
   /// (ja) トランザクションクエリを実行します。
   /// サーバーサイドでは、この呼び出しの前に正規の呼び出しであるかどうかの
   /// 検証(JWTのチェックや呼び出し元ユーザーの権限のチェック)を行ってください。
   /// トランザクション時は、全ての処理が正常に完了後、各コレクションに
   /// リスナーのコールバックがあれば起動し、失敗の場合はなにもしません。
+  /// removeCollection及びmergeクエリは実行できず、
+  /// トランザクションに含まれる場合はエラーメッセージが返されます。
   ///
   /// * [q] : The query.
   /// * [collectionPermissions] : Collection level operation permissions for
@@ -469,7 +481,8 @@ class DeltaTraceDatabase extends CloneableFile {
   }) {
     // 許可されていないクエリが混ざっていないか調査し、混ざっていたら失敗にする。
     for (Query i in q.queries) {
-      if (i.type == EnumQueryType.removeCollection) {
+      if (i.type == EnumQueryType.removeCollection ||
+          i.type == EnumQueryType.merge) {
         return TransactionQueryResult(
           isSuccess: false,
           results: [],
@@ -566,5 +579,182 @@ class DeltaTraceDatabase extends CloneableFile {
       results: [],
       errorMessage: "Transaction failed",
     );
+  }
+
+  /// (en) Run merge query.
+  ///
+  /// (ja) マージクエリを実行します。
+  ///
+  /// * [q] : The query.
+  QueryResult<T> _executeMergeQuery<T>(Query q) {
+    MergeQueryParams? mqp = q.mergeQueryParams;
+    if (mqp == null) {
+      return QueryResult<T>(
+        isSuccess: false,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: 0,
+        updateCount: 0,
+        hitCount: 0,
+        errorMessage: "Argument error",
+      );
+    }
+    // 捜査対象コレクションの存在チェック。
+    if (findCollection(mqp.base) == null) {
+      return QueryResult<T>(
+        isSuccess: false,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: 0,
+        updateCount: 0,
+        hitCount: 0,
+        errorMessage: "Base collection does not exist.",
+      );
+    }
+    if (mqp.source.isNotEmpty) {
+      for (String colName in mqp.source) {
+        if (findCollection(colName) == null) {
+          return QueryResult<T>(
+            isSuccess: false,
+            target: q.target,
+            type: q.type,
+            result: [],
+            dbLength: 0,
+            updateCount: 0,
+            hitCount: 0,
+            errorMessage: "Source collection does not exist.",
+          );
+        }
+      }
+    }
+    if (mqp.serialBase != null) {
+      if (findCollection(mqp.serialBase!) == null) {
+        return QueryResult<T>(
+          isSuccess: false,
+          target: q.target,
+          type: q.type,
+          result: [],
+          dbLength: 0,
+          updateCount: 0,
+          hitCount: 0,
+          errorMessage: "Serial base collection does not exist.",
+        );
+      }
+    }
+    // フラグの設定がおかしい場合はエラー。
+    if (mqp.sourceKeys != null) {
+      if (mqp.sourceKeys!.isEmpty ||
+          (mqp.source.length != mqp.sourceKeys!.length)) {
+        return QueryResult<T>(
+          isSuccess: false,
+          target: q.target,
+          type: q.type,
+          result: [],
+          dbLength: 0,
+          updateCount: 0,
+          hitCount: 0,
+          errorMessage: "The relationKey or relationKeys setting is invalid.",
+        );
+      }
+    }
+    // 既に出力先コレクションが存在するならエラー。
+    if (findCollection(mqp.output) != null) {
+      return QueryResult<T>(
+        isSuccess: false,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: 0,
+        updateCount: 0,
+        hitCount: 0,
+        errorMessage: "The output collection already exists.",
+      );
+    }
+    try {
+      // DSLを解釈しながら新しいデータを生成する。
+      List<Map<String, dynamic>> newData = [];
+      // まず、マージ元のデータを取得する。
+      final List<Map<String, dynamic>> baseCollection = findCollection(
+        mqp.base,
+      )!.raw;
+      final List<List<Map<String, dynamic>>> sourceCollections = [];
+      for (String sourceName in mqp.source) {
+        sourceCollections.add(findCollection(sourceName)!.raw);
+      }
+      // テンプレートの構造に沿ってDSLで値を代入していく。
+      for (final baseItem in baseCollection) {
+        final List<Map<String, dynamic>> matchedSources =
+            UtilDslEvaluator.resolveSourceItems(
+              baseItem,
+              sourceCollections,
+              mqp.relationKey,
+              mqp.sourceKeys,
+            );
+        final Map<String, dynamic> newRow = UtilDslEvaluator.run(
+          mqp.dslTmp,
+          baseItem,
+          matchedSources,
+        );
+        newData.add(newRow);
+      }
+      // 作成された新しいデータを新しいコレクションとして追加する。
+      if (mqp.serialBase != null) {
+        // シリアルナンバーの値を引き継ぐ。
+        _collections[mqp.output] = Collection.fromData(
+          newData,
+          findCollection(mqp.serialBase!)!.getSerialNum(),
+        );
+      } else {
+        // シリアルナンバーはserialKey依存で追加する。
+        final addedResult = collection(mqp.output).addAll(
+          RawQueryBuilder.add(
+            target: mqp.output,
+            rawAddData: newData,
+            serialKey: mqp.serialKey,
+          ).build(),
+        );
+        if (addedResult.isSuccess == false) {
+          removeCollection(mqp.output);
+          return QueryResult<T>(
+            isSuccess: false,
+            target: q.target,
+            type: q.type,
+            result: [],
+            dbLength: 0,
+            updateCount: 0,
+            hitCount: 0,
+            errorMessage: addedResult.errorMessage,
+          );
+        }
+      }
+      final Collection? resultCol = findCollection(mqp.output);
+      return QueryResult<T>(
+        isSuccess: true,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: resultCol?.length ?? 0,
+        updateCount: resultCol?.length ?? 0,
+        hitCount: 0,
+      );
+    } catch (e, stack) {
+      // もし途中でエラーになった場合、outputのコレクションが生成されていたら削除して元に戻す。
+      if (findCollection(mqp.output) != null) {
+        removeCollection(mqp.output);
+      }
+      _logger.severe("executeMergeQuery failed", e, stack);
+      return QueryResult<T>(
+        isSuccess: false,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: 0,
+        updateCount: 0,
+        hitCount: 0,
+        errorMessage: "Merge failed",
+      );
+    }
   }
 }

@@ -23,10 +23,16 @@ This allows you to build rich and highly detailed operation logs suitable for se
 - Lightweight in-memory DB for Dart / Flutter
 - High-speed search performance even with ~100,000 records
 - Queries are classes, making it easy to preserve operation logs
-- Python version available  
+- Python version available.  
   → https://pypi.org/project/delta-trace-db/
-- GUI editor for DB content is under development  
+- GUI editor for DB content is available.  
   → https://github.com/MasahideMori-SimpleAppli/delta_trace_studio
+
+## Basic Operations
+
+For detailed usage, including how to write queries, see the documentation:
+
+📘 [Online Documentation](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
 
 ## Quick Start
 
@@ -136,12 +142,6 @@ focusing solely on retrieving the class objects you need.
 │   │   └── data: Map<String, dynamic>
 └── ...
 ```
-
-## Basic Operations
-
-For detailed usage, including how to write queries, see the documentation:
-
-📘 [Online Documentation](https://masahidemori-simpleappli.github.io/delta_trace_db_docs/)
 
 ## Performance
 
