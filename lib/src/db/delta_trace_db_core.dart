@@ -311,22 +311,22 @@ class DeltaTraceDatabase extends CloneableFile {
     Query q, {
     Map<String, Permission>? collectionPermissions,
   }) {
-    // パーミッションのチェック。
-    if (!UtilQuery.checkPermissions(q, collectionPermissions)) {
-      return QueryResult<T>(
-        isSuccess: false,
-        target: q.target,
-        type: q.type,
-        result: [],
-        dbLength: -1,
-        updateCount: 0,
-        hitCount: 0,
-        errorMessage: "Operation not permitted.",
-      );
-    }
-    final bool isExistCol = _collections.containsKey(q.target);
-    Collection col = collection(q.target);
     try {
+      // パーミッションのチェック。
+      if (!UtilQuery.checkPermissions(q, collectionPermissions)) {
+        return QueryResult<T>(
+          isSuccess: false,
+          target: q.target,
+          type: q.type,
+          result: [],
+          dbLength: -1,
+          updateCount: 0,
+          hitCount: 0,
+          errorMessage: "Operation not permitted.",
+        );
+      }
+      final bool isExistCol = _collections.containsKey(q.target);
+      Collection col = collection(q.target);
       QueryResult<T>? r;
       switch (q.type) {
         case EnumQueryType.add:
@@ -432,9 +432,9 @@ class DeltaTraceDatabase extends CloneableFile {
         target: q.target,
         type: q.type,
         result: [],
-        dbLength: col.raw.length,
-        updateCount: -1,
-        hitCount: -1,
+        dbLength: -1,
+        updateCount: 0,
+        hitCount: 0,
         errorMessage: "executeQuery ArgumentError",
       );
     } catch (e, stack) {
@@ -444,9 +444,9 @@ class DeltaTraceDatabase extends CloneableFile {
         target: q.target,
         type: q.type,
         result: [],
-        dbLength: col.raw.length,
-        updateCount: -1,
-        hitCount: -1,
+        dbLength: -1,
+        updateCount: 0,
+        hitCount: 0,
         errorMessage: "executeQuery Unexpected Error",
       );
     }

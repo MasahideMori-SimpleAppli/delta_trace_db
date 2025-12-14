@@ -34,6 +34,8 @@ class UtilQuery {
   /// * [collectionPermissions] : The permissions of the user performing
   /// this operation.
   /// Use null on the frontend, if this is null then everything is allowed.
+  ///
+  /// Throws : ArgumentError. If the merge query does not have MergeQueryParams.
   static bool checkPermissions(
     Query q,
     Map<String, Permission>? collectionPermissions,
@@ -41,16 +43,47 @@ class UtilQuery {
     if (collectionPermissions == null) {
       return true;
     } else {
-      if (!collectionPermissions.containsKey(q.target)) {
-        return false;
-      } else {
-        // allowsのチェック。
-        final Permission p = collectionPermissions[q.target]!;
-        if (p.allows.contains(q.type)) {
-          return true;
+      // mergeかどうかで分岐
+      if (q.type == EnumQueryType.merge) {
+        // merge query must always have mergeQueryParams (fail fast)
+        final mqp = q.mergeQueryParams;
+        if (mqp == null) {
+          throw ArgumentError("The merge query must have MergeQueryParams.");
         }
-        return false;
+        if (!_canRead(mqp.base, collectionPermissions)) return false;
+        for (final s in mqp.source) {
+          if (!_canRead(s, collectionPermissions)) return false;
+        }
+        if (mqp.serialBase != null &&
+            !_canRead(mqp.serialBase!, collectionPermissions)) {
+          return false;
+        }
+        return _canMerge(mqp.output, collectionPermissions);
+      } else {
+        if (!collectionPermissions.containsKey(q.target)) {
+          return false;
+        } else {
+          // allowsのチェック。
+          final Permission p = collectionPermissions[q.target]!;
+          if (p.allows.contains(q.type)) {
+            return true;
+          }
+          return false;
+        }
       }
     }
+  }
+
+  static bool _canRead(String collection, Map<String, Permission> perms) {
+    final Permission? p = perms[collection];
+    if (p == null) return false;
+    return p.allows.contains(EnumQueryType.search) ||
+        p.allows.contains(EnumQueryType.searchOne);
+  }
+
+  static bool _canMerge(String collection, Map<String, Permission> perms) {
+    final Permission? p = perms[collection];
+    if (p == null) return false;
+    return p.allows.contains(EnumQueryType.merge);
   }
 }
