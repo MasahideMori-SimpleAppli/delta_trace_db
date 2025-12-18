@@ -9,7 +9,7 @@ class MergeQueryParams extends CloneableFile {
   final String base;
   final List<String> source;
   final String relationKey;
-  final List<String>? sourceKeys;
+  final List<String> sourceKeys;
   final String output;
   final Map<String, dynamic> dslTmp;
   final String? serialBase;
@@ -18,16 +18,9 @@ class MergeQueryParams extends CloneableFile {
   /// * [base]: The name of the collection used as the base when merging.
   /// * [source]: An array of names of the source collections to be merged.
   /// Each element corresponds to the array index on `dslTmp`.
-  /// * [relationKey]: The key name defined on items in the base collection
-  /// that is used to establish the relation.
-  /// In each source collection, the first object that has the same key name
-  /// and value as an item in the base collection will be merged.
-  /// If a different key name is used on the source collection side,
-  /// set the `sourceKeys` parameter.
-  /// * [sourceKeys]: Usually `null`. This is used when the key names for the
-  /// relation differ between the base collection and the source collections.
-  /// Specify, for each source collection, the name of the key on the source
-  /// side whose value corresponds to `relationKey`.
+  /// * [relationKey]: The key name on the base collection used for the relation.
+  /// * [sourceKeys]: Key names on each source collection whose values are compared
+  /// with the value of `relation_key` on the base collection.
   /// * [output]: The name of the output collection.
   /// * [dslTmp]: Structural information of the merged items described in DSL.
   /// * [serialBase]: When set, the serial number currently managed within the

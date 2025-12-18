@@ -636,20 +636,17 @@ class DeltaTraceDatabase extends CloneableFile {
       }
     }
     // フラグの設定がおかしい場合はエラー。
-    if (mqp.sourceKeys != null) {
-      if (mqp.sourceKeys!.isEmpty ||
-          (mqp.source.length != mqp.sourceKeys!.length)) {
-        return QueryResult<T>(
-          isSuccess: false,
-          target: q.target,
-          type: q.type,
-          result: [],
-          dbLength: 0,
-          updateCount: 0,
-          hitCount: 0,
-          errorMessage: "The relationKey or relationKeys setting is invalid.",
-        );
-      }
+    if (mqp.source.length != mqp.sourceKeys.length) {
+      return QueryResult<T>(
+        isSuccess: false,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: 0,
+        updateCount: 0,
+        hitCount: 0,
+        errorMessage: "The relationKey or relationKeys setting is invalid.",
+      );
     }
     // 既に出力先コレクションが存在するならエラー。
     if (findCollection(mqp.output) != null) {
