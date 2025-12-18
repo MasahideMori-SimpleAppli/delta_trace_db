@@ -395,28 +395,20 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.clearAdd:
         case EnumQueryType.removeCollection:
         case EnumQueryType.merge:
-          if (q.mustAffectAtLeastOne) {
-            if (r.updateCount == 0) {
-              if (r.isSuccess == false) {
-                //　既に別のエラーが返されている場合。
-                return r;
-              } else {
-                return QueryResult<T>(
-                  isSuccess: false,
-                  target: q.target,
-                  type: q.type,
-                  result: [],
-                  dbLength: col.raw.length,
-                  updateCount: 0,
-                  hitCount: r.hitCount,
-                  errorMessage:
-                      "No data matched the condition (mustAffectAtLeastOne=true).",
-                );
-              }
-            } else {
-              return r;
-            }
+          if (q.mustAffectAtLeastOne && r.updateCount == 0 && r.isSuccess) {
+            return QueryResult<T>(
+              isSuccess: false,
+              target: q.target,
+              type: q.type,
+              result: [],
+              dbLength: col.raw.length,
+              updateCount: 0,
+              hitCount: r.hitCount,
+              errorMessage:
+                  "No data matched the condition (mustAffectAtLeastOne=true).",
+            );
           } else {
+            //　既に別のエラーが返されている場合などもこっちを通る。
             return r;
           }
         case EnumQueryType.search:
