@@ -22,7 +22,7 @@ class _DSLObj {
       return _DSLObj(s, null);
     }
     if (dot == 0 || dot == s.length - 1) {
-      throw FormatException('Invalid DSL path: $s');
+      throw FormatException('Invalid DSL path');
     }
     return _DSLObj(s.substring(0, dot), s.substring(dot + 1));
   }
@@ -101,7 +101,7 @@ class UtilDslEvaluator {
       final v = dsl.substring(5, dsl.length - 1);
       if (v == 'true') return true;
       if (v == 'false') return false;
-      throw FormatException('Invalid bool literal: $dsl');
+      throw FormatException('Invalid bool literal');
     }
 
     // str(xxx)
@@ -121,7 +121,7 @@ class UtilDslEvaluator {
     if (dsl.startsWith('popped.') && dsl.endsWith(']')) {
       final body = dsl.substring(7, dsl.length - 1); // N[a.b,c.d
       final bracket = body.indexOf('[');
-      if (bracket == -1) throw FormatException('Invalid DSL path: $dsl');
+      if (bracket == -1) throw FormatException('Invalid DSL path');
       final targetPart = body.substring(0, bracket);
       final pathsPart = body.substring(bracket + 1);
       final Map<String, dynamic> r = UtilCopy.jsonableDeepCopy(
