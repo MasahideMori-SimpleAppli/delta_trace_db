@@ -2,6 +2,7 @@ export 'src/db/delta_trace_db_collection.dart';
 export 'src/db/delta_trace_db_core.dart';
 export 'src/db/util_copy.dart';
 
+/// このアプリの外でも便利に活用できる可能性があるので、これは公開する。
 export 'src/dsl/util_dsl_evaluator.dart';
 
 export 'src/query/cause/temporal_trace/temporal_trace.dart';

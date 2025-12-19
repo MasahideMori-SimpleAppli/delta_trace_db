@@ -69,6 +69,9 @@ class UtilDslEvaluator {
     return template;
   }
 
+  /// (en) Interprets the DSL and transforms the data.
+  /// This is used internally and should not normally be called externally.
+  ///
   /// (ja) DSLを解釈してデータを変換します。
   /// これは内部的に使用されるため、通常は外部から呼び出さないでください。
   ///
