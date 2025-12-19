@@ -191,11 +191,11 @@ class UtilDslEvaluator {
     Map<String, dynamic> baseItem,
     List<List<Map<String, dynamic>>> sourceCollections,
     String relationKey,
-    List<String>? sourceKeys,
+    List<String> sourceKeys,
   ) {
     final List<Map<String, dynamic>> result = [];
     for (int i = 0; i < sourceCollections.length; i++) {
-      final sourceKey = sourceKeys != null ? sourceKeys[i] : relationKey;
+      final sourceKey = sourceKeys[i];
       final baseValue = baseItem[relationKey];
       Map<String, dynamic>? hit;
       if (baseValue != null) {
