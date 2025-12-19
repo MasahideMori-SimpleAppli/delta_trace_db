@@ -40,7 +40,7 @@ class UtilDslEvaluator {
   ///
   /// * [template] : This varies depending on the internal recursion,
   /// and the Map or List format is passed in.
-  /// The first call passes MergeQueryParams.dlsTmp.
+  /// The first call passes MergeQueryParams.dslTmp.
   /// * [base] : A base collection item.
   /// * [source] : A list of related items retrieved from each related collection.
   /// The index matches the MergeQueryParams.source.
@@ -147,7 +147,7 @@ class UtilDslEvaluator {
     }
   }
 
-  /// DLSのターゲットとして指定されたコレクションを取得します。
+  /// DSLのターゲットとして指定されたコレクションを取得します。
   static Map<String, dynamic> _getTargetCollection(
     String target,
     Map<String, dynamic> base,
