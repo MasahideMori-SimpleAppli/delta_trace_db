@@ -216,4 +216,53 @@ void main() {
       expect(mergeResult.getSerialNum() == 2, true);
     });
   });
+
+  group('MergeQuery broken DSL patterns', () {
+    final baseCollection = <Map<String, dynamic>>[
+      {"id": -1, "name": "Alice", "groupId": "g1", "age": 30},
+      {"id": -1, "name": "Bob", "groupId": "g2", "age": 25},
+    ];
+    final sourceUserDetail = <Map<String, dynamic>>[
+      {"userId": 0, "email": "alice@example.com"},
+      {"userId": 1, "email": "bob@example.com"},
+    ];
+    final brokenDslPatterns = <String>[
+      "",
+      "base.",
+      "int(",
+      "bool(TRUE)",
+      "popped.base[a,b",
+      "2.email",
+    ];
+    for (final brokenDsl in brokenDslPatterns) {
+      test('merge query broken DSL: "$brokenDsl"', () {
+        final params = MergeQueryParams(
+          base: "baseUsers",
+          source: ["userDetail"],
+          relationKey: "id",
+          sourceKeys: ["userId"],
+          output: "mergedUsers",
+          dslTmp: {"id": brokenDsl},
+        );
+        final db = DeltaTraceDatabase();
+        db.executeQuery(
+          RawQueryBuilder.add(
+            target: "baseUsers",
+            rawAddData: baseCollection,
+            serialKey: "id",
+          ).build(),
+        );
+        db.executeQuery(
+          RawQueryBuilder.add(
+            target: "userDetail",
+            rawAddData: sourceUserDetail,
+          ).build(),
+        );
+        final result = db.executeQuery(
+          QueryBuilder.merge(mergeQueryParams: params).build(),
+        );
+        expect(result.isSuccess, isFalse);
+      });
+    }
+  });
 }
