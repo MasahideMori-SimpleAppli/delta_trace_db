@@ -199,11 +199,12 @@ class UtilDslEvaluator {
     final List<Map<String, dynamic>> result = [];
     for (int i = 0; i < sourceCollections.length; i++) {
       final sourceKey = sourceKeys[i];
-      final baseValue = baseItem[relationKey];
+      final baseValue = UtilField.getNestedFieldValue(baseItem, relationKey);
       Map<String, dynamic>? hit;
       if (baseValue != null) {
         for (final item in sourceCollections[i]) {
-          if (item[sourceKey] == baseValue) {
+          final sourceValue = UtilField.getNestedFieldValue(item, sourceKey);
+          if (sourceValue == baseValue) {
             hit = item;
             break;
           }
