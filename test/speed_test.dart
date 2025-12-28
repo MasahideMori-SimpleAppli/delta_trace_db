@@ -143,7 +143,7 @@ void main() {
     print(
       "end getAll: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
-    expect(r1.isSuccess, true);
+    expect(r1Get.isSuccess, true);
     print("returnsLength:${r1Get.result.length}");
 
     // save
