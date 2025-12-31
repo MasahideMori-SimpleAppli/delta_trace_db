@@ -51,7 +51,7 @@ void main() {
     expect(
       (DeltaTraceDatabase.fromDict(dbBuf).raw.keys.length ==
               db.raw.keys.length) &&
-          (db.raw.keys.length == 0),
+          (db.raw.keys.isEmpty),
       true,
     );
   });

@@ -9,4 +9,3 @@ linter:
 analyzer:
   exclude:
     - build/**
-    - test/**

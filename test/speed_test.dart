@@ -353,6 +353,6 @@ void main() {
       "end add with serialKey: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
     );
     expect(r8.isSuccess, true);
-    print("addedCount:" + r8.dbLength.toString());
+    print("addedCount:${r8.dbLength}");
   });
 }

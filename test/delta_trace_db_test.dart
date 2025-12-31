@@ -224,15 +224,15 @@ void main() {
       ]),
       sortObj: SingleSort(field: 'createdAt', reversed: true),
     ).build();
-    final QueryResult<User> r2_dt = db.executeQuery<User>(
+    final QueryResult<User> r2Dt = db.executeQuery<User>(
       Query.fromDict(q2Dt.toDict()),
     );
-    expect(r2_dt.dbLength == 4, true);
-    expect(r2_dt.hitCount == 2, true);
-    List<User> result2_dt = r2_dt.convert(User.fromDict);
-    expect(result2_dt.length == 2, true);
-    expect(result2_dt[0].name == 'サンプル三郎', true);
-    expect(result2_dt[1].name == 'サンプル次郎', true);
+    expect(r2Dt.dbLength == 4, true);
+    expect(r2Dt.hitCount == 2, true);
+    List<User> result2Dt = r2Dt.convert(User.fromDict);
+    expect(result2Dt.length == 2, true);
+    expect(result2Dt[0].name == 'サンプル三郎', true);
+    expect(result2Dt[1].name == 'サンプル次郎', true);
 
     // paging
     final Query q3 = QueryBuilder.search(

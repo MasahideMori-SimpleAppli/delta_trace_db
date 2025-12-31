@@ -80,9 +80,7 @@ void main() {
         ).build(),
       );
       // execute merge query.
-      final r = db.executeQuery(
-        QueryBuilder.merge(mergeQueryParams: params).build(),
-      );
+      db.executeQuery(QueryBuilder.merge(mergeQueryParams: params).build());
       final Collection? mergeResult = db.findCollection("mergedUsers");
       // test
       expect(mergeResult, isNotNull);
@@ -184,9 +182,7 @@ void main() {
         ).build(),
       );
       // execute merge query.
-      final r = db.executeQuery(
-        QueryBuilder.merge(mergeQueryParams: params).build(),
-      );
+      db.executeQuery(QueryBuilder.merge(mergeQueryParams: params).build());
       final Collection? mergeResult = db.findCollection("mergedUsers");
       // test
       expect(mergeResult, isNotNull);
@@ -350,9 +346,7 @@ void main() {
       ).build(),
     );
     // execute merge query.
-    final r = db.executeQuery(
-      QueryBuilder.merge(mergeQueryParams: params).build(),
-    );
+    db.executeQuery(QueryBuilder.merge(mergeQueryParams: params).build());
     final Collection? mergeResult = db.findCollection("mergedUsers");
     // test
     expect(mergeResult, isNotNull);
