@@ -1,7 +1,7 @@
 ## 0.1.2
 
-* Improve hash comparison accuracy for `Actor` class by updating internal dependencies 
-* Update hash calculation for `Permission` class (no significant behavior change)
+* Improve hash comparison accuracy for `Actor` class by updating internal dependencies. 
+* Update hash calculation for `Permission` class (no significant behavior change).
 
 ## 0.1.1
 
