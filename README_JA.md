@@ -207,7 +207,7 @@ addedCount:100000
 （例：優先サポート、設計アドバイス、実装支援）が必要な場合は、
 下記までご連絡ください。
 
-**SimpleAppli Inc.**  
+**合同会社シンプルアプリ**  
 https://simpleappli.com/index.html
 
 ## バージョン管理について
