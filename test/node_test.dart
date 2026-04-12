@@ -179,4 +179,104 @@ void main() {
       ); // NOT(TRUE OR FALSE) = FALSE
     });
   });
+
+  group('EnumValueType.stringIgnoreCase_', () {
+    test('FieldEquals ignores case', () {
+      final node = FieldEquals(
+        'status',
+        'active',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      expect(node.evaluate({'status': 'active'}), isTrue);
+      expect(node.evaluate({'status': 'Active'}), isTrue);
+      expect(node.evaluate({'status': 'ACTIVE'}), isTrue);
+      expect(node.evaluate({'status': 'inactive'}), isFalse);
+    });
+
+    test('FieldNotEquals ignores case', () {
+      final node = FieldNotEquals(
+        'status',
+        'active',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      expect(node.evaluate({'status': 'Active'}), isFalse);
+      expect(node.evaluate({'status': 'ACTIVE'}), isFalse);
+      expect(node.evaluate({'status': 'inactive'}), isTrue);
+    });
+
+    test('FieldGreaterThan ignores case', () {
+      final node = FieldGreaterThan(
+        'name',
+        'b',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      expect(node.evaluate({'name': 'C'}), isTrue);
+      expect(node.evaluate({'name': 'c'}), isTrue);
+      expect(node.evaluate({'name': 'A'}), isFalse);
+      expect(node.evaluate({'name': 'b'}), isFalse);
+    });
+
+    test('FieldGreaterThanOrEqual ignores case', () {
+      final node = FieldGreaterThanOrEqual(
+        'name',
+        'b',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      expect(node.evaluate({'name': 'B'}), isTrue);
+      expect(node.evaluate({'name': 'C'}), isTrue);
+      expect(node.evaluate({'name': 'A'}), isFalse);
+    });
+
+    test('FieldLessThan ignores case', () {
+      final node = FieldLessThan(
+        'name',
+        'b',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      expect(node.evaluate({'name': 'A'}), isTrue);
+      expect(node.evaluate({'name': 'a'}), isTrue);
+      expect(node.evaluate({'name': 'B'}), isFalse);
+      expect(node.evaluate({'name': 'C'}), isFalse);
+    });
+
+    test('FieldLessThanOrEqual ignores case', () {
+      final node = FieldLessThanOrEqual(
+        'name',
+        'b',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      expect(node.evaluate({'name': 'B'}), isTrue);
+      expect(node.evaluate({'name': 'A'}), isTrue);
+      expect(node.evaluate({'name': 'C'}), isFalse);
+    });
+
+    test('FieldEquals serialization with stringIgnoreCase_', () {
+      final node = FieldEquals(
+        'status',
+        'active',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      final jsonStr = jsonEncode(node.toDict());
+      final restored = FieldEquals.fromDict(jsonDecode(jsonStr));
+      expect(restored.evaluate({'status': 'ACTIVE'}), isTrue);
+      expect(restored.evaluate({'status': 'inactive'}), isFalse);
+    });
+
+    test('SingleSort with stringIgnoreCase_ sorts case-insensitively', () {
+      final items = [
+        {'name': 'banana'},
+        {'name': 'Apple'},
+        {'name': 'cherry'},
+        {'name': 'APRICOT'},
+      ];
+      final sort = SingleSort(
+        field: 'name',
+        vType: EnumValueType.stringIgnoreCase_,
+      );
+      final sorted = List<Map<String, dynamic>>.from(items)
+        ..sort(sort.getComparator());
+      final names = sorted.map((e) => e['name']).toList();
+      expect(names, ['Apple', 'APRICOT', 'banana', 'cherry']);
+    });
+  });
 }

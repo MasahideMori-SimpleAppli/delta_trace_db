@@ -1,3 +1,9 @@
+## 0.1.4 (2026-04-12)
+
+* Added `stringIgnoreCase_` to `EnumValueType`. When this type is used, string comparison is performed after converting both values to lowercase.
+* Fixed test file names: `verson_up_test.dart` (typo) → `version_up_test.dart`, `transaction_test2.dart` → `transaction2_test.dart`. These are test-only changes with no impact on library behavior.
+* Fixed a test assertion in `transaction2_test.dart` that used `MapEquality` for nested map comparison; replaced with `DeepCollectionEquality`. This is a test-only fix with no impact on library behavior.
+
 ## 0.1.3
 
 * Added information about corporate/enterprise support in the README.

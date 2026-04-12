@@ -47,7 +47,7 @@ void main() {
     QueryExecutionResult result = db.executeQueryObject(tq1);
     expect(result.isSuccess, false);
     // コレクションが何もない空のままでないとNG
-    expect(MapEquality().equals(dbBuf, db.toDict()), true);
+    expect(DeepCollectionEquality().equals(dbBuf, db.toDict()), true);
     expect(
       (DeltaTraceDatabase.fromDict(dbBuf).raw.keys.length ==
               db.raw.keys.length) &&

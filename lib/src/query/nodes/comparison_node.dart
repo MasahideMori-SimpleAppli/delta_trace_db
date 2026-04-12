@@ -68,6 +68,9 @@ class FieldEquals extends QueryNode {
               bool.parse(value.toString().toLowerCase());
         case EnumValueType.string_:
           return fValue.toString() == value.toString();
+        case EnumValueType.stringIgnoreCase_:
+          return fValue.toString().toLowerCase() ==
+              value.toString().toLowerCase();
       }
     } catch (_) {
       return false;
@@ -151,6 +154,9 @@ class FieldNotEquals extends QueryNode {
               bool.parse(value.toString().toLowerCase());
         case EnumValueType.string_:
           return fValue.toString() != value.toString();
+        case EnumValueType.stringIgnoreCase_:
+          return fValue.toString().toLowerCase() !=
+              value.toString().toLowerCase();
       }
     } catch (_) {
       return false;
@@ -233,6 +239,11 @@ class FieldGreaterThan extends QueryNode {
           return (a - b) > 1e-12;
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) > 0;
+        case EnumValueType.stringIgnoreCase_:
+          return fValue.toString().toLowerCase().compareTo(
+                value.toString().toLowerCase(),
+              ) >
+              0;
         case EnumValueType.auto_:
           return fValue > value;
         case EnumValueType.boolean_:
@@ -319,6 +330,11 @@ class FieldLessThan extends QueryNode {
           return (b - a) > 1e-12;
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) < 0;
+        case EnumValueType.stringIgnoreCase_:
+          return fValue.toString().toLowerCase().compareTo(
+                value.toString().toLowerCase(),
+              ) <
+              0;
         case EnumValueType.auto_:
           return fValue < value;
         case EnumValueType.boolean_:
@@ -410,6 +426,11 @@ class FieldGreaterThanOrEqual extends QueryNode {
           return (a - b) >= -1e-12; // a >= b（誤差付き）
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) >= 0;
+        case EnumValueType.stringIgnoreCase_:
+          return fValue.toString().toLowerCase().compareTo(
+                value.toString().toLowerCase(),
+              ) >=
+              0;
         case EnumValueType.auto_:
           return fValue >= value;
         case EnumValueType.boolean_:
@@ -501,6 +522,11 @@ class FieldLessThanOrEqual extends QueryNode {
           return (b - a) >= -1e-12; // a <= b（誤差を含めて）
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) <= 0;
+        case EnumValueType.stringIgnoreCase_:
+          return fValue.toString().toLowerCase().compareTo(
+                value.toString().toLowerCase(),
+              ) <=
+              0;
         case EnumValueType.auto_:
           return fValue <= value;
         case EnumValueType.boolean_:

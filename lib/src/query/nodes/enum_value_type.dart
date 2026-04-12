@@ -9,4 +9,5 @@ enum EnumValueType {
   floatEpsilon12_, // Tolerance 1e-12
   boolean_,
   string_,
+  stringIgnoreCase_,
 }

@@ -105,6 +105,8 @@ class SingleSort extends CloneableFile implements AbstractSort {
         throw Exception('Cannot convert value to bool');
       case EnumValueType.string_:
         return value.toString();
+      case EnumValueType.stringIgnoreCase_:
+        return value.toString().toLowerCase();
       case EnumValueType.auto_:
         // そのまま返します。
         return value;
