@@ -1,3 +1,7 @@
+## 0.1.5 (2026-04-12)
+
+* Delete the old test files.
+
 ## 0.1.4 (2026-04-12)
 
 * Added `stringIgnoreCase_` to `EnumValueType`. When this type is used, string comparison is performed after converting both values to lowercase.
