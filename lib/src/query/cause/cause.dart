@@ -56,6 +56,9 @@ class Cause extends CloneableFile {
     this.confidenceScore = 1.0,
   });
 
+  /// double型への変換用。
+  static double _d(dynamic value) => (value as num).toDouble();
+
   /// (en) Restore this object from the dictionary.
   ///
   /// (ja) このオブジェクトを辞書から復元します。
@@ -73,7 +76,7 @@ class Cause extends CloneableFile {
       context: src["context"] != null
           ? src["context"] as Map<String, dynamic>
           : null,
-      confidenceScore: src["confidenceScore"],
+      confidenceScore: _d(src["confidenceScore"]),
     );
   }
 

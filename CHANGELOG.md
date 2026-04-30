@@ -1,3 +1,9 @@
+## 0.1.6 (2026-04-30)
+
+* Fixed a type error in `Cause.fromDict` where `confidenceScore` could be deserialized
+  as `int` instead of `double` in certain environments (e.g. iOS app mode on macOS).
+  Added `_d()` helper and applied it to the `confidenceScore` assignment.
+
 ## 0.1.5 (2026-04-12)
 
 * Delete the old test files.
