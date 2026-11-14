@@ -16,7 +16,8 @@ NoSQLですが、ネストされた子クラスの値についても全文検索
 - 約 10 万件レベルでも高速な検索性能
 - クエリ自体がクラスなので操作ログとして保存可能
 - DartとPythonで同一結果になる、10進数・有理数の正確な比較とソート  
-  （`EnumValueType.decimal_` / `rational_`。[simple_portable_numeric](https://pub.dev/packages/simple_portable_numeric) を使用）
+  （`EnumValueType.decimal_` / `rational_`。[simple_portable_numeric](https://pub.dev/packages/simple_portable_numeric) を使用）。  
+  値は数値ではなく文字列（例：`"10.50"`）で保存してください。
 - Python版もあります。  
   → https://pypi.org/project/delta-trace-db/
 - DB の内容を編集できる GUI ツールもあります。  

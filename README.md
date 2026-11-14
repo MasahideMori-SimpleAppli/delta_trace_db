@@ -24,7 +24,8 @@ This allows you to build rich and highly detailed operation logs suitable for se
 - High-speed search performance even with ~100,000 records
 - Queries are classes, making it easy to preserve operation logs
 - Exact decimal / rational comparison and sorting with identical results in Dart and Python  
-  (`EnumValueType.decimal_` / `rational_`, using [simple_portable_numeric](https://pub.dev/packages/simple_portable_numeric))
+  (`EnumValueType.decimal_` / `rational_`, using [simple_portable_numeric](https://pub.dev/packages/simple_portable_numeric)).  
+  Store such values as strings (e.g. `"10.50"`), not as numbers.
 - Python version available.  
   → https://pypi.org/project/delta-trace-db/
 - GUI editor for DB content is available.  
