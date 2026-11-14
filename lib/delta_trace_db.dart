@@ -18,6 +18,9 @@ export 'src/query/nodes/enum_value_type.dart';
 export 'src/query/nodes/logical_node.dart';
 export 'src/query/nodes/query_node.dart';
 
+export 'src/query/aggregate/aggregation.dart';
+export 'src/query/aggregate/enum_aggregate_type.dart';
+
 export 'src/query/sort/abstract_sort.dart';
 export 'src/query/sort/multi_sort.dart';
 export 'src/query/sort/single_sort.dart';
@@ -33,5 +36,10 @@ export 'src/query/transaction_query.dart';
 export 'src/query/transaction_query_result.dart';
 export 'src/query/util_query.dart';
 
+// re-export (decimal_ / rational_ value types)
+export 'package:simple_portable_numeric/simple_portable_numeric.dart';
+
 // internal only
 // export 'src/query/util_field.dart';
+// export 'src/query/util_portable_numeric.dart';
+// export 'src/query/aggregate/util_aggregate.dart';

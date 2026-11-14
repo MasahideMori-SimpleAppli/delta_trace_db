@@ -10,4 +10,6 @@ enum EnumValueType {
   boolean_,
   string_,
   stringIgnoreCase_,
+  decimal_, // simple_portable_numeric PortableDecimal
+  rational_, // simple_portable_numeric PortableRational
 }

@@ -1,5 +1,6 @@
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:delta_trace_db/src/query/util_field.dart';
+import 'package:delta_trace_db/src/query/util_portable_numeric.dart';
 import 'package:delta_trace_db/delta_trace_db.dart';
 
 /// (en) This class allows you to specify single-key sorting for
@@ -107,6 +108,14 @@ class SingleSort extends CloneableFile implements AbstractSort {
         return value.toString();
       case EnumValueType.stringIgnoreCase_:
         return value.toString().toLowerCase();
+      case EnumValueType.decimal_:
+      case EnumValueType.rational_:
+        // 変換できない値は null として扱い、末尾に並べます。
+        try {
+          return UtilPortableNumeric.convert(value, vType);
+        } catch (_) {
+          return null;
+        }
       case EnumValueType.auto_:
         // そのまま返します。
         return value;

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:delta_trace_db/delta_trace_db.dart';
+import 'package:delta_trace_db/src/query/aggregate/util_aggregate.dart';
 
 final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 
@@ -722,6 +723,50 @@ class Collection extends CloneableFile {
       updateCount: updateCount,
       hitCount: updateCount,
     );
+  }
+
+  /// (en) Calculates the aggregations of the query for the matched items.
+  /// If the definitions are invalid or a value cannot be converted,
+  /// a failed result with the reason in errorMessage is returned.
+  ///
+  /// (ja) 条件に一致したアイテムについて、クエリの集計を計算します。
+  /// 定義が不正な場合や値を変換できない場合は、errorMessage に理由を入れた
+  /// 失敗の結果を返します。
+  ///
+  /// * [q] : The query.
+  QueryResult<T> aggregate<T>(Query q) {
+    final List<Map<String, dynamic>> items = [];
+    for (var i = 0; i < _data.length; i++) {
+      if (q.queryNode == null || _evaluate(_data[i], q.queryNode!)) {
+        items.add(_data[i]);
+      }
+    }
+    try {
+      final Map<String, dynamic> r = UtilAggregate.calculate(
+        items,
+        q.aggregations ?? [],
+      );
+      return QueryResult<T>(
+        isSuccess: true,
+        target: q.target,
+        type: q.type,
+        result: [r],
+        dbLength: _data.length,
+        updateCount: 0,
+        hitCount: items.length,
+      );
+    } on ArgumentError catch (e) {
+      return QueryResult<T>(
+        isSuccess: false,
+        target: q.target,
+        type: q.type,
+        result: [],
+        dbLength: _data.length,
+        updateCount: 0,
+        hitCount: items.length,
+        errorMessage: "${e.message}",
+      );
+    }
   }
 
   /// (en) Returns the total number of items stored in the collection.

@@ -1,3 +1,33 @@
+## 0.2.0 (2026-11-14)
+
+* Added `decimal_` and `rational_` to `EnumValueType`.
+  Values are converted with the `simple_portable_numeric` package and compared by value,
+  so the results are identical to the Python version
+  (e.g. `"1.50"` equals `"1.5"`, and digits beyond double precision are not lost).
+  Only `String`, `PortableDecimal` and `PortableRational` are converted.
+  Numbers such as `int` and `double` are treated as conversion failures,
+  because their exactness cannot be guaranteed. This also applies to the query value,
+  so a comparison with an `int` value such as `FieldGreaterThan("v", 11, vType: EnumValueType.decimal_)`
+  is always false. Use `"11"` instead.
+* The comparison nodes (`FieldEquals`, `FieldNotEquals`, `FieldGreaterThan`, `FieldLessThan`,
+  `FieldGreaterThanOrEqual`, `FieldLessThanOrEqual`) set `vType` automatically when
+  a `PortableDecimal` or `PortableRational` is passed as the value, and save it as a String.
+* `SingleSort` (and therefore `MultiSort`) supports `decimal_` and `rational_`.
+  Values that cannot be converted are treated as null.
+* Added `simple_portable_numeric` to the dependencies.
+  `PortableDecimal`, `PortableRational` and `EnumRoundingMode` are re-exported from this package.
+* Queries using the new types cannot be read by older versions.
+* Added the `aggregate` query type (`QueryBuilder.aggregate` / `RawQueryBuilder.aggregate`).
+  It calculates `count_`, `sum_`, `min_`, `max_` and `mean_` (`EnumAggregateType`) for the items
+  that match an optional query node, and returns the results as a single map in `result`.
+  Each `Aggregation` chooses the calculation type with `vType`:
+  `floatStrict_` (double), `decimal_` or `rational_` (exact, results are strings).
+  `mean_` with `decimal_` requires `scale` and `rounding`.
+  Null and missing values are excluded, and values that cannot be converted make the query fail.
+  The results are identical between the Dart and Python versions
+  (floating-point sums use simple left-to-right addition in both).
+* `Query` version is now 8 (added `aggregations`).
+
 ## 0.1.6 (2026-04-30)
 
 * Fixed a type error in `Cause.fromDict` where `confidenceScore` could be deserialized

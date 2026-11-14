@@ -1,5 +1,6 @@
 import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:delta_trace_db/src/query/util_field.dart';
+import 'package:delta_trace_db/src/query/util_portable_numeric.dart';
 
 /// (en) Query node for Equals operation.
 ///
@@ -17,15 +18,18 @@ class FieldEquals extends QueryNode {
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
   /// Iso8601String and vType will be set to EnumValueType.datetime_.
+  /// If PortableDecimal or PortableRational is specified, it will be saved as
+  /// a String and vType will be set to EnumValueType.decimal_ or
+  /// EnumValueType.rational_. With these types, only String, PortableDecimal
+  /// and PortableRational values are converted; numbers such as int and double
+  /// are treated as conversion failures.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
   FieldEquals(this.field, this.value, {this.vType = EnumValueType.auto_}) {
-    if (value is DateTime) {
-      vType = EnumValueType.datetime_;
-    }
+    vType = UtilPortableNumeric.inferVType(value, vType);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -66,6 +70,9 @@ class FieldEquals extends QueryNode {
         case EnumValueType.boolean_:
           return bool.parse(fValue.toString().toLowerCase()) ==
               bool.parse(value.toString().toLowerCase());
+        case EnumValueType.decimal_:
+        case EnumValueType.rational_:
+          return UtilPortableNumeric.compare(fValue, value, vType) == 0;
         case EnumValueType.string_:
           return fValue.toString() == value.toString();
         case EnumValueType.stringIgnoreCase_:
@@ -81,7 +88,9 @@ class FieldEquals extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.equals_.name,
     'field': field,
-    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
+    'value': value is DateTime
+        ? (value as DateTime).toIso8601String()
+        : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
     'version': '2',
   };
@@ -103,15 +112,18 @@ class FieldNotEquals extends QueryNode {
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
   /// Iso8601String and vType will be set to EnumValueType.datetime_.
+  /// If PortableDecimal or PortableRational is specified, it will be saved as
+  /// a String and vType will be set to EnumValueType.decimal_ or
+  /// EnumValueType.rational_. With these types, only String, PortableDecimal
+  /// and PortableRational values are converted; numbers such as int and double
+  /// are treated as conversion failures.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
   FieldNotEquals(this.field, this.value, {this.vType = EnumValueType.auto_}) {
-    if (value is DateTime) {
-      vType = EnumValueType.datetime_;
-    }
+    vType = UtilPortableNumeric.inferVType(value, vType);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -152,6 +164,9 @@ class FieldNotEquals extends QueryNode {
         case EnumValueType.boolean_:
           return bool.parse(fValue.toString().toLowerCase()) !=
               bool.parse(value.toString().toLowerCase());
+        case EnumValueType.decimal_:
+        case EnumValueType.rational_:
+          return UtilPortableNumeric.compare(fValue, value, vType) != 0;
         case EnumValueType.string_:
           return fValue.toString() != value.toString();
         case EnumValueType.stringIgnoreCase_:
@@ -167,7 +182,9 @@ class FieldNotEquals extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.notEquals_.name,
     'field': field,
-    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
+    'value': value is DateTime
+        ? (value as DateTime).toIso8601String()
+        : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
     'version': '2',
   };
@@ -193,15 +210,18 @@ class FieldGreaterThan extends QueryNode {
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
   /// Iso8601String and vType will be set to EnumValueType.datetime_.
+  /// If PortableDecimal or PortableRational is specified, it will be saved as
+  /// a String and vType will be set to EnumValueType.decimal_ or
+  /// EnumValueType.rational_. With these types, only String, PortableDecimal
+  /// and PortableRational values are converted; numbers such as int and double
+  /// are treated as conversion failures.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
   FieldGreaterThan(this.field, this.value, {this.vType = EnumValueType.auto_}) {
-    if (value is DateTime) {
-      vType = EnumValueType.datetime_;
-    }
+    vType = UtilPortableNumeric.inferVType(value, vType);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -237,6 +257,9 @@ class FieldGreaterThan extends QueryNode {
           final a = double.parse(fValue.toString());
           final b = double.parse(value.toString());
           return (a - b) > 1e-12;
+        case EnumValueType.decimal_:
+        case EnumValueType.rational_:
+          return UtilPortableNumeric.compare(fValue, value, vType) > 0;
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) > 0;
         case EnumValueType.stringIgnoreCase_:
@@ -258,7 +281,9 @@ class FieldGreaterThan extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.greaterThan_.name,
     'field': field,
-    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
+    'value': value is DateTime
+        ? (value as DateTime).toIso8601String()
+        : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
     'version': '2',
   };
@@ -284,15 +309,18 @@ class FieldLessThan extends QueryNode {
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
   /// Iso8601String and vType will be set to EnumValueType.datetime_.
+  /// If PortableDecimal or PortableRational is specified, it will be saved as
+  /// a String and vType will be set to EnumValueType.decimal_ or
+  /// EnumValueType.rational_. With these types, only String, PortableDecimal
+  /// and PortableRational values are converted; numbers such as int and double
+  /// are treated as conversion failures.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
   FieldLessThan(this.field, this.value, {this.vType = EnumValueType.auto_}) {
-    if (value is DateTime) {
-      vType = EnumValueType.datetime_;
-    }
+    vType = UtilPortableNumeric.inferVType(value, vType);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -328,6 +356,9 @@ class FieldLessThan extends QueryNode {
           final double a = double.parse(fValue.toString());
           final double b = double.parse(value.toString());
           return (b - a) > 1e-12;
+        case EnumValueType.decimal_:
+        case EnumValueType.rational_:
+          return UtilPortableNumeric.compare(fValue, value, vType) < 0;
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) < 0;
         case EnumValueType.stringIgnoreCase_:
@@ -349,7 +380,9 @@ class FieldLessThan extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.lessThan_.name,
     'field': field,
-    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
+    'value': value is DateTime
+        ? (value as DateTime).toIso8601String()
+        : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
     'version': '2',
   };
@@ -375,6 +408,11 @@ class FieldGreaterThanOrEqual extends QueryNode {
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
   /// Iso8601String and vType will be set to EnumValueType.datetime_.
+  /// If PortableDecimal or PortableRational is specified, it will be saved as
+  /// a String and vType will be set to EnumValueType.decimal_ or
+  /// EnumValueType.rational_. With these types, only String, PortableDecimal
+  /// and PortableRational values are converted; numbers such as int and double
+  /// are treated as conversion failures.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
@@ -385,9 +423,7 @@ class FieldGreaterThanOrEqual extends QueryNode {
     this.value, {
     this.vType = EnumValueType.auto_,
   }) {
-    if (value is DateTime) {
-      vType = EnumValueType.datetime_;
-    }
+    vType = UtilPortableNumeric.inferVType(value, vType);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -424,6 +460,9 @@ class FieldGreaterThanOrEqual extends QueryNode {
           final a = double.parse(fValue.toString());
           final b = double.parse(value.toString());
           return (a - b) >= -1e-12; // a >= b（誤差付き）
+        case EnumValueType.decimal_:
+        case EnumValueType.rational_:
+          return UtilPortableNumeric.compare(fValue, value, vType) >= 0;
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) >= 0;
         case EnumValueType.stringIgnoreCase_:
@@ -445,7 +484,9 @@ class FieldGreaterThanOrEqual extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.greaterThanOrEqual_.name,
     'field': field,
-    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
+    'value': value is DateTime
+        ? (value as DateTime).toIso8601String()
+        : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
     'version': '2',
   };
@@ -471,6 +512,11 @@ class FieldLessThanOrEqual extends QueryNode {
   /// * [value] : The compare value.
   /// If DateTime is specified, it will be automatically converted to
   /// Iso8601String and vType will be set to EnumValueType.datetime_.
+  /// If PortableDecimal or PortableRational is specified, it will be saved as
+  /// a String and vType will be set to EnumValueType.decimal_ or
+  /// EnumValueType.rational_. With these types, only String, PortableDecimal
+  /// and PortableRational values are converted; numbers such as int and double
+  /// are treated as conversion failures.
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
@@ -481,9 +527,7 @@ class FieldLessThanOrEqual extends QueryNode {
     this.value, {
     this.vType = EnumValueType.auto_,
   }) {
-    if (value is DateTime) {
-      vType = EnumValueType.datetime_;
-    }
+    vType = UtilPortableNumeric.inferVType(value, vType);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -520,6 +564,9 @@ class FieldLessThanOrEqual extends QueryNode {
           final a = double.parse(fValue.toString());
           final b = double.parse(value.toString());
           return (b - a) >= -1e-12; // a <= b（誤差を含めて）
+        case EnumValueType.decimal_:
+        case EnumValueType.rational_:
+          return UtilPortableNumeric.compare(fValue, value, vType) <= 0;
         case EnumValueType.string_:
           return fValue.toString().compareTo(value.toString()) <= 0;
         case EnumValueType.stringIgnoreCase_:
@@ -541,7 +588,9 @@ class FieldLessThanOrEqual extends QueryNode {
   Map<String, dynamic> toDict() => {
     'type': EnumNodeType.lessThanOrEqual_.name,
     'field': field,
-    'value': value is DateTime ? (value as DateTime).toIso8601String() : value,
+    'value': value is DateTime
+        ? (value as DateTime).toIso8601String()
+        : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
     'version': '2',
   };

@@ -14,7 +14,7 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// そのログは完全なDB操作の履歴になります。
 class Query extends CloneableFile {
   static const String className = "Query";
-  static const String version = "7";
+  static const String version = "8";
 
   String target;
   EnumQueryType type;
@@ -34,6 +34,7 @@ class Query extends CloneableFile {
   String? serialKey;
   bool resetSerial;
   MergeQueryParams? mergeQueryParams;
+  List<Aggregation>? aggregations;
   Cause? cause;
 
   /// (en) This is a query class for DB operations. It is usually built using
@@ -110,6 +111,7 @@ class Query extends CloneableFile {
   /// * [resetSerial] : If true, resets the managed serial number to 0 on
   /// a clear or clearAdd query.
   /// * [mergeQueryParams] : Dedicated parameters when issuing a merge query.
+  /// * [aggregations] : Use aggregate type only. The aggregation definitions.
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -135,6 +137,7 @@ class Query extends CloneableFile {
     this.serialKey,
     this.resetSerial = false,
     this.mergeQueryParams,
+    this.aggregations,
     this.cause,
   });
 
@@ -174,6 +177,11 @@ class Query extends CloneableFile {
       serialKey: src.containsKey("serialKey") ? src["serialKey"] : null,
       resetSerial: src.containsKey("resetSerial") ? src["resetSerial"] : false,
       mergeQueryParams: mqp,
+      aggregations: src["aggregations"] != null
+          ? (src["aggregations"] as List)
+                .map((e) => Aggregation.fromDict(e as Map<String, dynamic>))
+                .toList()
+          : null,
       cause: src["cause"] != null ? Cause.fromDict(src["cause"]) : null,
     );
   }
@@ -204,6 +212,7 @@ class Query extends CloneableFile {
       "serialKey": serialKey,
       "resetSerial": resetSerial,
       "mergeQueryParams": mergeQueryParams?.toDict(),
+      "aggregations": aggregations?.map((e) => e.toDict()).toList(),
       "cause": cause?.toDict(),
     };
   }

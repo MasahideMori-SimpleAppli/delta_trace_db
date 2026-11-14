@@ -17,4 +17,5 @@ enum EnumQueryType {
   clearAdd, // clear then add.
   removeCollection, // A special query that is not allowed in a transaction.
   merge,
+  aggregate, // read only, calculates aggregations.
 }

@@ -382,6 +382,8 @@ class DeltaTraceDatabase extends CloneableFile {
           removeCollection(q.target);
         case EnumQueryType.merge:
           r = _executeMergeQuery(q);
+        case EnumQueryType.aggregate:
+          r = col.aggregate(q);
       }
       switch (q.type) {
         case EnumQueryType.add:
@@ -415,6 +417,7 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.searchOne:
         case EnumQueryType.getAll:
         case EnumQueryType.count:
+        case EnumQueryType.aggregate:
           return r;
       }
     } on ArgumentError catch (e, stack) {

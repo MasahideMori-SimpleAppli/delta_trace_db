@@ -34,6 +34,7 @@ class QueryBuilder {
   String? serialKey;
   bool resetSerial = false;
   MergeQueryParams? mergeQueryParams;
+  List<Aggregation>? aggregations;
   Cause? cause;
 
   /// (en) Adds an item to the specified collection.
@@ -383,6 +384,34 @@ class QueryBuilder {
   QueryBuilder.count({required this.target, this.cause})
     : type = EnumQueryType.count;
 
+  /// (en) Calculates aggregations such as count, sum, min, max and mean
+  /// for the items that match the criteria.
+  /// The result is returned as a single map in QueryResult.result,
+  /// whose keys are the Aggregation.outputKey values,
+  /// and QueryResult.hitCount is the number of matched items.
+  /// If a value cannot be converted, the query fails.
+  ///
+  /// (ja) 条件に一致するアイテムについて、件数・合計・最小・最大・平均などの
+  /// 集計を計算します。
+  /// 結果は QueryResult.result に1つのマップとして返され、
+  /// そのキーは Aggregation.outputKey の値です。
+  /// QueryResult.hitCount は条件に一致した件数です。
+  /// 値を変換できない場合、クエリは失敗します。
+  ///
+  /// * [target] : The collection name in DB.
+  /// * [aggregations] : The aggregation definitions.
+  /// * [queryNode] : This is the node object used for the search.
+  /// If null, all items are targeted.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
+  QueryBuilder.aggregate({
+    required this.target,
+    required List<Aggregation> this.aggregations,
+    this.queryNode,
+    this.cause,
+  }) : type = EnumQueryType.aggregate;
+
   /// (en) This query empties the contents of the specified collection.
   ///
   /// (ja) このクエリは指定したコレクションの内容を空にします。
@@ -591,6 +620,7 @@ class QueryBuilder {
       serialKey: serialKey,
       resetSerial: resetSerial,
       mergeQueryParams: mergeQueryParams,
+      aggregations: aggregations,
       cause: cause,
     );
   }
