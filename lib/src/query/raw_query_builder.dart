@@ -366,6 +366,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// whose keys are the Aggregation.outputKey values,
   /// and QueryResult.hitCount is the number of matched items.
   /// If a value cannot be converted, the query fails.
+  /// Security: treat the aggregate permission as equivalent to read (search)
+  /// access. Even though no items are returned, the contents can be discovered,
+  /// e.g. by repeating count_ with FieldStartsWith while extending the prefix
+  /// one character at a time, and min_ / max_ return field values directly.
   ///
   /// (ja) 条件に一致するアイテムについて、件数・合計・最小・最大・平均などの
   /// 集計を計算します。
@@ -373,6 +377,10 @@ class RawQueryBuilder extends QueryBuilder {
   /// そのキーは Aggregation.outputKey の値です。
   /// QueryResult.hitCount は条件に一致した件数です。
   /// 値を変換できない場合、クエリは失敗します。
+  /// セキュリティ：aggregate の権限は、読み取り（search）の権限と同等に扱って
+  /// ください。アイテム自体は返されませんが、例えば FieldStartsWith の前方一致を
+  /// 1文字ずつ伸ばしながら count_ を繰り返すことで内容を特定できます。
+  /// また、min_ / max_ はフィールドの値をそのまま返します。
   ///
   /// * [target] : The collection name in DB.
   /// * [aggregations] : The aggregation definitions.

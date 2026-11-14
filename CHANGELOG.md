@@ -26,6 +26,10 @@
   Null and missing values are excluded, and values that cannot be converted make the query fail.
   The results are identical between the Dart and Python versions
   (floating-point sums use simple left-to-right addition in both).
+  Security: treat the `aggregate` permission as equivalent to read (`search`) access,
+  because the contents can be discovered through aggregations (e.g. repeating `count_` with
+  `FieldStartsWith` while extending the prefix one character at a time), and `min_` / `max_`
+  return field values directly.
 * `Query` version is now 8 (added `aggregations`).
 
 ## 0.1.6 (2026-04-30)
