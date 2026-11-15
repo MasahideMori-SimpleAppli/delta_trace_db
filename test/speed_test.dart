@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:test/test.dart';
@@ -360,18 +361,17 @@ void main() {
     final int recordsCount = 100000;
     print("aggregate speed test for $recordsCount records");
     final db = DeltaTraceDatabase();
+    // The items are shuffled (with a fixed seed) so that sorting does not get already sorted data.
+    final List<Map<String, dynamic>> orders = [
+      for (int i = 0; i < recordsCount; i++)
+        {
+          'status': i.isEven ? 'paid' : 'cancel',
+          'price': '${i ~/ 100}.${(i % 100).toString().padLeft(2, '0')}',
+          'score': i * 0.5,
+        },
+    ]..shuffle(Random(0));
     final rAdd = db.executeQuery(
-      RawQueryBuilder.add(
-        target: 'orders',
-        rawAddData: [
-          for (int i = 0; i < recordsCount; i++)
-            {
-              'status': i.isEven ? 'paid' : 'cancel',
-              'price': '${i ~/ 100}.${(i % 100).toString().padLeft(2, '0')}',
-              'score': i * 0.5,
-            },
-        ],
-      ).build(),
+      RawQueryBuilder.add(target: 'orders', rawAddData: orders).build(),
     );
     expect(rAdd.isSuccess, true);
 
