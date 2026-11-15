@@ -147,7 +147,7 @@ DeltaTraceDB では、各コレクションが「クラスのリスト」に相�
 test/speed_test.dart
 ```
 
-また、以下は Ryzen 5 3500 の PC で実施した実際の結果です。
+また、以下は Ryzen 5 3500 の PC（Dart SDK 3.12.2）で実施した実際の結果です。
 ```text
 speed test for 100000 records
 start add

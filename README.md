@@ -158,7 +158,7 @@ You can run performance tests using:
 test/speed_test.dart
 ```
 
-Below is an example result from a Ryzen 5 3500 machine:
+Below is an example result from a Ryzen 5 3500 machine (Dart SDK 3.12.2):
 ```text
 speed test for 100000 records
 start add
