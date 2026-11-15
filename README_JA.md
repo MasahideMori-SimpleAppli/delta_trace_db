@@ -212,6 +212,7 @@ addedCount:100000
 - 変換できない値は、比較では偽になり、ソートではnullとして扱われます（昇順では末尾）。
 - タイムゾーン付きの日時とタイムゾーン無しの日時は、互いに比較されません（変換失敗として扱われます）。
   日時はUTCで保存するか、`naiveUtcOffsetMinutes`（例：UTC+9なら540）でタイムゾーン無しの値の解釈を指定してください。
+- `MultiSort` では、`vType` と `naiveUtcOffsetMinutes` は各 `SingleSort` に指定し、上記の規則はそれぞれの `SingleSort` に適用されます。
 
 ## サポート
 

@@ -224,6 +224,7 @@ so the same query gives the same result in both.
 - A value that cannot be converted makes a comparison false, and is sorted as null (to the end in ascending order).
 - Timezone-aware and naive date-times are not compared with each other (treated as a conversion failure).
   Store date-times in UTC, or use `naiveUtcOffsetMinutes` (e.g. 540 for UTC+9) to interpret naive values.
+- In a `MultiSort`, `vType` and `naiveUtcOffsetMinutes` are set on each `SingleSort`, and the rules above apply to each of them.
 
 ## Support
 
