@@ -7,6 +7,8 @@ return the same results.
   (it moves to the end in ascending order), instead of making the query fail.
   With `int_`, `floatStrict_` and `floatEpsilon12_`, `bool`, `NaN` and (for `int_`) infinite values are
   treated as conversion failures.
+* `MultiSort` itself is unchanged (its version is still 1). The `SingleSort` changes in this version apply
+  to each `SingleSort` in a `MultiSort`, and `naiveUtcOffsetMinutes` (added below) is set on each `SingleSort`.
 * Strings are converted to numbers with the same rules as Dart's `int.parse` / `double.parse`:
   surrounding whitespace is ignored, `int_` accepts decimal digits and `0x` hexadecimal numbers
   (64-bit), and floating-point types accept forms such as `"1e3"`, `".5"`, `"Infinity"` and `"NaN"`.
@@ -24,8 +26,6 @@ return the same results.
   interpreted as times at UTC + this many minutes (e.g. 540 for UTC+9), so aware and naive values can be compared.
   A value of -1440 or less, or 1440 or more, throws `ArgumentError`.
   Queries that use it are read by older versions without an error but with the option ignored.
-* `MultiSort` itself is unchanged (its version is still 1). The `SingleSort` changes above apply to each
-  `SingleSort` in a `MultiSort`, and `naiveUtcOffsetMinutes` is set on each `SingleSort`.
 * Comparison node version is now 3, and `SingleSort` version is now 6 (added `naiveUtcOffsetMinutes`).
 
 ## 0.2.0 (2026-11-14)
