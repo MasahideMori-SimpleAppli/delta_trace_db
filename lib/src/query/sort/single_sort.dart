@@ -1,5 +1,6 @@
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:delta_trace_db/src/query/util_field.dart';
+import 'package:delta_trace_db/src/query/util_date_time.dart';
 import 'package:delta_trace_db/src/query/util_portable_numeric.dart';
 import 'package:delta_trace_db/delta_trace_db.dart';
 
@@ -9,10 +10,11 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// (ja) クエリの戻り値について、単一キーでのソートを指定するためのクラスです。
 class SingleSort extends CloneableFile implements AbstractSort {
   static const String className = "SingleSort";
-  static const String version = "5";
+  static const String version = "6";
   String field;
   bool reversed;
   EnumValueType vType;
+  int? naiveUtcOffsetMinutes;
 
   /// (en) This class allows you to specify single-key sorting for
   /// the return values of a query.
@@ -28,13 +30,26 @@ class SingleSort extends CloneableFile implements AbstractSort {
   /// * [vType] : Specifies the comparison type during calculation.
   /// If you select anything other than auto_,
   /// the value will be cast to that type before the comparison is performed.
-  /// If an exception occurs, such as a conversion failure,
-  /// an Exception is thrown.
+  /// A value that cannot be converted is treated as null
+  /// (e.g. a non-numeric string, or a bool, NaN or infinity with int_).
+  /// With datetime_, when a timezone-aware (UTC) value is compared with
+  /// a naive (local) value, the naive value is treated as null.
+  /// With auto_, values are compared as they are, and the query fails
+  /// if they cannot be compared.
+  /// The results are identical to the Python version.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before sorting,
+  /// so aware and naive values are sorted together. Must be greater than
+  /// -1440 and less than 1440.
   SingleSort({
     required this.field,
     this.reversed = false,
     this.vType = EnumValueType.auto_,
-  });
+    this.naiveUtcOffsetMinutes,
+  }) {
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
+  }
 
   /// (en) Restore this object from the dictionary.
   ///
@@ -48,6 +63,7 @@ class SingleSort extends CloneableFile implements AbstractSort {
       vType: src.containsKey("vType")
           ? EnumValueType.values.byName(src["vType"])
           : EnumValueType.auto_,
+      naiveUtcOffsetMinutes: src["naiveUtcOffsetMinutes"],
     );
   }
 
@@ -59,6 +75,7 @@ class SingleSort extends CloneableFile implements AbstractSort {
       "field": field,
       "reversed": reversed,
       "vType": vType.name,
+      "naiveUtcOffsetMinutes": naiveUtcOffsetMinutes,
     };
   }
 
@@ -74,27 +91,29 @@ class SingleSort extends CloneableFile implements AbstractSort {
   /// * [value] : The conversion target.
   ///
   /// Throws on [Exception] if the [value] is cannot conversion.
+  /// Converts a value with vType. Returns null if it cannot be converted.
   dynamic _convertValue(dynamic value) {
     if (value == null) return null;
     switch (vType) {
       case EnumValueType.datetime_:
-        if (value is DateTime) return value;
-        if (value is String) return DateTime.tryParse(value);
-        throw Exception('Cannot convert value to DateTime');
+        DateTime? d;
+        if (value is DateTime) d = value;
+        if (value is String) d = UtilDateTime.tryParse(value);
+        if (d != null && naiveUtcOffsetMinutes != null) {
+          return UtilDateTime.toUtc(d, naiveUtcOffsetMinutes!);
+        }
+        return d;
       case EnumValueType.int_:
         if (value is int) return value;
-        if (value is num) return value.toInt();
+        if (value is double) return value.isFinite ? value.toInt() : null;
         if (value is String) return int.tryParse(value);
-        throw Exception('Cannot convert value to int');
+        return null;
       case EnumValueType.floatStrict_:
-        if (value is double) return value;
-        if (value is num) return value.toDouble();
-        if (value is String) return double.tryParse(value);
-        throw Exception('Cannot convert value to double');
       case EnumValueType.floatEpsilon12_:
-        if (value is num) return value.toDouble();
-        if (value is String) return double.tryParse(value);
-        throw Exception('Cannot convert value to double (epsilon)');
+        double? d;
+        if (value is num) d = value.toDouble();
+        if (value is String) d = double.tryParse(value);
+        return d != null && !d.isNaN ? d : null;
       case EnumValueType.boolean_:
         if (value is bool) return value;
         if (value is int) return value != 0;
@@ -103,7 +122,7 @@ class SingleSort extends CloneableFile implements AbstractSort {
           if (['true', '1', 'yes', 'y'].contains(lower)) return true;
           if (['false', '0', 'no', 'n'].contains(lower)) return false;
         }
-        throw Exception('Cannot convert value to bool');
+        return null;
       case EnumValueType.string_:
         return value.toString();
       case EnumValueType.stringIgnoreCase_:
@@ -126,8 +145,14 @@ class SingleSort extends CloneableFile implements AbstractSort {
   Comparator<Map<String, dynamic>> getComparator() {
     return (Map<String, dynamic> a, Map<String, dynamic> b) {
       // 型変換を適用
-      final aValue = _convertValue(UtilField.getNestedFieldValue(a, field));
-      final bValue = _convertValue(UtilField.getNestedFieldValue(b, field));
+      dynamic aValue = _convertValue(UtilField.getNestedFieldValue(a, field));
+      dynamic bValue = _convertValue(UtilField.getNestedFieldValue(b, field));
+      // A naive (local) datetime compared with an aware (UTC) one is
+      // treated as null, the same as the Python version.
+      if (aValue is DateTime && bValue is DateTime) {
+        if (aValue.isUtc && !bValue.isUtc) bValue = null;
+        if (!aValue.isUtc && bValue != null && bValue.isUtc) aValue = null;
+      }
       // null値対応用の処理。
       // 両方nullなら同等
       if (aValue == null && bValue == null) return 0;

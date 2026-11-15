@@ -212,6 +212,19 @@ The focus will instead be on improving usability and developing surrounding tool
 This package is designed for single-threaded environments.  
 When using parallel processing without shared memory, additional mechanisms such as message passing are required.
 
+### Value conversion (vType)
+
+When `vType` is specified, values are converted with the same rules in the Dart and Python versions,
+so the same query gives the same result in both.
+
+- Numeric strings follow Dart's `int.parse` / `double.parse`: surrounding whitespace is ignored,
+  `int_` accepts `0x` hexadecimal numbers (`"0x10"` is 16), and `"1_000"`, `"inf"` and non-ASCII digits
+  (e.g. full-width digits) are not converted.
+- `datetime_` accepts only valid ISO 8601 date-times. Values such as month 13 or hour 24 are not converted.
+- A value that cannot be converted makes a comparison false, and is sorted as null (to the end in ascending order).
+- Timezone-aware and naive date-times are not compared with each other (treated as a conversion failure).
+  Store date-times in UTC, or use `naiveUtcOffsetMinutes` (e.g. 540 for UTC+9) to interpret naive values.
+
 ## Support
 
 This package is developed and maintained by me personally as an open-source project.  

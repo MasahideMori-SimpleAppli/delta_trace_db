@@ -1,6 +1,35 @@
 import 'package:delta_trace_db/delta_trace_db.dart';
 import 'package:delta_trace_db/src/query/util_field.dart';
+import 'package:delta_trace_db/src/query/util_date_time.dart';
 import 'package:delta_trace_db/src/query/util_portable_numeric.dart';
+
+/// Returns the field value and the compare value for datetime_ comparison.
+/// If [naiveUtcOffsetMinutes] is not null, naive values are converted to UTC
+/// with that offset. Otherwise, a FormatException is thrown if exactly one of
+/// them is timezone-aware (UTC), so that mixing naive and aware datetimes is
+/// treated as a conversion failure (false), the same as the Python version.
+(DateTime, DateTime) _dateTimes(
+  dynamic fValue,
+  dynamic value,
+  int? naiveUtcOffsetMinutes,
+) {
+  final DateTime? d = UtilDateTime.tryParse(fValue.toString());
+  if (d == null || value is! DateTime) {
+    throw const FormatException("Invalid date-time.");
+  }
+  if (naiveUtcOffsetMinutes != null) {
+    return (
+      UtilDateTime.toUtc(d, naiveUtcOffsetMinutes),
+      UtilDateTime.toUtc(value, naiveUtcOffsetMinutes),
+    );
+  }
+  if (d.isUtc != value.isUtc) {
+    throw const FormatException(
+      "Naive and aware datetimes cannot be compared.",
+    );
+  }
+  return (d, value);
+}
 
 /// (en) Query node for Equals operation.
 ///
@@ -9,6 +38,7 @@ class FieldEquals extends QueryNode {
   final String field;
   final dynamic value;
   EnumValueType vType;
+  final int? naiveUtcOffsetMinutes;
 
   /// (en) Query node for Equals (filed == value) operation.
   ///
@@ -28,8 +58,21 @@ class FieldEquals extends QueryNode {
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldEquals(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+  /// With datetime_, mixing a timezone-aware (UTC) value and a naive (local)
+  /// value is treated as a conversion failure.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before comparison,
+  /// so aware and naive values can be compared. Must be greater than -1440
+  /// and less than 1440.
+  FieldEquals(
+    this.field,
+    this.value, {
+    this.vType = EnumValueType.auto_,
+    this.naiveUtcOffsetMinutes,
+  }) {
     vType = UtilPortableNumeric.inferVType(value, vType);
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -45,6 +88,7 @@ class FieldEquals extends QueryNode {
           ? DateTime.parse(src['value'])
           : src['value'],
       vType: t,
+      naiveUtcOffsetMinutes: src['naiveUtcOffsetMinutes'],
     );
   }
 
@@ -56,7 +100,8 @@ class FieldEquals extends QueryNode {
         case EnumValueType.auto_:
           return fValue == value;
         case EnumValueType.datetime_:
-          return DateTime.parse(fValue.toString()) == (value as DateTime);
+          final (d, v) = _dateTimes(fValue, value, naiveUtcOffsetMinutes);
+          return d == v;
         case EnumValueType.int_:
           return int.parse(fValue.toString()) == int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -92,7 +137,8 @@ class FieldEquals extends QueryNode {
         ? (value as DateTime).toIso8601String()
         : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
-    'version': '2',
+    'naiveUtcOffsetMinutes': naiveUtcOffsetMinutes,
+    'version': '3',
   };
 }
 
@@ -103,6 +149,7 @@ class FieldNotEquals extends QueryNode {
   final String field;
   final dynamic value;
   EnumValueType vType;
+  final int? naiveUtcOffsetMinutes;
 
   /// (en) Query node for NotEquals (filed != value) operation.
   ///
@@ -122,8 +169,21 @@ class FieldNotEquals extends QueryNode {
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldNotEquals(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+  /// With datetime_, mixing a timezone-aware (UTC) value and a naive (local)
+  /// value is treated as a conversion failure.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before comparison,
+  /// so aware and naive values can be compared. Must be greater than -1440
+  /// and less than 1440.
+  FieldNotEquals(
+    this.field,
+    this.value, {
+    this.vType = EnumValueType.auto_,
+    this.naiveUtcOffsetMinutes,
+  }) {
     vType = UtilPortableNumeric.inferVType(value, vType);
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -139,6 +199,7 @@ class FieldNotEquals extends QueryNode {
           ? DateTime.parse(src['value'])
           : src['value'],
       vType: t,
+      naiveUtcOffsetMinutes: src['naiveUtcOffsetMinutes'],
     );
   }
 
@@ -150,7 +211,8 @@ class FieldNotEquals extends QueryNode {
         case EnumValueType.auto_:
           return fValue != value;
         case EnumValueType.datetime_:
-          return DateTime.parse(fValue.toString()) != (value as DateTime);
+          final (d, v) = _dateTimes(fValue, value, naiveUtcOffsetMinutes);
+          return d != v;
         case EnumValueType.int_:
           return int.parse(fValue.toString()) != int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -186,7 +248,8 @@ class FieldNotEquals extends QueryNode {
         ? (value as DateTime).toIso8601String()
         : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
-    'version': '2',
+    'naiveUtcOffsetMinutes': naiveUtcOffsetMinutes,
+    'version': '3',
   };
 }
 
@@ -197,6 +260,7 @@ class FieldGreaterThan extends QueryNode {
   final String field;
   final dynamic value;
   EnumValueType vType;
+  final int? naiveUtcOffsetMinutes;
 
   /// (en) Query node for "field > value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -220,8 +284,21 @@ class FieldGreaterThan extends QueryNode {
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldGreaterThan(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+  /// With datetime_, mixing a timezone-aware (UTC) value and a naive (local)
+  /// value is treated as a conversion failure.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before comparison,
+  /// so aware and naive values can be compared. Must be greater than -1440
+  /// and less than 1440.
+  FieldGreaterThan(
+    this.field,
+    this.value, {
+    this.vType = EnumValueType.auto_,
+    this.naiveUtcOffsetMinutes,
+  }) {
     vType = UtilPortableNumeric.inferVType(value, vType);
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -237,6 +314,7 @@ class FieldGreaterThan extends QueryNode {
           ? DateTime.parse(src['value'])
           : src['value'],
       vType: t,
+      naiveUtcOffsetMinutes: src['naiveUtcOffsetMinutes'],
     );
   }
 
@@ -247,7 +325,8 @@ class FieldGreaterThan extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          return DateTime.parse(fValue.toString()).isAfter(value as DateTime);
+          final (d, v) = _dateTimes(fValue, value, naiveUtcOffsetMinutes);
+          return d.isAfter(v);
         case EnumValueType.int_:
           return int.parse(fValue.toString()) > int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -285,7 +364,8 @@ class FieldGreaterThan extends QueryNode {
         ? (value as DateTime).toIso8601String()
         : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
-    'version': '2',
+    'naiveUtcOffsetMinutes': naiveUtcOffsetMinutes,
+    'version': '3',
   };
 }
 
@@ -296,6 +376,7 @@ class FieldLessThan extends QueryNode {
   final String field;
   final dynamic value;
   EnumValueType vType;
+  final int? naiveUtcOffsetMinutes;
 
   /// (en) Query node for "field < value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -319,8 +400,21 @@ class FieldLessThan extends QueryNode {
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
-  FieldLessThan(this.field, this.value, {this.vType = EnumValueType.auto_}) {
+  /// With datetime_, mixing a timezone-aware (UTC) value and a naive (local)
+  /// value is treated as a conversion failure.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before comparison,
+  /// so aware and naive values can be compared. Must be greater than -1440
+  /// and less than 1440.
+  FieldLessThan(
+    this.field,
+    this.value, {
+    this.vType = EnumValueType.auto_,
+    this.naiveUtcOffsetMinutes,
+  }) {
     vType = UtilPortableNumeric.inferVType(value, vType);
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -336,6 +430,7 @@ class FieldLessThan extends QueryNode {
           ? DateTime.parse(src['value'])
           : src['value'],
       vType: t,
+      naiveUtcOffsetMinutes: src['naiveUtcOffsetMinutes'],
     );
   }
 
@@ -346,7 +441,8 @@ class FieldLessThan extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          return DateTime.parse(fValue.toString()).isBefore(value as DateTime);
+          final (d, v) = _dateTimes(fValue, value, naiveUtcOffsetMinutes);
+          return d.isBefore(v);
         case EnumValueType.int_:
           return int.parse(fValue.toString()) < int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -384,7 +480,8 @@ class FieldLessThan extends QueryNode {
         ? (value as DateTime).toIso8601String()
         : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
-    'version': '2',
+    'naiveUtcOffsetMinutes': naiveUtcOffsetMinutes,
+    'version': '3',
   };
 }
 
@@ -395,6 +492,7 @@ class FieldGreaterThanOrEqual extends QueryNode {
   final String field;
   final dynamic value;
   EnumValueType vType;
+  final int? naiveUtcOffsetMinutes;
 
   /// (en) Query node for "field >= value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -418,12 +516,21 @@ class FieldGreaterThanOrEqual extends QueryNode {
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
+  /// With datetime_, mixing a timezone-aware (UTC) value and a naive (local)
+  /// value is treated as a conversion failure.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before comparison,
+  /// so aware and naive values can be compared. Must be greater than -1440
+  /// and less than 1440.
   FieldGreaterThanOrEqual(
     this.field,
     this.value, {
     this.vType = EnumValueType.auto_,
+    this.naiveUtcOffsetMinutes,
   }) {
     vType = UtilPortableNumeric.inferVType(value, vType);
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -439,6 +546,7 @@ class FieldGreaterThanOrEqual extends QueryNode {
           ? DateTime.parse(src['value'])
           : src['value'],
       vType: t,
+      naiveUtcOffsetMinutes: src['naiveUtcOffsetMinutes'],
     );
   }
 
@@ -449,8 +557,8 @@ class FieldGreaterThanOrEqual extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          final d = DateTime.parse(fValue.toString());
-          return !d.isBefore(value as DateTime); // d1 >= d2
+          final (d, v) = _dateTimes(fValue, value, naiveUtcOffsetMinutes);
+          return !d.isBefore(v); // d1 >= d2
         case EnumValueType.int_:
           return int.parse(fValue.toString()) >= int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -488,7 +596,8 @@ class FieldGreaterThanOrEqual extends QueryNode {
         ? (value as DateTime).toIso8601String()
         : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
-    'version': '2',
+    'naiveUtcOffsetMinutes': naiveUtcOffsetMinutes,
+    'version': '3',
   };
 }
 
@@ -499,6 +608,7 @@ class FieldLessThanOrEqual extends QueryNode {
   final String field;
   final dynamic value;
   EnumValueType vType;
+  final int? naiveUtcOffsetMinutes;
 
   /// (en) Query node for "field <= value" operation.
   /// If you try to compare objects that cannot be compared in magnitude,
@@ -522,12 +632,21 @@ class FieldLessThanOrEqual extends QueryNode {
   /// the value will be cast to that type before the comparison is performed.
   /// When an exception occurs, such as a conversion failure,
   /// the result is always False.
+  /// With datetime_, mixing a timezone-aware (UTC) value and a naive (local)
+  /// value is treated as a conversion failure.
+  /// * [naiveUtcOffsetMinutes] : Used only with datetime_. If specified,
+  /// naive (local) date-times are interpreted as times at UTC + this many
+  /// minutes (e.g. 540 for UTC+9) and converted to UTC before comparison,
+  /// so aware and naive values can be compared. Must be greater than -1440
+  /// and less than 1440.
   FieldLessThanOrEqual(
     this.field,
     this.value, {
     this.vType = EnumValueType.auto_,
+    this.naiveUtcOffsetMinutes,
   }) {
     vType = UtilPortableNumeric.inferVType(value, vType);
+    UtilDateTime.checkOffset(naiveUtcOffsetMinutes);
   }
 
   /// (en) Restore this object from the dictionary.
@@ -543,6 +662,7 @@ class FieldLessThanOrEqual extends QueryNode {
           ? DateTime.parse(src['value'])
           : src['value'],
       vType: t,
+      naiveUtcOffsetMinutes: src['naiveUtcOffsetMinutes'],
     );
   }
 
@@ -553,8 +673,8 @@ class FieldLessThanOrEqual extends QueryNode {
     try {
       switch (vType) {
         case EnumValueType.datetime_:
-          final d = DateTime.parse(fValue.toString());
-          return !d.isAfter(value as DateTime); // d1 <= d2
+          final (d, v) = _dateTimes(fValue, value, naiveUtcOffsetMinutes);
+          return !d.isAfter(v); // d1 <= d2
         case EnumValueType.int_:
           return int.parse(fValue.toString()) <= int.parse(value.toString());
         case EnumValueType.floatStrict_:
@@ -592,7 +712,8 @@ class FieldLessThanOrEqual extends QueryNode {
         ? (value as DateTime).toIso8601String()
         : UtilPortableNumeric.toSerializable(value),
     'vType': vType.name,
-    'version': '2',
+    'naiveUtcOffsetMinutes': naiveUtcOffsetMinutes,
+    'version': '3',
   };
 }
 

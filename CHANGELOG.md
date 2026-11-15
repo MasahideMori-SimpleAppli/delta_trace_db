@@ -1,3 +1,31 @@
+## 0.3.0 (2026-11-15)
+
+This version changes the behavior of some conversions so that the Dart and Python versions always
+return the same results.
+
+* `SingleSort`: a value that cannot be converted with `vType` is now treated as null for every type
+  (it moves to the end in ascending order), instead of making the query fail.
+  With `int_`, `floatStrict_` and `floatEpsilon12_`, `bool`, `NaN` and (for `int_`) infinite values are
+  treated as conversion failures.
+* Strings are converted to numbers with the same rules as Dart's `int.parse` / `double.parse`:
+  surrounding whitespace is ignored, `int_` accepts decimal digits and `0x` hexadecimal numbers
+  (64-bit), and floating-point types accept forms such as `"1e3"`, `".5"`, `"Infinity"` and `"NaN"`.
+  `"1_000"`, `"inf"`, `"nan"` and non-ASCII digits are not converted.
+* `datetime_` now accepts only valid ISO 8601 date-times. Out-of-range values (e.g. month 13,
+  February 30, hour 24, minute 60), a lowercase `z`, mixed basic / extended formats, week dates and
+  ordinal dates are conversion failures (previously the Dart version silently carried over values such as
+  month 13 to the next year).
+* `datetime_` no longer compares a timezone-aware value with a naive value.
+  Comparison nodes return false (including `FieldNotEquals`), and `SingleSort` treats the naive value as null
+  when it is compared with an aware one. Previously the Dart version interpreted naive values in the local
+  timezone of the running machine.
+* Added `naiveUtcOffsetMinutes` to the comparison nodes (`FieldEquals`, `FieldNotEquals`, `FieldGreaterThan`, `FieldLessThan`,
+  `FieldGreaterThanOrEqual`, `FieldLessThanOrEqual`) and `SingleSort`. With `datetime_`, naive date-times are
+  interpreted as times at UTC + this many minutes (e.g. 540 for UTC+9), so aware and naive values can be compared.
+  A value of -1440 or less, or 1440 or more, throws `ArgumentError`.
+  Queries that use it are read by older versions without an error but with the option ignored.
+* Comparison node version is now 3, and `SingleSort` version is now 6 (added `naiveUtcOffsetMinutes`).
+
 ## 0.2.0 (2026-11-14)
 
 * Added `decimal_` and `rational_` to `EnumValueType`.
