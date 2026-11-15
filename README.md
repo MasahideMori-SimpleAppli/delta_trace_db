@@ -273,7 +273,7 @@ However, versions less than 1.0.0 may change the file structure regardless of th
 
 This software is released under the Apache-2.0 License, see LICENSE file.
 
-Copyright 2025 Masahide Mori
+Copyright 2025-2026 Masahide Mori
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

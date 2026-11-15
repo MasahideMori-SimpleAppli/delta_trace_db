@@ -260,7 +260,7 @@ https://simpleappli.com/index.html
 
 このソフトウェアはApache-2.0ライセンスの元配布されます。LICENSEファイルの内容をご覧ください。
 
-Copyright 2025 Masahide Mori
+Copyright 2025-2026 Masahide Mori
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
