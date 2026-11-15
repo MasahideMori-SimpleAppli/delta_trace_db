@@ -24,6 +24,8 @@ return the same results.
   interpreted as times at UTC + this many minutes (e.g. 540 for UTC+9), so aware and naive values can be compared.
   A value of -1440 or less, or 1440 or more, throws `ArgumentError`.
   Queries that use it are read by older versions without an error but with the option ignored.
+* `MultiSort` itself is unchanged (its version is still 1). The `SingleSort` changes above apply to each
+  `SingleSort` in a `MultiSort`, and `naiveUtcOffsetMinutes` is set on each `SingleSort`.
 * Comparison node version is now 3, and `SingleSort` version is now 6 (added `naiveUtcOffsetMinutes`).
 
 ## 0.2.0 (2026-11-14)
