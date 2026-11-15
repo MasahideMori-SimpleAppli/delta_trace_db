@@ -36,11 +36,11 @@ void main() {
         "NaN",
         {"a": 1},
       ]) {
-        expect(
-          _sorted(["2", bad, "1"], SingleSort(field: "v", vType: t)),
-          [2, 0, 1],
-          reason: "${t.name} $bad",
-        );
+        expect(_sorted(["2", bad, "1"], SingleSort(field: "v", vType: t)), [
+          2,
+          0,
+          1,
+        ], reason: "${t.name} $bad");
         expect(
           _sorted([
             "2",
