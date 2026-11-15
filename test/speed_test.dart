@@ -355,4 +355,93 @@ void main() {
     expect(r8.isSuccess, true);
     print("addedCount:${r8.dbLength}");
   });
+
+  test('aggregate speed test', () {
+    final int recordsCount = 100000;
+    print("aggregate speed test for $recordsCount records");
+    final db = DeltaTraceDatabase();
+    final rAdd = db.executeQuery(
+      RawQueryBuilder.add(
+        target: 'orders',
+        rawAddData: [
+          for (int i = 0; i < recordsCount; i++)
+            {
+              'status': i.isEven ? 'paid' : 'cancel',
+              'price': '${i ~/ 100}.${(i % 100).toString().padLeft(2, '0')}',
+              'score': i * 0.5,
+            },
+        ],
+      ).build(),
+    );
+    expect(rAdd.isSuccess, true);
+
+    // Runs the query, then prints the elapsed time and the first result item.
+    void measure(String label, Query q) {
+      print("start $label");
+      final DateTime dt1 = DateTime.now();
+      final QueryResult r = db.executeQuery(q);
+      final DateTime dt2 = DateTime.now();
+      print(
+        "end $label: ${dt2.millisecondsSinceEpoch - dt1.millisecondsSinceEpoch} ms",
+      );
+      expect(r.isSuccess, true);
+      print("result:${r.result.first}");
+    }
+
+    List<Aggregation> sumMinMaxMean(String field, EnumValueType vType) => [
+      Aggregation(EnumAggregateType.sum_, field: field, vType: vType),
+      Aggregation(EnumAggregateType.min_, field: field, vType: vType),
+      Aggregation(EnumAggregateType.max_, field: field, vType: vType),
+      Aggregation(
+        EnumAggregateType.mean_,
+        field: field,
+        vType: vType,
+        scale: vType == EnumValueType.decimal_ ? 2 : null,
+        rounding: vType == EnumValueType.decimal_
+            ? EnumRoundingMode.halfEven
+            : null,
+      ),
+    ];
+
+    measure(
+      "aggregate count_ with condition",
+      RawQueryBuilder.aggregate(
+        target: 'orders',
+        queryNode: FieldEquals('status', 'paid'),
+        aggregations: [Aggregation(EnumAggregateType.count_)],
+      ).build(),
+    );
+    measure(
+      "aggregate sum_, min_, max_, mean_ (floatStrict_, number values)",
+      RawQueryBuilder.aggregate(
+        target: 'orders',
+        aggregations: sumMinMaxMean('score', EnumValueType.floatStrict_),
+      ).build(),
+    );
+    measure(
+      "aggregate sum_, min_, max_, mean_ (decimal_, string values)",
+      RawQueryBuilder.aggregate(
+        target: 'orders',
+        aggregations: sumMinMaxMean('price', EnumValueType.decimal_),
+      ).build(),
+    );
+    measure(
+      "aggregate sum_, min_, max_, mean_ (rational_, string values)",
+      RawQueryBuilder.aggregate(
+        target: 'orders',
+        aggregations: sumMinMaxMean('price', EnumValueType.rational_),
+      ).build(),
+    );
+    measure(
+      "getAll with SingleSort (decimal_, reversed)",
+      RawQueryBuilder.getAll(
+        target: 'orders',
+        sortObj: SingleSort(
+          field: 'price',
+          reversed: true,
+          vType: EnumValueType.decimal_,
+        ),
+      ).build(),
+    );
+  });
 }
