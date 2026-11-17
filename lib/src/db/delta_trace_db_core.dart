@@ -325,6 +325,24 @@ class DeltaTraceDatabase extends CloneableFile {
           errorMessage: "Operation not permitted.",
         );
       }
+      // CSV はコレクションの作成前に変換し、不正なら何も変更せずに失敗を返す。
+      if (q.type == EnumQueryType.addCsv ||
+          q.type == EnumQueryType.clearAddCsv) {
+        try {
+          q = q.clone()..addData = UtilCsv.toItems(q.csvText!);
+        } on CsvFormatError catch (e) {
+          return QueryResult<T>(
+            isSuccess: false,
+            target: q.target,
+            type: q.type,
+            result: [],
+            dbLength: _collections[q.target]?.length ?? 0,
+            updateCount: 0,
+            hitCount: 0,
+            errorMessage: e.toString(),
+          );
+        }
+      }
       final bool isExistCol = _collections.containsKey(q.target);
       Collection col = collection(q.target);
       QueryResult<T>? r;
@@ -383,7 +401,18 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.merge:
           r = _executeMergeQuery(q);
         case EnumQueryType.aggregate:
-          r = col.aggregate(q);
+          r = col.aggregate(
+            q,
+            joinSources: {
+              for (final AggregateJoin j in q.joins ?? [])
+                if (_collections.containsKey(j.collection))
+                  j.collection: _collections[j.collection]!.raw,
+            },
+          );
+        case EnumQueryType.addCsv:
+          r = col.addAll(q);
+        case EnumQueryType.clearAddCsv:
+          r = col.clearAdd(q);
       }
       switch (q.type) {
         case EnumQueryType.add:
@@ -397,6 +426,8 @@ class DeltaTraceDatabase extends CloneableFile {
         case EnumQueryType.clearAdd:
         case EnumQueryType.removeCollection:
         case EnumQueryType.merge:
+        case EnumQueryType.addCsv:
+        case EnumQueryType.clearAddCsv:
           if (q.mustAffectAtLeastOne && r.updateCount == 0 && r.isSuccess) {
             return QueryResult<T>(
               isSuccess: false,

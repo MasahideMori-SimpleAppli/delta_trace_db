@@ -19,6 +19,7 @@ class QueryBuilder {
   String target;
   EnumQueryType type;
   List<CloneableFile>? addData;
+  String? csvText;
   Map<String, dynamic>? overrideData;
   Map<String, dynamic>? template;
   QueryNode? queryNode;
@@ -35,6 +36,8 @@ class QueryBuilder {
   bool resetSerial = false;
   MergeQueryParams? mergeQueryParams;
   List<Aggregation>? aggregations;
+  List<AggregateJoin>? joins;
+  List<AggregateGroupKey>? groupBy;
   Cause? cause;
 
   /// (en) Adds an item to the specified collection.
@@ -386,30 +389,49 @@ class QueryBuilder {
 
   /// (en) Calculates aggregations such as count, sum, min, max and mean
   /// for the items that match the criteria.
-  /// The result is returned as a single map in QueryResult.result,
-  /// whose keys are the Aggregation.outputKey values,
-  /// and QueryResult.hitCount is the number of matched items.
-  /// If a value cannot be converted, the query fails.
+  /// Without [groupBy], the result is returned as a single map in
+  /// QueryResult.result, whose keys are the Aggregation.outputKey values.
+  /// With [groupBy], QueryResult.result contains one map per group, which has
+  /// the AggregateGroupKey.outputKey values followed by the aggregation
+  /// results. The groups are in the order in which they first appear,
+  /// or sorted by [sortObj].
+  /// QueryResult.hitCount is the number of matched items.
+  /// If a value cannot be converted or a join fails, the query fails.
   /// Security: treat the aggregate permission as equivalent to read (search)
   /// access. Even though no items are returned, the contents can be discovered,
   /// e.g. by repeating count_ with FieldStartsWith while extending the prefix
-  /// one character at a time, and min_ / max_ return field values directly.
+  /// one character at a time, and min_ / max_ and the group keys return
+  /// field values directly. With [joins], the executing user also needs the
+  /// search or searchOne permission on each joined collection.
   ///
   /// (ja) 条件に一致するアイテムについて、件数・合計・最小・最大・平均などの
   /// 集計を計算します。
-  /// 結果は QueryResult.result に1つのマップとして返され、
+  /// [groupBy] がない場合、結果は QueryResult.result に1つのマップとして返され、
   /// そのキーは Aggregation.outputKey の値です。
+  /// [groupBy] がある場合、QueryResult.result にはグループごとに1つのマップが入り、
+  /// AggregateGroupKey.outputKey の値と、それに続く集計結果を持ちます。
+  /// グループは最初に現れた順、または [sortObj] で並べ替えた順になります。
   /// QueryResult.hitCount は条件に一致した件数です。
-  /// 値を変換できない場合、クエリは失敗します。
+  /// 値を変換できない場合や結合に失敗した場合、クエリは失敗します。
   /// セキュリティ：aggregate の権限は、読み取り（search）の権限と同等に扱って
   /// ください。アイテム自体は返されませんが、例えば FieldStartsWith の前方一致を
   /// 1文字ずつ伸ばしながら count_ を繰り返すことで内容を特定できます。
-  /// また、min_ / max_ はフィールドの値をそのまま返します。
+  /// また、min_ / max_ とグループキーはフィールドの値をそのまま返します。
+  /// [joins] を使う場合、実行するユーザーは結合する各コレクションについても
+  /// search または searchOne の権限が必要です。
   ///
   /// * [target] : The collection name in DB.
   /// * [aggregations] : The aggregation definitions.
   /// * [queryNode] : This is the node object used for the search.
-  /// If null, all items are targeted.
+  /// If null, all items are targeted. With [joins], it is evaluated on the
+  /// joined items, so the fields of joined items can be specified as
+  /// "alias.field".
+  /// * [joins] : The items of other collections joined to each item.
+  /// See AggregateJoin.
+  /// * [groupBy] : The keys used to group the items. See AggregateGroupKey.
+  /// * [sortObj] : Used only with [groupBy]. Sorts the result maps.
+  /// Specify the output keys of the group keys or aggregations as the fields.
+  /// Output keys that contain a dot cannot be specified, so set an alias.
   /// * [cause] : Optional metadata for auditing or logging.
   /// Useful in high-security environments or for autonomous AI programs
   /// to record the reason or initiator of a query.
@@ -417,6 +439,9 @@ class QueryBuilder {
     required this.target,
     required List<Aggregation> this.aggregations,
     this.queryNode,
+    this.joins,
+    this.groupBy,
+    this.sortObj,
     this.cause,
   }) : type = EnumQueryType.aggregate;
 
@@ -475,6 +500,89 @@ class QueryBuilder {
     this.resetSerial = false,
     this.cause,
   }) : type = EnumQueryType.clearAdd;
+
+  /// (en) Adds the items converted from CSV text to the specified collection.
+  /// The first record is the header, and each following record becomes
+  /// an item of {column name: cell text}. All values are added as strings.
+  /// See UtilCsv for the CSV format.
+  /// If the specified collection does not already exist,
+  /// it will be created automatically.
+  /// If the CSV is invalid, the query fails and nothing is changed.
+  ///
+  /// (ja) CSV のテキストから変換した要素を指定されたコレクションに追加します。
+  /// 最初のレコードをヘッダーとし、以降の各レコードを {列名: セルの文字列} の
+  /// 要素として追加します。値は全て文字列のままです。
+  /// CSV の形式は UtilCsv を参照してください。
+  /// 指定されたコレクションがまだ存在しない場合はコレクションが自動で作成されます。
+  /// CSV が不正な場合はクエリが失敗し、何も変更されません。
+  ///
+  /// * [target] : The collection name in DB.
+  /// * [csvText] : The CSV text to add.
+  /// * [returnData] : If true, return the changed objs.
+  /// If serialKey is set, the object will be returned with
+  /// the serial number added.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// The key must be one of the CSV column names.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
+  QueryBuilder.addCsv({
+    required this.target,
+    required String this.csvText,
+    this.returnData = false,
+    this.mustAffectAtLeastOne = true,
+    this.serialKey,
+    this.cause,
+  }) : type = EnumQueryType.addCsv;
+
+  /// (en) Clears the specified collection and then adds the items converted
+  /// from CSV text.
+  /// The first record is the header, and each following record becomes
+  /// an item of {column name: cell text}. All values are added as strings.
+  /// See UtilCsv for the CSV format.
+  /// If the CSV is invalid, the query fails and nothing is changed.
+  ///
+  /// (ja) 指定されたコレクションを clear した後、CSV のテキストから変換した要素を
+  /// 追加します。
+  /// 最初のレコードをヘッダーとし、以降の各レコードを {列名: セルの文字列} の
+  /// 要素として追加します。値は全て文字列のままです。
+  /// CSV の形式は UtilCsv を参照してください。
+  /// CSV が不正な場合はクエリが失敗し、何も変更されません。
+  ///
+  /// * [target] : The collection name in DB.
+  /// * [csvText] : The CSV text to add.
+  /// * [returnData] : If true, return the changed objs.
+  /// If serialKey is set, the object will be returned with
+  /// the serial number added.
+  /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
+  /// failed if it affects 0 objects.
+  /// As with clearAdd, the number of affected objects is the number of
+  /// cleared objects.
+  /// If the operation is treated as a failure, the isSuccess flag of the
+  /// returned QueryResult will be set to false.
+  /// * [serialKey] : If not null, the add query will assign a unique serial
+  /// number (integer value) to the specified key.
+  /// This value is unique per collection.
+  /// The key must be one of the CSV column names.
+  /// * [resetSerial] : If true, resets the managed serial number to 0.
+  /// * [cause] : Optional metadata for auditing or logging.
+  /// Useful in high-security environments or for autonomous AI programs
+  /// to record the reason or initiator of a query.
+  QueryBuilder.clearAddCsv({
+    required this.target,
+    required String this.csvText,
+    this.returnData = false,
+    this.mustAffectAtLeastOne = true,
+    this.serialKey,
+    this.resetSerial = false,
+    this.cause,
+  }) : type = EnumQueryType.clearAddCsv;
 
   /// (en) Deletes the specified collection.
   /// This query is special because it deletes the collection itself.
@@ -613,6 +721,7 @@ class QueryBuilder {
       target: target,
       type: type,
       addData: mData,
+      csvText: csvText,
       overrideData: overrideData,
       template: template,
       queryNode: queryNode,
@@ -629,6 +738,8 @@ class QueryBuilder {
       resetSerial: resetSerial,
       mergeQueryParams: mergeQueryParams,
       aggregations: aggregations,
+      joins: joins,
+      groupBy: groupBy,
       cause: cause,
     );
   }

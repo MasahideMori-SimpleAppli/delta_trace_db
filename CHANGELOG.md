@@ -1,3 +1,31 @@
+## 0.4.0 (2026-11-17)
+
+* Added the `addCsv` and `clearAddCsv` query types. They take CSV text (`csvText`) and add its rows
+  to the collection as items of `{column name: cell text}` (all values are strings). `clearAddCsv`
+  clears the collection first, in the same way as `clearAdd`.
+  If the CSV is invalid, the query fails without changing anything, and `errorMessage` shows the kind
+  of error and the line number (e.g. `CsvFormatError(columnCount, line 3)`).
+* Added `QueryBuilder.addCsv` and `QueryBuilder.clearAddCsv` to the query builder.
+* Added `UtilCsv`, `CsvFormatError` and `EnumCsvErrorKind`, which convert and check CSV text with the
+  same rules as the queries above.
+* `Query`: added `csvText`, `joins` and `groupBy`, and updated the version to 9. Queries made with earlier versions can still be read.
+  Queries that use the new types cannot be read by earlier versions.
+  Earlier versions ignore `joins` and `groupBy` without an error and return the aggregation of all
+  matched items, so send queries that use them only to version 0.4.0 or later (e.g. on the server).
+* `aggregate` query: added joins, groups and products of fields.
+  * `joins`: attaches the matching item of another collection to each item under an alias
+    (`AggregateJoin`), so its fields can be used as `alias.field` in the query node, the group keys and
+    the aggregations. Exactly one item must match; otherwise the query fails.
+    The joined collections also require the search or searchOne permission.
+  * `groupBy`: calculates the aggregations per group (`AggregateGroupKey`). Date-time values can be
+    grouped by day, week, month, quarter or year (`EnumAggregateGroupUnit`) in a given time zone, with
+    a configurable first day of the week and first month of the year. The result contains one map per
+    group, which can be sorted with `sortObj`.
+  * `Aggregation`: added `fields` to aggregate the product of several fields, and updated the version to 2.
+  * Queries without these options return the same results as before.
+* `aggregate` query: error messages no longer contain the values of items, so that data is not exposed
+  through them (e.g. `Cannot convert the value of field 'qty' to decimal_.`).
+
 ## 0.3.0 (2026-11-15)
 
 This version changes the behavior of some conversions so that the Dart and Python versions always

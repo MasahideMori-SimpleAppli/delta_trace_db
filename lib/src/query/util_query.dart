@@ -27,8 +27,12 @@ class UtilQuery {
 
   /// (en) Checks the collection operation permissions for the target query and
   /// returns true if there are no problems.
+  /// For an aggregate query with joins, the search or searchOne permission on
+  /// each joined collection is also required.
   ///
   /// (ja) 対象クエリに関するコレクションの操作権限をチェックし、問題なければtrueを返します。
+  /// 結合を含む aggregate クエリでは、結合する各コレクションの search または
+  /// searchOne の権限も必要です。
   ///
   /// * [q] : The query you want to look up.
   /// * [collectionPermissions] : The permissions of the user performing
@@ -65,10 +69,14 @@ class UtilQuery {
         } else {
           // allowsのチェック。
           final Permission p = collectionPermissions[q.target]!;
-          if (p.allows.contains(q.type)) {
-            return true;
+          if (!p.allows.contains(q.type)) {
+            return false;
           }
-          return false;
+          // aggregate の結合先は読み取り権限が必要。
+          for (final AggregateJoin j in q.joins ?? []) {
+            if (!_canRead(j.collection, collectionPermissions)) return false;
+          }
+          return true;
         }
       }
     }

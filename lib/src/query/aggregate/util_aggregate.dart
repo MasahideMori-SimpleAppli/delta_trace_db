@@ -44,22 +44,52 @@ class UtilAggregate {
     List<Map<String, dynamic>> items,
     Aggregation a,
   ) {
+    if (a.field != null && a.fields != null) {
+      throw ArgumentError("Specify either field or fields, not both.");
+    }
+    if (a.fields != null && a.fields!.isEmpty) {
+      throw ArgumentError("fields must not be empty.");
+    }
+    final List<String>? paths =
+        a.fields ?? (a.field != null ? [a.field!] : null);
     if (a.type == EnumAggregateType.count_) {
-      if (a.field == null) return items.length;
+      if (paths == null) return items.length;
       return items
-          .where((e) => UtilField.getNestedFieldValue(e, a.field!) != null)
+          .where(
+            (e) =>
+                paths.every((p) => UtilField.getNestedFieldValue(e, p) != null),
+          )
           .length;
     }
-    if (a.field == null) {
+    if (paths == null) {
       throw ArgumentError("${a.type.name} requires a field.");
     }
     switch (a.vType) {
       case EnumValueType.floatStrict_:
-        return _calculateFloat(_values(items, a, _toDouble), a.type);
+        return _calculateFloat(
+          _values<double>(items, a, paths, _toDouble, (x, y) => x * y),
+          a.type,
+        );
       case EnumValueType.decimal_:
+        return _calculateExact(
+          _values<Comparable<dynamic>>(
+            items,
+            a,
+            paths,
+            (v) => UtilPortableNumeric.convert(v, a.vType),
+            (x, y) => (x as PortableDecimal) * (y as PortableDecimal),
+          ),
+          a,
+        );
       case EnumValueType.rational_:
         return _calculateExact(
-          _values(items, a, (v) => UtilPortableNumeric.convert(v, a.vType)),
+          _values<Comparable<dynamic>>(
+            items,
+            a,
+            paths,
+            (v) => UtilPortableNumeric.convert(v, a.vType),
+            (x, y) => (x as PortableRational) * (y as PortableRational),
+          ),
           a,
         );
       default:
@@ -69,24 +99,46 @@ class UtilAggregate {
     }
   }
 
-  /// Converts the non-null field values. Throws ArgumentError on failure.
+  /// (en) Converts the values of [paths] of each item and returns their
+  /// products. Items with a null value in any of [paths] are skipped.
+  ///
+  /// (ja) 各アイテムの [paths] の値を変換し、その積を返します。
+  /// [paths] のいずれかの値が null のアイテムは除外します。
+  ///
+  /// * [items] : The target items.
+  /// * [a] : The aggregation.
+  /// * [paths] : The field paths. One path for field.
+  /// * [convert] : Converts a value.
+  /// * [multiply] : Multiplies two converted values.
+  ///
+  /// Throws [ArgumentError] if a value cannot be converted.
   static List<T> _values<T>(
     List<Map<String, dynamic>> items,
     Aggregation a,
+    List<String> paths,
     T Function(Object value) convert,
+    T Function(T x, T y) multiply,
   ) {
     final List<T> r = [];
     for (final Map<String, dynamic> item in items) {
-      final dynamic v = UtilField.getNestedFieldValue(item, a.field!);
-      if (v == null) continue;
-      try {
-        r.add(convert(v));
-      } catch (_) {
-        throw ArgumentError(
-          "Cannot convert the value of field '${a.field}' "
-          "to ${a.vType.name}: $v",
-        );
+      final List<dynamic> raw = [
+        for (final String p in paths) UtilField.getNestedFieldValue(item, p),
+      ];
+      if (raw.contains(null)) continue;
+      T? product;
+      for (var i = 0; i < paths.length; i++) {
+        final T c;
+        try {
+          c = convert(raw[i] as Object);
+        } catch (_) {
+          throw ArgumentError(
+            "Cannot convert the value of field '${paths[i]}' "
+            "to ${a.vType.name}.",
+          );
+        }
+        product = product == null ? c : multiply(product, c);
       }
+      r.add(product as T);
     }
     return r;
   }

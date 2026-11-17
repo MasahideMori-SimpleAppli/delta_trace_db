@@ -14,11 +14,12 @@ import 'package:delta_trace_db/delta_trace_db.dart';
 /// そのログは完全なDB操作の履歴になります。
 class Query extends CloneableFile {
   static const String className = "Query";
-  static const String version = "8";
+  static const String version = "9";
 
   String target;
   EnumQueryType type;
   List<Map<String, dynamic>>? addData;
+  String? csvText;
   Map<String, dynamic>? overrideData;
   Map<String, dynamic>? template;
   QueryNode? queryNode;
@@ -35,6 +36,8 @@ class Query extends CloneableFile {
   bool resetSerial;
   MergeQueryParams? mergeQueryParams;
   List<Aggregation>? aggregations;
+  List<AggregateJoin>? joins;
+  List<AggregateGroupKey>? groupBy;
   Cause? cause;
 
   /// (en) This is a query class for DB operations. It is usually built using
@@ -55,6 +58,10 @@ class Query extends CloneableFile {
   /// Data specified when performing an add operation.
   /// Typically, this is assigned the list that results from calling toDict on
   /// a subclass of ClonableFile.
+  /// * [csvText] : Use addCsv or clearAddCsv type only.
+  /// The CSV text to add. The first record is the header, and each following
+  /// record becomes an item of {column name: cell text}.
+  /// All values are added as strings. See UtilCsv for the format.
   /// * [overrideData] : Use update or updateOne type only.
   /// This is not a serialized version of the full class,
   /// but a dictionary containing only the parameters you want to update.
@@ -109,9 +116,14 @@ class Query extends CloneableFile {
   /// Note that only variables directly under the class can be specified as
   /// keys, not nested fields.
   /// * [resetSerial] : If true, resets the managed serial number to 0 on
-  /// a clear or clearAdd query.
+  /// a clear, clearAdd or clearAddCsv query.
   /// * [mergeQueryParams] : Dedicated parameters when issuing a merge query.
   /// * [aggregations] : Use aggregate type only. The aggregation definitions.
+  /// * [joins] : Use aggregate type only. The items of other collections
+  /// joined to each item before the query node is evaluated.
+  /// * [groupBy] : Use aggregate type only. The keys used to group the items.
+  /// If set, the result contains one map per group, which can be sorted
+  /// with [sortObj].
   /// * [cause] : You can add further parameters such as why this query was
   /// made and who made it.
   /// This is useful if you have high security requirements or want to run the
@@ -122,6 +134,7 @@ class Query extends CloneableFile {
     required this.target,
     required this.type,
     this.addData,
+    this.csvText,
     this.overrideData,
     this.template,
     this.queryNode,
@@ -138,6 +151,8 @@ class Query extends CloneableFile {
     this.resetSerial = false,
     this.mergeQueryParams,
     this.aggregations,
+    this.joins,
+    this.groupBy,
     this.cause,
   });
 
@@ -158,6 +173,7 @@ class Query extends CloneableFile {
       addData: src["addData"] != null
           ? (src["addData"] as List).cast<Map<String, dynamic>>()
           : null,
+      csvText: src.containsKey("csvText") ? src["csvText"] : null,
       overrideData: src["overrideData"],
       template: src["template"],
       queryNode: src["queryNode"] != null
@@ -182,6 +198,18 @@ class Query extends CloneableFile {
                 .map((e) => Aggregation.fromDict(e as Map<String, dynamic>))
                 .toList()
           : null,
+      joins: src["joins"] != null
+          ? (src["joins"] as List)
+                .map((e) => AggregateJoin.fromDict(e as Map<String, dynamic>))
+                .toList()
+          : null,
+      groupBy: src["groupBy"] != null
+          ? (src["groupBy"] as List)
+                .map(
+                  (e) => AggregateGroupKey.fromDict(e as Map<String, dynamic>),
+                )
+                .toList()
+          : null,
       cause: src["cause"] != null ? Cause.fromDict(src["cause"]) : null,
     );
   }
@@ -197,6 +225,7 @@ class Query extends CloneableFile {
           ? (UtilCopy.jsonableDeepCopy(addData) as List)
                 .cast<Map<String, dynamic>>()
           : null,
+      "csvText": csvText,
       "overrideData": UtilCopy.jsonableDeepCopy(overrideData),
       "template": UtilCopy.jsonableDeepCopy(template),
       "queryNode": queryNode?.toDict(),
@@ -213,6 +242,8 @@ class Query extends CloneableFile {
       "resetSerial": resetSerial,
       "mergeQueryParams": mergeQueryParams?.toDict(),
       "aggregations": aggregations?.map((e) => e.toDict()).toList(),
+      "joins": joins?.map((e) => e.toDict()).toList(),
+      "groupBy": groupBy?.map((e) => e.toDict()).toList(),
       "cause": cause?.toDict(),
     };
   }

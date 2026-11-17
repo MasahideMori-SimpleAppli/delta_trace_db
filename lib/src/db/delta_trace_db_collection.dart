@@ -2,7 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:file_state_manager/file_state_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:delta_trace_db/delta_trace_db.dart';
-import 'package:delta_trace_db/src/query/aggregate/util_aggregate.dart';
+import 'package:delta_trace_db/src/query/aggregate/util_group.dart';
+import 'package:delta_trace_db/src/query/aggregate/util_join.dart';
 
 final Logger _logger = Logger('delta_trace_db.db.delta_trace_db_collection');
 
@@ -726,31 +727,48 @@ class Collection extends CloneableFile {
   }
 
   /// (en) Calculates the aggregations of the query for the matched items.
-  /// If the definitions are invalid or a value cannot be converted,
-  /// a failed result with the reason in errorMessage is returned.
+  /// The joins of the query are applied before the query node is evaluated,
+  /// and the items are grouped by the group keys of the query.
+  /// If the definitions are invalid, a join fails or a value cannot be
+  /// converted, a failed result with the reason in errorMessage is returned.
   ///
   /// (ja) 条件に一致したアイテムについて、クエリの集計を計算します。
-  /// 定義が不正な場合や値を変換できない場合は、errorMessage に理由を入れた
-  /// 失敗の結果を返します。
+  /// クエリの結合は検索ノードの評価の前に適用され、
+  /// アイテムはクエリのグループキーでグループ化されます。
+  /// 定義が不正な場合、結合に失敗した場合、値を変換できない場合は、
+  /// errorMessage に理由を入れた失敗の結果を返します。
   ///
   /// * [q] : The query.
-  QueryResult<T> aggregate<T>(Query q) {
+  /// * [joinSources] : The items of each joined collection, keyed by the
+  /// collection name. A collection that does not exist must not be included.
+  QueryResult<T> aggregate<T>(
+    Query q, {
+    Map<String, List<Map<String, dynamic>>> joinSources = const {},
+  }) {
     final List<Map<String, dynamic>> items = [];
-    for (var i = 0; i < _data.length; i++) {
-      if (q.queryNode == null || _evaluate(_data[i], q.queryNode!)) {
-        items.add(_data[i]);
-      }
-    }
     try {
-      final Map<String, dynamic> r = UtilAggregate.calculate(
+      final List<Map<String, dynamic>> rows = q.joins == null
+          ? _data
+          : UtilJoin.join(_data, q.joins!, joinSources);
+      for (final Map<String, dynamic> row in rows) {
+        if (q.queryNode == null || _evaluate(row, q.queryNode!)) {
+          items.add(row);
+        }
+      }
+      final List<Map<String, dynamic>> r = UtilGroup.calculate(
         items,
+        q.groupBy ?? [],
         q.aggregations ?? [],
       );
+      // 結果が両言語で同じ順になるように、安定ソートを使う。
+      if (q.groupBy != null && q.sortObj != null) {
+        mergeSort(r, compare: q.sortObj!.getComparator());
+      }
       return QueryResult<T>(
         isSuccess: true,
         target: q.target,
         type: q.type,
-        result: [r],
+        result: r,
         dbLength: _data.length,
         updateCount: 0,
         hitCount: items.length,
