@@ -1,3 +1,9 @@
+## Unreleased
+
+* Updated `simple_portable_numeric` to 0.1.0.
+  The rounding mode `up` (away from zero) can be used in `aggregate` queries,
+  and the new methods such as `PortableDecimal.parseLenient`, `pow`, `toBigInt` and `PortableRational.toDecimalExact` are available.
+
 ## 0.4.0 (2026-11-17)
 
 * Added the `addCsv` and `clearAddCsv` query types. They take CSV text (`csvText`) and add its rows
