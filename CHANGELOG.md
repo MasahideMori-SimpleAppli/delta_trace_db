@@ -1,4 +1,4 @@
-## Unreleased
+## 0.5.0 (2026-11-20)
 
 * Updated `simple_portable_numeric` to 0.1.0.
   The rounding mode `up` (away from zero) can be used in `aggregate` queries,
