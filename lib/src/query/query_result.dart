@@ -42,6 +42,8 @@ class QueryResult<T> extends QueryExecutionResult {
   /// * [dbLength] : DB side item length.
   /// This is The total number of items in the collection.
   /// * [updateCount] : The total number of items add, updated or deleted.
+  /// For clearAdd and clearAddCsv, this is the number of cleared items
+  /// plus the number of added items.
   /// When issuing a removeCollection query,
   /// if the target collection already exists, the result will be 1.
   /// if a non-existent collection is specified the result will be 0.

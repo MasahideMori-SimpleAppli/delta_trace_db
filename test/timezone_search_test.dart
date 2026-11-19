@@ -26,7 +26,8 @@ void main() {
     // search by utc(with timezone).
     final q3 = RawQueryBuilder.search(
       target: "user",
-      queryNode: FieldEquals("time", DateTime(2025, 10, 11, 18, 30).toUtc()),
+      // 2025-10-11T18:30+09:00
+      queryNode: FieldEquals("time", DateTime.utc(2025, 10, 11, 9, 30)),
     ).build();
     final r3 = db.executeQuery(q3);
     // Only items with a time zone attached will be hit.

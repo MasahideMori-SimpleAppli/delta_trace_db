@@ -162,63 +162,72 @@ Below is an example result from a Ryzen 5 3500 machine (Dart SDK 3.14.0):
 ```text
 speed test for 100000 records
 start add
-end add: 226 ms
+end add: 210 ms
 start getAll (with object convert)
-end getAll: 1319 ms
+end getAll: 1311 ms
 returnsLength:100000
 start save (with json string convert)
-end save: 354 ms
+end save: 345 ms
 start load (with json string convert)
-end load: 230 ms
+end load: 243 ms
 start search (with object convert)
-end search: 1493 ms
+end search: 1523 ms
 returnsLength:100000
 start search paging, half limit pre search (with object convert)
 end search paging: 823 ms
 returnsLength:50000
 start search paging by obj (with object convert)
-end search paging by obj: 897 ms
+end search paging by obj: 894 ms
 returnsLength:50000
 start search paging by offset (with object convert)
-end search paging by offset: 812 ms
+end search paging by offset: 820 ms
 returnsLength:50000
 start searchOne, the last index object search (with object convert)
-end searchOne: 15 ms
+end searchOne: 11 ms
 returnsLength:1
 start update at half index and last index object
-end update: 25 ms
+end update: 24 ms
 start updateOne of half index object
-end updateOne: 9 ms
+end updateOne: 8 ms
 start conformToTemplate
-end conformToTemplate: 62 ms
+end conformToTemplate: 70 ms
 start delete half object (with object convert)
-end delete: 773 ms
+end delete: 762 ms
 returnsLength:50000
 start deleteOne for last object (with object convert)
-end deleteOne: 7 ms
+end deleteOne: 5 ms
 returnsLength:1
 start add with serialKey
-end add with serialKey: 57 ms
+end add with serialKey: 72 ms
 addedCount:100000
 aggregate speed test for 100000 records
 start aggregate count_ with condition
-end aggregate count_ with condition: 11 ms
+end aggregate count_ with condition: 33 ms
 result:{count_: 50000}
 start aggregate sum_, min_, max_, mean_ (floatStrict_, number values)
-end aggregate sum_, min_, max_, mean_ (floatStrict_, number values): 89 ms
+end aggregate sum_, min_, max_, mean_ (floatStrict_, number values): 148 ms
 result:{sum_score: 2499975000.0, min_score: 0.0, max_score: 49999.5, mean_score: 24999.75}
 start aggregate sum_, min_, max_, mean_ (decimal_, string values)
-end aggregate sum_, min_, max_, mean_ (decimal_, string values): 628 ms
+end aggregate sum_, min_, max_, mean_ (decimal_, string values): 642 ms
 result:{sum_price: 49999500.00, min_price: 0.00, max_price: 999.99, mean_price: 500.00}
 start aggregate sum_, min_, max_, mean_ (rational_, string values)
-end aggregate sum_, min_, max_, mean_ (rational_, string values): 1600 ms
+end aggregate sum_, min_, max_, mean_ (rational_, string values): 1641 ms
 result:{sum_price: 49999500, min_price: 0, max_price: 99999/100, mean_price: 99999/200}
 start getAll with SingleSort (decimal_, reversed)
-end getAll with SingleSort (decimal_, reversed): 4559 ms
-result:{status: cancel, price: 999.99, score: 49999.5}
+end getAll with SingleSort (decimal_, reversed): 4738 ms
+result:{status: cancel, price: 999.99, score: 49999.5, customer: C199, date: 2026-11-26T10:30:00}
+start aggregate count_, sum_ grouped by customer
+end aggregate count_, sum_ grouped by customer: 136 ms
+result:{customer: C013, count_: 500, sum_score: 12478250.0}
+start aggregate count_, sum_ grouped by month of date-time strings
+end aggregate count_, sum_ grouped by month of date-time strings: 402 ms
+result:{date: 2026-10, count_: 4464, sum_score: 210039012.0}
+start getAll with SingleSort (datetime_)
+end getAll with SingleSort (datetime_): 9981 ms
+result:{status: paid, price: 0.00, score: 0.0, customer: C000, date: 2025-01-01T00:00:00}
 ```
 
-With `decimal_` and `rational_`, values are converted at each comparison, so sorting by these types is much slower than sorting numbers.
+With `decimal_`, `rational_` and `datetime_`, values are converted at each comparison, so sorting by these types is much slower than sorting numbers.
 
 ## Future plans
 

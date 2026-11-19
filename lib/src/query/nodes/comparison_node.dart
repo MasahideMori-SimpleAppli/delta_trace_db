@@ -3,32 +3,36 @@ import 'package:delta_trace_db/src/query/util_field.dart';
 import 'package:delta_trace_db/src/query/util_date_time.dart';
 import 'package:delta_trace_db/src/query/util_portable_numeric.dart';
 
-/// Returns the field value and the compare value for datetime_ comparison.
+/// Returns the field value and the compare value for datetime_ comparison
+/// as UTC DateTimes, without converting them to the local time of the
+/// running machine.
 /// If [naiveUtcOffsetMinutes] is not null, naive values are converted to UTC
 /// with that offset. Otherwise, a FormatException is thrown if exactly one of
-/// them is timezone-aware (UTC), so that mixing naive and aware datetimes is
+/// them is timezone-aware, so that mixing naive and aware datetimes is
 /// treated as a conversion failure (false), the same as the Python version.
+/// Naive values are then compared by their date and time as they are.
 (DateTime, DateTime) _dateTimes(
   dynamic fValue,
   dynamic value,
   int? naiveUtcOffsetMinutes,
 ) {
-  final DateTime? d = UtilDateTime.tryParse(fValue.toString());
+  final NaiveOrUtc? d = UtilDateTime.tryParse(fValue.toString());
   if (d == null || value is! DateTime) {
     throw const FormatException("Invalid date-time.");
   }
+  final NaiveOrUtc v = UtilDateTime.fromDateTime(value);
   if (naiveUtcOffsetMinutes != null) {
     return (
       UtilDateTime.toUtc(d, naiveUtcOffsetMinutes),
-      UtilDateTime.toUtc(value, naiveUtcOffsetMinutes),
+      UtilDateTime.toUtc(v, naiveUtcOffsetMinutes),
     );
   }
-  if (d.isUtc != value.isUtc) {
+  if (d.isNaive != v.isNaive) {
     throw const FormatException(
       "Naive and aware datetimes cannot be compared.",
     );
   }
-  return (d, value);
+  return (d.value, v.value);
 }
 
 /// (en) Query node for Equals operation.

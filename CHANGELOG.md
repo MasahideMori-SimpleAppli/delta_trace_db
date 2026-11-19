@@ -3,6 +3,20 @@
 * Updated `simple_portable_numeric` to 0.1.0.
   The rounding mode `up` (away from zero) can be used in `aggregate` queries,
   and the new methods such as `PortableDecimal.parseLenient`, `pow`, `toBigInt` and `PortableRational.toDecimalExact` are available.
+* `clearAdd` and `clearAddCsv`: `updateCount` is now the number of cleared items plus the number of
+  added items (it was the number of cleared items only). Previously, these queries failed with
+  `mustAffectAtLeastOne` (the default) when the collection was empty, even though the items were added.
+  A query that adds no items to an empty collection still fails.
+* Grouping by date-time in `aggregate` queries (`AggregateGroupKey.unit`) and sorting with `datetime_`
+  are faster.
+* `datetime_` values without a time zone are no longer converted to the local time of the running
+  machine in comparisons, sorts and date-time grouping, so the results no longer depend on its time zone.
+  Previously, on a machine with daylight saving time, a time skipped by it (e.g. 02:30 on the day the
+  clocks go forward) was shifted by an hour, and the results could differ from the Python version.
+  A `DateTime` made in local time by the application (including one restored with `fromDict`) is still
+  subject to this shift by Dart itself, so use a UTC `DateTime` for such times.
+* `aggregate` query: aggregations with `field` are as fast as in 0.3.0 again. Since 0.4.0, they were
+  calculated in the same way as `fields` (products of fields), which was slower.
 
 ## 0.4.0 (2026-11-17)
 

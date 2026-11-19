@@ -563,7 +563,7 @@ class QueryBuilder {
   /// * [mustAffectAtLeastOne] : If true, the operation will be marked as
   /// failed if it affects 0 objects.
   /// As with clearAdd, the number of affected objects is the number of
-  /// cleared objects.
+  /// cleared objects plus the number of added objects.
   /// If the operation is treated as a failure, the isSuccess flag of the
   /// returned QueryResult will be set to false.
   /// * [serialKey] : If not null, the add query will assign a unique serial

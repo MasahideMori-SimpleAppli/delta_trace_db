@@ -54,5 +54,25 @@ void main() {
     expect(db.collection("user").length == 3, true);
     expect(r4.isSuccess, true);
     expect(db.collection("user").raw[0]["id"] == 3, true);
+    expect(r4.updateCount, 6);
+  });
+
+  test('clearAdd to an empty collection', () {
+    final db = DeltaTraceDatabase();
+    final r1 = db.executeQuery(
+      RawQueryBuilder.clearAdd(
+        target: "user",
+        rawAddData: [
+          {"id": -1},
+          {"id": -1},
+        ],
+      ).build(),
+    );
+    expect(r1.isSuccess, true);
+    expect(r1.updateCount, 2);
+    final r2 = db.executeQuery(
+      RawQueryBuilder.clearAdd(target: "empty", rawAddData: []).build(),
+    );
+    expect(r2.isSuccess, false);
   });
 }

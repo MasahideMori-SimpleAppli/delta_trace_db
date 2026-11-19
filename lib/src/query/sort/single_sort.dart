@@ -96,11 +96,14 @@ class SingleSort extends CloneableFile implements AbstractSort {
     if (value == null) return null;
     switch (vType) {
       case EnumValueType.datetime_:
-        DateTime? d;
-        if (value is DateTime) d = value;
+        NaiveOrUtc? d;
+        if (value is DateTime) d = UtilDateTime.fromDateTime(value);
         if (value is String) d = UtilDateTime.tryParse(value);
         if (d != null && naiveUtcOffsetMinutes != null) {
-          return UtilDateTime.toUtc(d, naiveUtcOffsetMinutes!);
+          return (
+            value: UtilDateTime.toUtc(d, naiveUtcOffsetMinutes!),
+            isNaive: false,
+          );
         }
         return d;
       case EnumValueType.int_:
@@ -147,12 +150,17 @@ class SingleSort extends CloneableFile implements AbstractSort {
       // 型変換を適用
       dynamic aValue = _convertValue(UtilField.getNestedFieldValue(a, field));
       dynamic bValue = _convertValue(UtilField.getNestedFieldValue(b, field));
-      // A naive (local) datetime compared with an aware (UTC) one is
+      // A naive datetime compared with an aware one is
       // treated as null, the same as the Python version.
-      if (aValue is DateTime && bValue is DateTime) {
-        if (aValue.isUtc && !bValue.isUtc) bValue = null;
-        if (!aValue.isUtc && bValue != null && bValue.isUtc) aValue = null;
+      if (aValue is NaiveOrUtc && bValue is NaiveOrUtc) {
+        if (!aValue.isNaive && bValue.isNaive) {
+          bValue = null;
+        } else if (aValue.isNaive && !bValue.isNaive) {
+          aValue = null;
+        }
       }
+      if (aValue is NaiveOrUtc) aValue = aValue.value;
+      if (bValue is NaiveOrUtc) bValue = bValue.value;
       // null値対応用の処理。
       // 両方nullなら同等
       if (aValue == null && bValue == null) return 0;

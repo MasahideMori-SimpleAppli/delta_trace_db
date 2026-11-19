@@ -204,6 +204,24 @@ void main() {
       expect(r.isSuccess, false, reason: a.toDict().toString());
       expect(r.errorMessage, isNotNull);
     }
+    // field and fields fail with the same message.
+    for (final a in [
+      Aggregation(
+        EnumAggregateType.sum_,
+        field: "qty",
+        vType: EnumValueType.decimal_,
+      ),
+      Aggregation(
+        EnumAggregateType.sum_,
+        fields: ["price", "qty"],
+        vType: EnumValueType.decimal_,
+      ),
+    ]) {
+      expect(
+        _run(db, [a]).errorMessage,
+        "Cannot convert the value of field 'qty' to decimal_.",
+      );
+    }
     // Duplicate key.
     final r = _run(db, [
       Aggregation(EnumAggregateType.count_),

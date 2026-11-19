@@ -119,7 +119,26 @@ class UtilAggregate {
     T Function(Object value) convert,
     T Function(T x, T y) multiply,
   ) {
+    T convertOne(String path, Object value) {
+      try {
+        return convert(value);
+      } catch (_) {
+        throw ArgumentError(
+          "Cannot convert the value of field '$path' to ${a.vType.name}.",
+        );
+      }
+    }
+
     final List<T> r = [];
+    // field の場合は、要素ごとにリストを作らずに処理する。
+    if (paths.length == 1) {
+      final String p = paths.first;
+      for (final Map<String, dynamic> item in items) {
+        final dynamic v = UtilField.getNestedFieldValue(item, p);
+        if (v != null) r.add(convertOne(p, v as Object));
+      }
+      return r;
+    }
     for (final Map<String, dynamic> item in items) {
       final List<dynamic> raw = [
         for (final String p in paths) UtilField.getNestedFieldValue(item, p),
@@ -127,15 +146,7 @@ class UtilAggregate {
       if (raw.contains(null)) continue;
       T? product;
       for (var i = 0; i < paths.length; i++) {
-        final T c;
-        try {
-          c = convert(raw[i] as Object);
-        } catch (_) {
-          throw ArgumentError(
-            "Cannot convert the value of field '${paths[i]}' "
-            "to ${a.vType.name}.",
-          );
-        }
+        final T c = convertOne(paths[i], raw[i] as Object);
         product = product == null ? c : multiply(product, c);
       }
       r.add(product as T);

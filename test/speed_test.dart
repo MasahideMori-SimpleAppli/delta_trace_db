@@ -368,6 +368,11 @@ void main() {
           'status': i.isEven ? 'paid' : 'cancel',
           'price': '${i ~/ 100}.${(i % 100).toString().padLeft(2, '0')}',
           'score': i * 0.5,
+          'customer': 'C${(i % 200).toString().padLeft(3, '0')}',
+          // Date-times without a time zone, every 10 minutes from 2025-01-01.
+          'date': DateTime.utc(
+            2025,
+          ).add(Duration(minutes: i * 10)).toIso8601String().substring(0, 19),
         },
     ]..shuffle(Random(0));
     final rAdd = db.executeQuery(
@@ -441,6 +446,39 @@ void main() {
           reversed: true,
           vType: EnumValueType.decimal_,
         ),
+      ).build(),
+    );
+    final List<Aggregation> countSum = [
+      Aggregation(EnumAggregateType.count_),
+      Aggregation(EnumAggregateType.sum_, field: 'score'),
+    ];
+    measure(
+      "aggregate count_, sum_ grouped by customer",
+      RawQueryBuilder.aggregate(
+        target: 'orders',
+        aggregations: countSum,
+        groupBy: [AggregateGroupKey('customer')],
+      ).build(),
+    );
+    measure(
+      "aggregate count_, sum_ grouped by month of date-time strings",
+      RawQueryBuilder.aggregate(
+        target: 'orders',
+        aggregations: countSum,
+        groupBy: [
+          AggregateGroupKey(
+            'date',
+            unit: EnumAggregateGroupUnit.month,
+            utcOffsetMinutes: 540,
+          ),
+        ],
+      ).build(),
+    );
+    measure(
+      "getAll with SingleSort (datetime_)",
+      RawQueryBuilder.getAll(
+        target: 'orders',
+        sortObj: SingleSort(field: 'date', vType: EnumValueType.datetime_),
       ).build(),
     );
   });

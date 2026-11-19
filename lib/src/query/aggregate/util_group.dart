@@ -114,13 +114,13 @@ class UtilGroup {
   static dynamic _keyValue(Map<String, dynamic> item, AggregateGroupKey g) {
     final dynamic v = UtilField.getNestedFieldValue(item, g.field);
     if (g.unit == null || v == null) return v;
-    final DateTime? d = v is String ? UtilDateTime.tryParse(v) : null;
+    final int offset = g.utcOffsetMinutes ?? 0;
+    final NaiveOrUtc? d = v is String ? UtilDateTime.tryParse(v) : null;
     if (d == null) {
       throw ArgumentError(
         "Cannot read the value of field '${g.field}' as a date-time.",
       );
     }
-    final int offset = g.utcOffsetMinutes ?? 0;
     // UTC の DateTime に、区切りに使うタイムゾーンでの日時を入れる。
     final DateTime t = UtilDateTime.toUtc(
       d,

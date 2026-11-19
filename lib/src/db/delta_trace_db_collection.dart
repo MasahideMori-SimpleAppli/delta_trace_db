@@ -889,7 +889,7 @@ class Collection extends CloneableFile {
       result: (UtilCopy.jsonableDeepCopy(addedItems) as List)
           .cast<Map<String, dynamic>>(),
       dbLength: _data.length,
-      updateCount: preLen,
+      updateCount: preLen + addData.length,
       hitCount: preLen,
     );
   }
